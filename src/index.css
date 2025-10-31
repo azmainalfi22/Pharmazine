@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 25% 98%;
+    --foreground: 230 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 15% 15%;
+
+    --primary: 232 65% 35%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-gradient: linear-gradient(135deg, hsl(232 65% 35%), hsl(245 75% 55%));
+    
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 230 15% 15%;
+
+    --muted: 220 15% 96%;
+    --muted-foreground: 230 10% 45%;
+
+    --accent: 210 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 160 80% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 95% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 90%;
+    --ring: 232 65% 35%;
+
+    --radius: 0.75rem;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 24px hsla(232, 65%, 35%, 0.2);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 230 15% 15%;
+    --sidebar-primary: 232 65% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 95%;
+    --sidebar-accent-foreground: 230 15% 15%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 232 65% 35%;
+  }
+
+  .dark {
+    --background: 230 20% 8%;
+    --foreground: 220 15% 95%;
+
+    --card: 230 18% 12%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 230 18% 12%;
+    --popover-foreground: 220 15% 95%;
+
+    --primary: 245 75% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-gradient: linear-gradient(135deg, hsl(245 75% 55%), hsl(260 80% 65%));
+
+    --secondary: 230 18% 18%;
+    --secondary-foreground: 220 15% 95%;
+
+    --muted: 230 18% 18%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 210 100% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 160 75% 50%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 90% 60%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 80% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 15% 22%;
+    --input: 230 15% 22%;
+    --ring: 245 75% 65%;
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 32px hsla(245, 75%, 65%, 0.3);
+
+    --sidebar-background: 230 18% 12%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 245 75% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 18% 18%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 230 15% 22%;
+    --sidebar-ring: 245 75% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground antialiased;
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+  }
+  
+  /* Allow dropdowns to overflow */
+  .relative {
+    overflow: visible !important;
+  }
+  
+  /* Hide scrollbars but allow content to overflow */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  *::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  /* Exception for dropdowns */
+  [class*="absolute"] {
+    overflow: visible !important;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--primary-gradient);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition);
+  }
+}

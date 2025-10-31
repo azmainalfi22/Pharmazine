@@ -1,0 +1,24 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#0F766E" stroke="#14B8A6" stroke-width="3"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="100" cy="100" r="75" fill="#134E4A" opacity="0.3"/>
+  
+  <!-- Medical Cross -->
+  <rect x="90" y="55" width="20" height="90" fill="white" rx="3"/>
+  <rect x="55" y="90" width="90" height="20" fill="white" rx="3"/>
+  
+  <!-- Leaf Symbol (representing animal feed/agriculture) -->
+  <path d="M 130 65 Q 145 60 155 70 Q 160 80 155 90 Q 145 95 130 90 L 130 65" 
+        fill="#10B981" stroke="white" stroke-width="2"/>
+  <path d="M 70 135 Q 55 140 45 130 Q 40 120 45 110 Q 55 105 70 110 L 70 135" 
+        fill="#10B981" stroke="white" stroke-width="2"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#14B8A6" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  
+  <!-- Letter S stylized -->
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">SHARKAR</text>
+</svg>
+
