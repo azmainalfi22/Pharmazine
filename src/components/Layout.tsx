@@ -31,7 +31,10 @@ import {
   PieChart,
   LineChart,
   FileText,
-  DollarSign
+  DollarSign,
+  Pill,
+  Stethoscope,
+  Briefcase
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,12 +45,24 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { signOut, user } = useAuth();
   const location = useLocation();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['inventory', 'inventory/stock-in', 'inventory/stock-out']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['medicine-management', 'inventory', 'inventory/stock-in', 'inventory/stock-out']);
 
   const isAdmin = (user?.roles || []).some(r => r.role === 'admin');
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { 
+      path: '/medicine-management', 
+      label: 'Medicines', 
+      icon: Pill,
+      submenu: [
+        { path: '/medicine-management', label: 'Overview', icon: LayoutDashboard },
+        { path: '/medicine-management/categories', label: 'Categories', icon: FolderTree },
+        { path: '/medicine-management/manufacturers', label: 'Manufacturers', icon: Building2 },
+        { path: '/medicine-management/batches', label: 'Batches', icon: Package },
+        { path: '/medicine-management/expiry-alerts', label: 'Expiry Alerts', icon: AlertTriangle },
+      ]
+    },
     { 
       path: '/inventory', 
       label: 'Inventory', 
@@ -62,9 +77,9 @@ const Layout = ({ children }: LayoutProps) => {
             { path: '/inventory/stock-in/purchase', label: 'Purchase', icon: ShoppingCart },
             { path: '/inventory/stock-in/sales-return', label: 'Sales Return', icon: RotateCcw },
             { path: '/inventory/stock-in/opening-stock', label: 'Opening Stock', icon: Warehouse },
-            { path: '/inventory/stock-in/transfer-in', label: 'Transfer from Other Store', icon: ArrowRightLeft },
-            { path: '/inventory/stock-in/stock-adjustment', label: 'Stock Adjustment', icon: Settings },
-            { path: '/inventory/stock-in/misc-receive', label: 'Misc/Others Receive', icon: Package2 },
+            { path: '/inventory/stock-in/transfer-in', label: 'Transfer In', icon: ArrowRightLeft },
+            { path: '/inventory/stock-in/stock-adjustment', label: 'Adjustment', icon: Settings },
+            { path: '/inventory/stock-in/misc-receive', label: 'Misc Receive', icon: Package2 },
           ]
         },
         { 
@@ -74,37 +89,39 @@ const Layout = ({ children }: LayoutProps) => {
           submenu: [
             { path: '/inventory/stock-out/sales', label: 'Sales', icon: ShoppingCart },
             { path: '/inventory/stock-out/supplier-return', label: 'Supplier Return', icon: RotateCcw },
-            { path: '/inventory/stock-out/production-out', label: 'Production Out/Consume', icon: Package },
+            { path: '/inventory/stock-out/production-out', label: 'Production Out', icon: Package },
             { path: '/inventory/stock-out/purchase-return', label: 'Purchase Return', icon: ArrowRightLeft },
-            { path: '/inventory/stock-out/stock-adjustment', label: 'Stock Adjustment', icon: Settings },
-            { path: '/inventory/stock-out/transfer-out', label: 'Transfer to Other Store', icon: ArrowRightLeft },
-            { path: '/inventory/stock-out/misc-issue', label: 'Misc/Others Issue', icon: Package2 },
+            { path: '/inventory/stock-out/stock-adjustment', label: 'Adjustment', icon: Settings },
+            { path: '/inventory/stock-out/transfer-out', label: 'Transfer Out', icon: ArrowRightLeft },
+            { path: '/inventory/stock-out/misc-issue', label: 'Misc Issue', icon: Package2 },
           ]
         },
       ]
     },
     { 
       path: '/sales', 
-      label: 'POS / Sales', 
+      label: 'POS & Sales', 
       icon: ShoppingCart,
       submenu: [
         { path: '/sales', label: 'POS Terminal', icon: CreditCard },
         { path: '/sales/history', label: 'Sales History', icon: Receipt },
       ]
     },
-    { path: '/purchase', label: 'Purchases & GRN', icon: ShoppingBag },
+    { path: '/purchase', label: 'Purchases', icon: ShoppingBag },
     { path: '/requisitions', label: 'Requisitions', icon: FileText },
     { path: '/payments', label: 'Payments', icon: CreditCard },
+    { path: '/services', label: 'Services', icon: Stethoscope },
+    { path: '/hrm', label: 'HR & Payroll', icon: Briefcase, roles: ['admin'] },
     { 
       path: '/reports', 
       label: 'Reports', 
       icon: FileText,
       submenu: [
-        { path: '/reports/inventory', label: 'Inventory Report', icon: Package },
-        { path: '/reports/sales', label: 'Sales Report', icon: ShoppingCart },
-        { path: '/reports/stock-movement', label: 'Stock Movement Report', icon: TrendingUp },
-        { path: '/reports/low-stock', label: 'Low Stock Alert Report', icon: AlertTriangle },
-        { path: '/reports/profit-loss', label: 'Profit & Loss Report', icon: BarChart3 },
+        { path: '/reports/inventory', label: 'Inventory', icon: Package },
+        { path: '/reports/sales', label: 'Sales', icon: ShoppingCart },
+        { path: '/reports/stock-movement', label: 'Stock Movement', icon: TrendingUp },
+        { path: '/reports/low-stock', label: 'Low Stock Alert', icon: AlertTriangle },
+        { path: '/reports/profit-loss', label: 'Profit & Loss', icon: BarChart3 },
         { path: '/reports/category-analysis', label: 'Category Analysis', icon: PieChart },
         { path: '/reports/trend-analysis', label: 'Trend Analysis', icon: LineChart },
       ]
@@ -139,28 +156,47 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="bg-background h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-80 border-r-2 border-teal-100 dark:border-teal-900 bg-gradient-to-b from-card via-card to-muted/20 shadow-2xl backdrop-blur-sm">
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 border-b-2 border-teal-200/50 dark:border-teal-800/50 px-6 py-6 bg-gradient-to-br from-teal-50 via-emerald-50 to-teal-50 dark:from-teal-950/40 dark:via-emerald-950/40 dark:to-teal-950/40">
-            <div className="relative">
-              <img 
-                src="/logo-icon.svg" 
-                alt="Sharkar Logo" 
-                className="h-14 w-14 drop-shadow-lg"
-              />
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-teal-950 animate-pulse shadow-lg"></div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-teal-800 dark:text-teal-100 tracking-tight leading-tight truncate">Sharkar Feed & Medicine</h1>
-              <p className="text-xs text-teal-600 dark:text-teal-400 font-medium mt-0.5">Pharmacy & Animal Feed</p>
+    <div className="bg-background h-screen overflow-hidden relative">
+      {/* Glassmorphic Background Effects */}
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-emerald-50/30 to-primary/10 dark:from-primary/10 dark:via-emerald-950/20 dark:to-primary/5 pointer-events-none"></div>
+      <div className="fixed top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none"></div>
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none" style={{ animationDelay: '2s' }}></div>
+      
+      {/* Glassmorphic Sidebar */}
+      <aside className="fixed left-0 top-0 z-50 h-screen w-72 backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 border-r border-white/20 dark:border-gray-700/30 shadow-2xl">
+        {/* Glassmorphic overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/30 to-white/20 dark:from-gray-900/50 dark:via-gray-900/30 dark:to-gray-900/20 pointer-events-none"></div>
+        
+        <div className="relative flex h-full flex-col">
+          {/* Logo - Glassmorphic Header */}
+          <div className="px-5 py-5 border-b border-white/20 dark:border-gray-700/30 backdrop-blur-xl">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-emerald-500/10 backdrop-blur-sm border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="relative">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary via-primary to-emerald-600 shadow-lg flex items-center justify-center ring-2 ring-white/50 dark:ring-primary/30 transition-transform hover:scale-105">
+                  <svg className="h-7 w-7 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 shadow-lg">
+                  <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75"></span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-primary to-emerald-600 bg-clip-text text-transparent tracking-tight leading-tight">
+                  Sharkar Pharmacy
+                </h1>
+                <p className="text-[10px] font-semibold text-primary/80 dark:text-primary/70 uppercase tracking-wider">
+                  Pharmacy Management
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1.5 p-5 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-200 dark:scrollbar-thumb-teal-800 scrollbar-track-transparent">
+          {/* Navigation - Glassmorphic */}
+          <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto glass-scrollbar">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || 
@@ -177,24 +213,24 @@ const Layout = ({ children }: LayoutProps) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-start gap-3 transition-all duration-200 font-medium px-4 py-3 rounded-xl',
+                          'w-full justify-start gap-2.5 transition-all duration-300 font-semibold text-sm px-3.5 py-2.5 rounded-xl group',
                           isActive 
-                            ? 'bg-gradient-to-r from-teal-500/20 via-emerald-500/15 to-teal-500/20 text-teal-700 dark:text-teal-300 shadow-md hover:shadow-lg border border-teal-200/50 dark:border-teal-800/50' 
-                            : 'hover:bg-teal-50/50 dark:hover:bg-teal-950/30 text-foreground hover:text-teal-700 dark:hover:text-teal-300'
+                            ? 'bg-gradient-to-r from-primary/20 via-emerald-500/15 to-primary/20 backdrop-blur-xl text-primary shadow-lg border border-white/40 dark:border-gray-700/50' 
+                            : 'hover:bg-white/60 dark:hover:bg-gray-800/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 hover:text-primary hover:shadow-md border border-transparent hover:border-white/30'
                         )}
                         onClick={() => toggleSubmenu(item.path.replace(/^\//, ''))}
                       >
-                        <Icon className={cn('h-5 w-5 flex-shrink-0 transition-transform', isActive && 'text-teal-600 dark:text-teal-400')} />
-                        <span className="truncate flex-1 text-left">{item.label}</span>
+                        <Icon className={cn('h-4 w-4 flex-shrink-0 transition-all duration-300', isActive ? 'text-primary scale-110' : 'group-hover:scale-110')} />
+                        <span className="truncate flex-1 text-left text-[13px]">{item.label}</span>
                         {isExpanded ? (
-                          <ChevronDown className={cn('h-4 w-4 ml-auto flex-shrink-0 transition-transform', isActive && 'text-teal-600 dark:text-teal-400')} />
+                          <ChevronDown className={cn('h-3.5 w-3.5 ml-auto flex-shrink-0 transition-all duration-300', isActive && 'text-primary')} />
                         ) : (
-                          <ChevronRight className="h-4 w-4 ml-auto flex-shrink-0 opacity-50" />
+                          <ChevronRight className="h-3.5 w-3.5 ml-auto flex-shrink-0 opacity-40 group-hover:opacity-70 transition-all" />
                         )}
                       </Button>
                       
                       {isExpanded && (
-                        <div className="ml-4 mt-2 space-y-1 border-l-2 border-teal-200/50 dark:border-teal-800/50 pl-4">
+                        <div className="ml-3 mt-1.5 space-y-0.5 border-l-2 border-primary/30 dark:border-primary/20 pl-3">
                           {item.submenu.map((subItem) => {
                             const SubIcon = subItem.icon;
                             const isSubActive = location.pathname === subItem.path || 
@@ -208,24 +244,24 @@ const Layout = ({ children }: LayoutProps) => {
                                   <Button
                                     variant="ghost"
                                     className={cn(
-                                      'w-full justify-start gap-2.5 transition-all duration-200 text-sm font-medium px-3 py-2.5 rounded-lg',
+                                      'w-full justify-start gap-2 transition-all duration-300 text-[12px] font-medium px-3 py-2 rounded-lg group',
                                       isSubActive 
-                                        ? 'bg-teal-100/70 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/30 dark:border-teal-800/30' 
-                                        : 'hover:bg-teal-50/50 dark:hover:bg-teal-950/20 text-foreground hover:text-teal-700 dark:hover:text-teal-300'
+                                        ? 'bg-primary/15 backdrop-blur-md text-primary shadow-md border border-white/30 dark:border-gray-700/40' 
+                                        : 'hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:text-primary'
                                     )}
                                     onClick={() => toggleSubmenu(subItem.path.replace(/^\//, ''))}
                                   >
-                                    <SubIcon className={cn('h-4 w-4 flex-shrink-0', isSubActive && 'text-teal-600 dark:text-teal-400')} />
+                                    <SubIcon className={cn('h-3.5 w-3.5 flex-shrink-0 transition-all', isSubActive ? 'text-primary scale-105' : 'group-hover:scale-105')} />
                                     <span className="truncate flex-1 text-left">{subItem.label}</span>
                                     {isSubExpanded ? (
-                                      <ChevronDown className={cn('h-3 w-3 ml-auto flex-shrink-0', isSubActive && 'text-teal-600 dark:text-teal-400')} />
+                                      <ChevronDown className={cn('h-3 w-3 ml-auto flex-shrink-0 transition-all', isSubActive && 'text-primary')} />
                                     ) : (
-                                      <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0 opacity-50" />
+                                      <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0 opacity-40 group-hover:opacity-60 transition-all" />
                                     )}
                                   </Button>
                                   
                                   {isSubExpanded && (
-                                    <div className="ml-6 mt-1.5 space-y-1 border-l-2 border-teal-200/30 dark:border-teal-800/30 pl-3">
+                                    <div className="ml-2.5 mt-1 space-y-0.5 border-l border-primary/20 dark:border-primary/15 pl-2.5">
                                       {subItem.submenu.map((subSubItem) => {
                                         const SubSubIcon = subSubItem.icon;
                                         const isSubSubActive = location.pathname === subSubItem.path;
@@ -235,13 +271,13 @@ const Layout = ({ children }: LayoutProps) => {
                                             <Button
                                               variant="ghost"
                                               className={cn(
-                                                'w-full justify-start gap-2.5 transition-all duration-200 text-xs px-3 py-2 min-h-[36px] rounded-md',
+                                                'w-full justify-start gap-2 transition-all duration-300 text-[11px] px-2.5 py-1.5 min-h-[32px] rounded-lg group',
                                                 isSubSubActive 
-                                                  ? 'bg-teal-100/60 dark:bg-teal-900/30 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/20 dark:border-teal-800/20' 
-                                                  : 'hover:bg-teal-50/40 dark:hover:bg-teal-950/15 text-foreground hover:text-teal-700 dark:hover:text-teal-300'
+                                                  ? 'bg-primary/12 backdrop-blur-sm text-primary shadow-sm border border-white/25 dark:border-gray-700/30' 
+                                                  : 'hover:bg-white/40 dark:hover:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:text-primary'
                                               )}
                                             >
-                                              <SubSubIcon className={cn('h-3.5 w-3.5 flex-shrink-0', isSubSubActive && 'text-teal-600 dark:text-teal-400')} />
+                                              <SubSubIcon className={cn('h-3 w-3 flex-shrink-0 transition-all', isSubSubActive ? 'text-primary' : 'group-hover:scale-105')} />
                                               <span className="truncate text-left flex-1">{subSubItem.label}</span>
                                             </Button>
                                           </Link>
@@ -259,13 +295,13 @@ const Layout = ({ children }: LayoutProps) => {
                                 <Button
                                   variant="ghost"
                                   className={cn(
-                                    'w-full justify-start gap-2.5 transition-all duration-200 text-sm font-medium px-3 py-2.5 rounded-lg',
+                                    'w-full justify-start gap-2 transition-all duration-300 text-[12px] font-medium px-3 py-2 rounded-lg group',
                                     isSubActive 
-                                      ? 'bg-teal-100/70 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 shadow-sm border border-teal-200/30 dark:border-teal-800/30' 
-                                      : 'hover:bg-teal-50/50 dark:hover:bg-teal-950/20 text-foreground hover:text-teal-700 dark:hover:text-teal-300'
+                                      ? 'bg-primary/15 backdrop-blur-md text-primary shadow-md border border-white/30 dark:border-gray-700/40' 
+                                      : 'hover:bg-white/50 dark:hover:bg-gray-800/50 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:text-primary'
                                   )}
                                 >
-                                  <SubIcon className={cn('h-4 w-4 flex-shrink-0', isSubActive && 'text-teal-600 dark:text-teal-400')} />
+                                  <SubIcon className={cn('h-3.5 w-3.5 flex-shrink-0 transition-all', isSubActive ? 'text-primary scale-105' : 'group-hover:scale-105')} />
                                   <span className="truncate flex-1 text-left">{subItem.label}</span>
                                 </Button>
                               </Link>
@@ -279,13 +315,13 @@ const Layout = ({ children }: LayoutProps) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full justify-start gap-3 transition-all duration-200 font-medium px-4 py-3 rounded-xl',
+                          'w-full justify-start gap-2.5 transition-all duration-300 font-semibold text-sm px-3.5 py-2.5 rounded-xl group',
                           isActive 
-                            ? 'bg-gradient-to-r from-teal-500/20 via-emerald-500/15 to-teal-500/20 text-teal-700 dark:text-teal-300 shadow-md hover:shadow-lg border border-teal-200/50 dark:border-teal-800/50' 
-                            : 'hover:bg-teal-50/50 dark:hover:bg-teal-950/30 text-foreground hover:text-teal-700 dark:hover:text-teal-300'
+                            ? 'bg-gradient-to-r from-primary/20 via-emerald-500/15 to-primary/20 backdrop-blur-xl text-primary shadow-lg border border-white/40 dark:border-gray-700/50' 
+                            : 'hover:bg-white/60 dark:hover:bg-gray-800/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 hover:text-primary hover:shadow-md border border-transparent hover:border-white/30'
                         )}
                       >
-                        <Icon className={cn('h-5 w-5 flex-shrink-0 transition-transform', isActive && 'text-teal-600 dark:text-teal-400')} />
+                        <Icon className={cn('h-4 w-4 flex-shrink-0 transition-all duration-300', isActive ? 'text-primary scale-110' : 'group-hover:scale-110')} />
                         <span className="truncate flex-1 text-left">{item.label}</span>
                       </Button>
                     </Link>
@@ -295,33 +331,36 @@ const Layout = ({ children }: LayoutProps) => {
             })}
           </nav>
 
-          {/* User info & logout */}
-          <div className="border-t-2 border-teal-200/50 dark:border-teal-800/50 p-5 space-y-3 bg-gradient-to-t from-muted/40 to-transparent">
-            <div className="px-4 py-3 bg-gradient-to-br from-card to-card/80 rounded-xl shadow-md border border-teal-100/50 dark:border-teal-900/50 backdrop-blur-sm">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white dark:ring-teal-950">
-                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+          {/* Glassmorphic User Profile & Logout */}
+          <div className="p-4 border-t border-white/20 dark:border-gray-700/30 backdrop-blur-xl">
+            <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary to-emerald-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white/50 dark:ring-primary/30">
+                    {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-foreground truncate">{user?.full_name || user?.email || 'User'}</p>
-                  <p className="text-xs text-muted-foreground truncate">{(user?.roles || []).map(r => r.role).join(', ') || 'Role'}</p>
+                  <p className="font-bold text-sm text-gray-800 dark:text-gray-100 truncate leading-tight">{user?.full_name || user?.email || 'User'}</p>
+                  <p className="text-[10px] font-semibold text-primary/80 uppercase tracking-wide truncate">{(user?.roles || []).map(r => r.role).join(', ') || 'Role'}</p>
                 </div>
               </div>
             </div>
             <Button
-              variant="outline"
-              className="w-full justify-start gap-3 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200 rounded-xl border-2"
+              variant="ghost"
+              className="w-full justify-start gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-500/10 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 border border-transparent hover:border-red-500/30 backdrop-blur-sm hover:shadow-md transition-all duration-300 group"
               onClick={signOut}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="font-medium">Sign Out</span>
+              <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              <span>Sign Out</span>
             </Button>
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="pl-80 h-screen overflow-hidden">
+      <main className="pl-72 h-screen overflow-hidden relative">
         <div className="container mx-auto h-full" style={{overflowY: 'auto', scrollbarWidth: 'thin', msOverflowStyle: 'none'}}>
           <style>{`
             .container::-webkit-scrollbar { 

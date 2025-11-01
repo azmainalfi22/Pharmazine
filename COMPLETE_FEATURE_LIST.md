@@ -1,4 +1,4 @@
-# 📋 COMPLETE FEATURE LIST - SHARKAR FEED & MEDICINE
+# 📋 COMPLETE FEATURE LIST - SHARKAR PHARMACY
 
 ## ✅ ALL FEATURES IMPLEMENTED AND TESTED
 
@@ -597,15 +597,15 @@ Redis Commander: http://localhost:8081
 ### Test Accounts:
 ```
 Admin:
-  Email: admin@voltdealer.com
+  Email: admin@sharkarpharmacy.com
   Password: admin123
 
 Manager:
-  Email: manager1@voltdealer.com
+  Email: manager@sharkarpharmacy.com
   Password: manager123
 
 Salesman:
-  Email: employee1@voltdealer.com
+  Email: employee@sharkarpharmacy.com
   Password: employee123
 ```
 

@@ -139,28 +139,28 @@ const Dashboard = () => {
       title: 'Total Revenue',
       value: `৳${stats.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
-      gradient: 'from-green-500 to-emerald-600',
+      gradient: 'from-primary to-emerald-600',
       change: stats.totalRevenue > 0 ? 'Active' : 'No revenue yet',
     },
     {
       title: 'Total Products',
       value: stats.totalProducts.toString(),
       icon: Package,
-      gradient: 'from-blue-500 to-indigo-600',
+      gradient: 'from-emerald-500 to-teal-600',
       change: stats.totalProducts > 0 ? 'In stock' : 'No products',
     },
     {
       title: 'Total Sales',
       value: stats.totalSales.toString(),
       icon: ShoppingCart,
-      gradient: 'from-purple-500 to-pink-600',
+      gradient: 'from-cyan-500 to-blue-600',
       change: stats.totalSales > 0 ? 'Active' : 'No sales yet',
     },
     {
       title: 'Total Purchases',
       value: stats.totalPurchases.toString(),
       icon: ShoppingBag,
-      gradient: 'from-cyan-500 to-blue-600',
+      gradient: 'from-blue-500 to-indigo-600',
       change: stats.totalPurchases > 0 ? 'Recorded' : 'No purchases',
     },
     {
@@ -194,7 +194,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-emerald-600 to-primary/90 p-8 rounded-2xl border-2 border-primary/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -203,7 +203,7 @@ const Dashboard = () => {
                 Dashboard Overview
               </h1>
               <p className="text-white/90 text-base max-w-2xl">
-                Real-time insights for Sharkar Feed & Medicine - Track sales, manage inventory, and optimize operations
+                Real-time insights for Sharkar Pharmacy - Track sales, manage inventory, and optimize operations
               </p>
             </div>
             <button

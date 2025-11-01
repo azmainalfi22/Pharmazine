@@ -1,4 +1,4 @@
-# Sharkar Feed & Medicine (Pharmacy + Animal Feed)
+# Sharkar Pharmacy - Best Pharmacy Management System
 
 ## Quick Start (Docker)
 1. Ensure Docker Desktop is running.

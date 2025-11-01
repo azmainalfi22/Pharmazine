@@ -48,7 +48,7 @@ app = FastAPI(title="Pharmazine API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://localhost:80", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:5173"],
+    allow_origins=["http://localhost", "http://localhost:80", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -181,26 +181,44 @@ class Product(Base):
     max_stock_level = Column(Integer, default=0)
     image_url = Column(String)
     brand = Column(String)
-    model = Column(String)
+    model = Column(String)  # For medical equipment model numbers
     manufacturer = Column(String)
     country_of_origin = Column(String)
-    assemble_country = Column(String)
-    serial_number = Column(String)
     mrp_unit = Column(Float)
     mrp_strip = Column(Float)
-    warranty_period = Column(String)
-    weight = Column(Float)
-    dimensions = Column(String)
-    power_consumption = Column(String)
-    voltage_rating = Column(String)
-    color = Column(String)
-    connectivity = Column(String)
-    specifications = Column(Text)
-    features = Column(Text)
-    compatibility = Column(String)
-    package_contents = Column(Text)
-    emi_management = Column(Boolean, default=False)
-    # Pharmacy-specific fields
+    weight = Column(Float)  # Medicine/product weight
+    dimensions = Column(String)  # Package dimensions
+    color = Column(String)  # Medicine color for identification
+    specifications = Column(Text)  # Product specifications
+    features = Column(Text)  # Product features
+    package_contents = Column(Text)  # Package contents
+    # Pharmacy-specific fields (from Phase 1 migration)
+    generic_name = Column(String)
+    brand_name = Column(String)
+    strength = Column(String)  # e.g., "500mg", "10ml"
+    composition = Column(Text)
+    barcode = Column(String)
+    qr_code = Column(String)
+    shelf_life_days = Column(Integer)
+    storage_condition = Column(String)
+    is_prescription_required = Column(Boolean, default=False)
+    is_schedule_drug = Column(Boolean, default=False)
+    schedule_category = Column(String)  # H, H1, X, etc.
+    side_effects = Column(Text)
+    dosage_info = Column(Text)
+    pack_size = Column(Integer, default=1)
+    strip_size = Column(Integer, default=1)
+    box_size = Column(Integer, default=1)
+    vat_percentage = Column(Float, default=0)
+    cgst_percentage = Column(Float, default=0)
+    sgst_percentage = Column(Float, default=0)
+    igst_percentage = Column(Float, default=0)
+    hsn_code = Column(String)
+    max_discount_percentage = Column(Float, default=0)
+    is_narcotic = Column(Boolean, default=False)
+    rack_number = Column(String)
+    shelf_number = Column(String)
+    # Legacy pharmacy fields (to be migrated to new structure)
     batch_number = Column(String)
     expiry_date = Column(DateTime)
     manufacturing_date = Column(DateTime)
@@ -209,7 +227,6 @@ class Product(Base):
     dosage = Column(String)
     storage_instructions = Column(Text)
     indications = Column(Text)
-    side_effects = Column(Text)
     prescription_required = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -682,23 +699,41 @@ class ProductCreate(BaseModel):
     model: Optional[str] = None
     manufacturer: Optional[str] = None
     country_of_origin: Optional[str] = None
-    assemble_country: Optional[str] = None
-    serial_number: Optional[str] = None
     mrp_unit: Optional[float] = None
     mrp_strip: Optional[float] = None
-    warranty_period: Optional[str] = None
-    weight: Optional[float] = None
-    dimensions: Optional[str] = None
-    power_consumption: Optional[str] = None
-    voltage_rating: Optional[str] = None
-    color: Optional[str] = None
-    connectivity: Optional[str] = None
+    weight: Optional[float] = None  # Medicine weight
+    dimensions: Optional[str] = None  # Package dimensions
+    color: Optional[str] = None  # Medicine color
     specifications: Optional[str] = None
     features: Optional[str] = None
-    compatibility: Optional[str] = None
     package_contents: Optional[str] = None
-    emi_management: bool = False
-    # Pharmacy-specific fields
+    # Pharmacy-specific fields (from Phase 1)
+    generic_name: Optional[str] = None
+    brand_name: Optional[str] = None
+    strength: Optional[str] = None
+    composition: Optional[str] = None
+    barcode: Optional[str] = None
+    qr_code: Optional[str] = None
+    shelf_life_days: Optional[int] = None
+    storage_condition: Optional[str] = None
+    is_prescription_required: bool = False
+    is_schedule_drug: bool = False
+    schedule_category: Optional[str] = None
+    side_effects: Optional[str] = None
+    dosage_info: Optional[str] = None
+    pack_size: int = 1
+    strip_size: int = 1
+    box_size: int = 1
+    vat_percentage: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
+    hsn_code: Optional[str] = None
+    max_discount_percentage: float = 0
+    is_narcotic: bool = False
+    rack_number: Optional[str] = None
+    shelf_number: Optional[str] = None
+    # Legacy pharmacy fields (for backward compatibility)
     batch_number: Optional[str] = None
     expiry_date: Optional[datetime] = None
     manufacturing_date: Optional[datetime] = None
@@ -904,25 +939,43 @@ class ProductResponse(BaseModel):
     max_stock_level: Optional[int] = None
     image_url: Optional[str] = None
     brand: Optional[str] = None
-    model: Optional[str] = None
+    model: Optional[str] = None  # Medical equipment model
     manufacturer: Optional[str] = None
     country_of_origin: Optional[str] = None
-    assemble_country: Optional[str] = None
-    serial_number: Optional[str] = None
     mrp_unit: Optional[float] = None
     mrp_strip: Optional[float] = None
-    warranty_period: Optional[str] = None
-    weight: Optional[float] = None
-    dimensions: Optional[str] = None
-    power_consumption: Optional[str] = None
-    voltage_rating: Optional[str] = None
-    color: Optional[str] = None
-    connectivity: Optional[str] = None
+    weight: Optional[float] = None  # Product weight
+    dimensions: Optional[str] = None  # Package dimensions
+    color: Optional[str] = None  # Medicine color
     specifications: Optional[str] = None
     features: Optional[str] = None
-    compatibility: Optional[str] = None
     package_contents: Optional[str] = None
-    emi_management: Optional[bool] = False
+    # Pharmacy-specific update fields
+    generic_name: Optional[str] = None
+    brand_name: Optional[str] = None
+    strength: Optional[str] = None
+    composition: Optional[str] = None
+    barcode: Optional[str] = None
+    qr_code: Optional[str] = None
+    shelf_life_days: Optional[int] = None
+    storage_condition: Optional[str] = None
+    is_prescription_required: Optional[bool] = None
+    is_schedule_drug: Optional[bool] = None
+    schedule_category: Optional[str] = None
+    side_effects: Optional[str] = None
+    dosage_info: Optional[str] = None
+    pack_size: Optional[int] = None
+    strip_size: Optional[int] = None
+    box_size: Optional[int] = None
+    vat_percentage: Optional[float] = None
+    cgst_percentage: Optional[float] = None
+    sgst_percentage: Optional[float] = None
+    igst_percentage: Optional[float] = None
+    hsn_code: Optional[str] = None
+    max_discount_percentage: Optional[float] = None
+    is_narcotic: Optional[bool] = None
+    rack_number: Optional[str] = None
+    shelf_number: Optional[str] = None
     unit_type: Optional[str] = None
     unit_size: Optional[str] = None
     unit_multiplier: Optional[float] = None
@@ -1309,22 +1362,14 @@ async def get_products(db: Session = Depends(get_db)):
             "model": product.model,
             "manufacturer": product.manufacturer,
             "country_of_origin": product.country_of_origin,
-            "assemble_country": product.assemble_country,
-            "serial_number": product.serial_number,
             "mrp_unit": product.mrp_unit,
             "mrp_strip": product.mrp_strip,
-            "warranty_period": product.warranty_period,
             "weight": product.weight,
             "dimensions": product.dimensions,
-            "power_consumption": product.power_consumption,
-            "voltage_rating": product.voltage_rating,
             "color": product.color,
-            "connectivity": product.connectivity,
             "specifications": product.specifications,
             "features": product.features,
-            "compatibility": product.compatibility,
             "package_contents": product.package_contents,
-            "emi_management": product.emi_management,
             "unit_type": getattr(product, "unit_type", None),
             "unit_size": getattr(product, "unit_size", None),
             "unit_multiplier": getattr(product, "unit_multiplier", None),

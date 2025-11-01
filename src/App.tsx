@@ -20,6 +20,7 @@ import PaymentsPage from "./pages/PaymentsPage";
 import FinancePage from "./pages/FinancePage";
 import ImportPage from "./pages/ImportPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
+import MedicineManagement from "./pages/MedicineManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,56 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/categories"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/manufacturers"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/batches"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/expiry-alerts"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
                   </Layout>
                 </ProtectedRoute>
               }

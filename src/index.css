@@ -8,111 +8,121 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 25% 98%;
-    --foreground: 230 15% 15%;
+    /* Sharkar Pharmacy - Professional Teal Theme */
+    --background: 0 0% 98%;
+    --foreground: 240 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 230 15% 15%;
+    --card-foreground: 240 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 230 15% 15%;
+    --popover-foreground: 240 10% 15%;
 
-    --primary: 232 65% 35%;
+    /* Primary: Professional Teal */
+    --primary: 174 62% 47%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-gradient: linear-gradient(135deg, hsl(232 65% 35%), hsl(245 75% 55%));
+    /* Teal to Emerald Gradient */
+    --primary-gradient: linear-gradient(135deg, hsl(174 62% 47%), hsl(160 84% 39%));
     
-    --secondary: 220 15% 95%;
-    --secondary-foreground: 230 15% 15%;
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 240 10% 15%;
 
-    --muted: 220 15% 96%;
-    --muted-foreground: 230 10% 45%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 240 5% 50%;
 
-    --accent: 210 100% 50%;
+    /* Accent: Emerald Green */
+    --accent: 160 84% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 160 80% 45%;
+    /* Success: Medical Green */
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 35 95% 55%;
+    /* Warning: Amber (for expiry alerts) */
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 85% 60%;
+    /* Destructive: Red (for critical alerts) */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 90%;
-    --ring: 232 65% 35%;
+    --border: 214 20% 88%;
+    --input: 214 20% 92%;
+    --ring: 174 62% 47%;
 
     --radius: 0.75rem;
     
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 24px hsla(232, 65%, 35%, 0.2);
+    /* Professional Shadows */
+    --shadow-sm: 0 2px 4px rgba(20, 184, 166, 0.05);
+    --shadow-md: 0 4px 12px rgba(20, 184, 166, 0.1);
+    --shadow-lg: 0 8px 24px rgba(20, 184, 166, 0.15);
+    --shadow-glow: 0 0 32px hsla(174, 62%, 47%, 0.2);
 
+    /* Sidebar - Professional Teal */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 230 15% 15%;
-    --sidebar-primary: 232 65% 35%;
+    --sidebar-foreground: 240 10% 15%;
+    --sidebar-primary: 174 62% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 95%;
-    --sidebar-accent-foreground: 230 15% 15%;
-    --sidebar-border: 220 15% 88%;
-    --sidebar-ring: 232 65% 35%;
+    --sidebar-accent: 174 62% 96%;
+    --sidebar-accent-foreground: 174 62% 35%;
+    --sidebar-border: 174 20% 88%;
+    --sidebar-ring: 174 62% 47%;
   }
 
   .dark {
-    --background: 230 20% 8%;
-    --foreground: 220 15% 95%;
+    /* Sharkar Pharmacy Dark Mode */
+    --background: 240 15% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 230 18% 12%;
-    --card-foreground: 220 15% 95%;
+    --card: 240 15% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 230 18% 12%;
-    --popover-foreground: 220 15% 95%;
+    --popover: 240 15% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 245 75% 65%;
+    --primary: 174 62% 55%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-gradient: linear-gradient(135deg, hsl(245 75% 55%), hsl(260 80% 65%));
+    --primary-gradient: linear-gradient(135deg, hsl(174 62% 55%), hsl(160 84% 49%));
 
-    --secondary: 230 18% 18%;
-    --secondary-foreground: 220 15% 95%;
+    --secondary: 240 15% 18%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 230 18% 18%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 240 15% 18%;
+    --muted-foreground: 240 5% 60%;
 
-    --accent: 210 100% 60%;
+    --accent: 160 84% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 160 75% 50%;
+    --success: 142 76% 50%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 35 90% 60%;
+    --warning: 38 92% 55%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 80% 65%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 230 15% 22%;
-    --input: 230 15% 22%;
-    --ring: 245 75% 65%;
+    --border: 240 15% 22%;
+    --input: 240 15% 22%;
+    --ring: 174 62% 55%;
     
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 32px hsla(245, 75%, 65%, 0.3);
+    --shadow-glow: 0 0 32px hsla(174, 62%, 55%, 0.3);
 
-    --sidebar-background: 230 18% 12%;
-    --sidebar-foreground: 220 15% 95%;
-    --sidebar-primary: 245 75% 65%;
+    --sidebar-background: 240 15% 12%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 174 62% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 18% 18%;
-    --sidebar-accent-foreground: 220 15% 95%;
-    --sidebar-border: 230 15% 22%;
-    --sidebar-ring: 245 75% 65%;
+    --sidebar-accent: 240 15% 18%;
+    --sidebar-accent-foreground: 174 62% 70%;
+    --sidebar-border: 240 15% 22%;
+    --sidebar-ring: 174 62% 55%;
   }
 }
 
@@ -164,5 +174,75 @@ All colors MUST be HSL.
   
   .transition-smooth {
     transition: var(--transition);
+  }
+  
+  /* Sharkar Pharmacy Professional Utilities */
+  .pharmacy-card {
+    @apply border-2 border-primary/10 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-card to-primary/5;
+  }
+  
+  .pharmacy-header {
+    @apply bg-gradient-to-r from-primary/5 to-emerald-50/30 dark:to-emerald-950/20 border-b-2 border-primary/10;
+  }
+  
+  .pharmacy-button {
+    @apply shadow-md bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 transition-all hover:shadow-lg;
+  }
+  
+  .pharmacy-button-outline {
+    @apply border-2 border-primary/30 hover:bg-primary/5 hover:border-primary transition-all shadow-md hover:shadow-lg;
+  }
+  
+  .pharmacy-badge {
+    @apply bg-gradient-to-r from-primary to-emerald-600 shadow-sm;
+  }
+  
+  .pharmacy-input {
+    @apply border-2 border-primary/20 focus:border-primary focus:ring-primary transition-all;
+  }
+  
+  .pharmacy-stat-card {
+    @apply border-2 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-card;
+  }
+  
+  /* Glassmorphic Effects */
+  .glass {
+    @apply backdrop-blur-xl bg-white/30 dark:bg-gray-900/30 border border-white/20 dark:border-gray-700/30;
+  }
+  
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-white/60 dark:bg-gray-900/60 border border-white/30 dark:border-gray-700/40;
+  }
+  
+  .glass-subtle {
+    @apply backdrop-blur-md bg-white/20 dark:bg-gray-900/20 border border-white/10 dark:border-gray-700/20;
+  }
+  
+  /* Smooth Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  /* Custom Scrollbar for Glassmorphic Sidebar */
+  .glass-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .glass-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .glass-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 10px;
+  }
+  
+  .glass-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
   }
 }

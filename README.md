@@ -1,16 +1,24 @@
-# Pharmazine
+# Sharkar Pharmacy - The Best Pharmacy Management System
 
-A comprehensive pharmacy management system with advanced inventory control, POS, and business management features. Built with React, TypeScript, and PostgreSQL.
+A comprehensive, professional-grade pharmacy management system with complete automation, modern invoicing, revenue management, inventory tracking, and business intelligence. Built with React, TypeScript, FastAPI, and PostgreSQL.
 
-## Features
+## 🏆 Complete Feature Set
 
-- **User Management**: Role-based access control (Admin, Manager, Employee)
-- **Product Management**: Detailed product specifications with categories and subcategories
-- **Inventory Tracking**: Real-time stock management with transaction history
-- **Sales Management**: Complete sales workflow with EMI support
-- **Customer & Supplier Management**: Comprehensive contact management
-- **Reports & Analytics**: Business insights and reporting
-- **Modern UI**: Built with shadcn/ui components and Tailwind CSS
+### Core Modules (All 14 Phases Implemented)
+- ✅ **Medicine Management**: Batch tracking, expiry alerts, barcode/QR generation
+- ✅ **Customer & Manufacturer Management**: Credit limits, statements, profit/loss tracking
+- ✅ **Advanced Purchase System**: Hold/recall, batch tracking, multiple print formats
+- ✅ **Comprehensive Reporting**: User/Product/Category-wise reports, profit/loss analysis
+- ✅ **Enhanced Invoice System**: Barcode scanning, professional templates, coupons
+- ✅ **Stock Management**: Valuation, batch details, fast/slow/dead stock analysis
+- ✅ **Return Management**: Customer & supplier returns, bulk processing
+- ✅ **Service Management**: Bookings, packages, reviews, ratings
+- ✅ **Accounts Management**: Chart of Accounts, vouchers, journal entries, trial balance
+- ✅ **HRM**: Attendance, leaves, payroll, loans, internal messaging
+- ✅ **Advanced Features**: Auto-backup, printer config, search history
+- ✅ **Branding & UI**: Custom themes, dashboard widgets, user preferences
+- ✅ **CRM & Marketing**: Campaigns, loyalty program, offers, birthday automation
+- ✅ **Complete Automation**: Automated alerts, reminders, and scheduled tasks
 
 ## Tech Stack
 
@@ -21,15 +29,16 @@ A comprehensive pharmacy management system with advanced inventory control, POS,
 - **Routing**: React Router DOM
 - **Forms**: React Hook Form with Zod validation
 
-## Quick Start
+## 🚀 Quick Start (Complete System)
 
 ### Prerequisites
 
 - Node.js 18+ 
 - PostgreSQL 12+
+- Python 3.9+ (for backend)
 - npm or yarn
 
-### Installation
+### Complete Setup (5 Minutes)
 
 1. **Clone the repository**
    ```bash
@@ -37,44 +46,53 @@ A comprehensive pharmacy management system with advanced inventory control, POS,
    cd Pharmazine
    ```
 
-2. **Install dependencies**
+2. **Install backend dependencies**
    ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+3. **Run Complete Pharmacy Migration**
+   ```bash
+   # This will set up ALL 14 phases of the system
+   python run_all_pharmacy_migrations.py
+   ```
+
+4. **Start backend server**
+   ```bash
+   python main.py
+   # Backend will run on http://localhost:9000
+   ```
+
+5. **Install frontend dependencies & start**
+   ```bash
+   cd ..
    npm install
-   ```
-
-3. **Set up PostgreSQL database**
-
-   **For Windows:**
-   ```bash
-   setup_postgresql.bat
-   ```
-
-   **For macOS/Linux:**
-   ```bash
-   chmod +x setup_postgresql.sh
-   ./setup_postgresql.sh
-   ```
-
-   **Manual setup:**
-   ```bash
-   # Create database
-   createdb pharmazine
-   
-   # Run the setup script
-   psql -d pharmazine -f database_setup.sql
-   
-   # Create environment file
-   cp env.example .env.local
-   # Edit .env.local with your database credentials
-   ```
-
-4. **Start the development server**
-   ```bash
    npm run dev
+   # Frontend will run on http://localhost:5173
    ```
 
-5. **Open your browser**
-   Navigate to `http://localhost:5173`
+6. **Access the system**
+   - Frontend: http://localhost:5173
+   - API Docs: http://localhost:9000/docs
+   - Medicine Management: http://localhost:5173/medicine-management
+
+## 🏆 All 14 Phases Implemented
+
+1. ✅ Medicine Management - Categories, batches, expiry tracking, barcode/QR
+2. ✅ Customer & Manufacturer - Credit limits, birthdays, statements
+3. ✅ Advanced Purchase - Hold/recall, batch tracking, print formats
+4. ✅ Comprehensive Reporting - User/product/category reports, P&L
+5. ✅ Enhanced Invoice - Barcode scanning, templates, coupons
+6. ✅ Stock Management - Valuation, fast/slow/dead stock analysis
+7. ✅ Return Management - Customer & supplier returns, bulk processing
+8. ✅ Service Management - Bookings, packages, invoices
+9. ✅ Accounts Management - Chart of Accounts, vouchers, trial balance
+10. ✅ HRM - Attendance, leaves, payroll, internal messaging
+11. ✅ Advanced Features - Auto-backup, printer config, search
+12. ✅ Branding & UI - Professional teal theme, dashboard widgets
+13. ✅ CRM & Marketing - Campaigns, loyalty program, birthday automation
+14. ✅ Complete System - 100+ tables, 30+ views, 20+ functions
 
 ## Login Credentials
 
@@ -82,32 +100,43 @@ The system comes with pre-configured user accounts:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@pharmazine.com | admin123 |
-| Manager | manager@pharmazine.com | manager123 |
-| Employee | employee@pharmazine.com | employee123 |
+| Admin | admin@sharkarpharmacy.com | admin123 |
+| Manager | manager@sharkarpharmacy.com | manager123 |
+| Pharmacist | employee@sharkarpharmacy.com | employee123 |
 
 ## Database Schema
 
 The system includes the following main entities:
 
+### Core Pharmacy Tables:
 - **Users & Roles**: User management with role-based permissions
-- **Products**: Detailed product catalog with specifications
-- **Categories & Subcategories**: Product classification system
-- **Suppliers & Customers**: Business partner management
-- **Sales & Sales Items**: Transaction management with EMI support
+- **Products/Medicines**: Complete medicine catalog with batch tracking
+- **Medicine Categories**: Dosage forms (Tablet, Syrup, Injection, etc.)
+- **Medicine Types**: Therapeutic categories (Painkiller, Antibiotic, etc.)
+- **Medicine Batches**: Individual batches with expiry tracking
+- **Manufacturers**: Medicine suppliers and manufacturers
+- **Customers**: Patient and customer management
+- **Sales & Sales Items**: POS and invoice management
+- **Purchases**: Medicine procurement with batch tracking
 - **Stock Transactions**: Complete inventory movement tracking
-- **Countries**: Reference data for product origins
+- **Service Management**: Healthcare services and bookings
+- **Accounts**: Complete double-entry accounting system
+- **HRM**: Employee, payroll, and attendance management
 
 ## Sample Data
 
-The database includes comprehensive sample data:
+The database includes comprehensive pharmacy sample data:
 
-- **6 user accounts** with different roles
-- **8 product categories** and **12 subcategories**
-- **6 suppliers** and **8 customers**
-- **10 sample products** including smartphones, laptops, LED bulbs, fans, and air conditioners
-- **5 sample sales transactions** with different payment methods
-- **Stock transactions** and inventory data
+- **3 user accounts** (Admin, Manager, Pharmacist)
+- **15 medicine categories** (Tablet, Syrup, Injection, etc.)
+- **23 medicine types** (Painkiller, Antibiotic, Diabetes, etc.)
+- **15 unit types** (mg, ml, piece, strip, etc.)
+- **50+ sample medicines** including common drugs and supplements
+- **15 suppliers** (Pharmaceutical distributors)
+- **30+ customers** (Pharmacies, hospitals, clinics, individuals)
+- **Sample batches** with expiry tracking
+- **Chart of Accounts** (40+ accounts)
+- **Service categories** (Home delivery, health checkups, etc.)
 
 ## Project Structure
 
@@ -203,4 +232,4 @@ For support and questions, please open an issue in the repository.
 
 ---
 
-**Pharmazine** - Professional pharmacy management system with comprehensive business solutions.
+**Sharkar Pharmacy** - Professional pharmacy management system with comprehensive business solutions powered by Pharmazine technology.

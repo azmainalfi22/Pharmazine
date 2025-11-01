@@ -57,7 +57,7 @@ def seed_database():
         admin = Profile(
             id=admin_id,
             full_name="Admin User",
-            email="admin@pharmazine.com",
+            email="admin@sharkarpharmacy.com",
             password_hash=hash_password("admin123"),
             phone="+1234567890"
         )
@@ -69,14 +69,14 @@ def seed_database():
             role="admin"
         )
         db.add(admin_role)
-        print("[OK] Created Admin: admin@pharmazine.com / admin123")
+        print("[OK] Created Admin: admin@sharkarpharmacy.com / admin123")
         
         # Create Manager user
         manager_id = str(uuid.uuid4())
         manager = Profile(
             id=manager_id,
             full_name="Manager User",
-            email="manager@pharmazine.com",
+            email="manager@sharkarpharmacy.com",
             password_hash=hash_password("manager123"),
             phone="+1234567891"
         )
@@ -88,14 +88,14 @@ def seed_database():
             role="manager"
         )
         db.add(manager_role)
-        print("[OK] Created Manager: manager@pharmazine.com / manager123")
+        print("[OK] Created Manager: manager@sharkarpharmacy.com / manager123")
         
         # Create Employee user
         employee_id = str(uuid.uuid4())
         employee = Profile(
             id=employee_id,
-            full_name="Employee User",
-            email="employee@pharmazine.com",
+            full_name="Pharmacist User",
+            email="employee@sharkarpharmacy.com",
             password_hash=hash_password("employee123"),
             phone="+1234567892"
         )
@@ -107,14 +107,14 @@ def seed_database():
             role="employee"
         )
         db.add(employee_role)
-        print("[OK] Created Employee: employee@pharmazine.com / employee123")
+        print("[OK] Created Pharmacist: employee@sharkarpharmacy.com / employee123")
         
         db.commit()
         print("\n[SUCCESS] Database seeded successfully with 3 user accounts!")
         print("\n=== Login Credentials ===")
-        print("Admin:    admin@pharmazine.com    / admin123")
-        print("Manager:  manager@pharmazine.com  / manager123")
-        print("Employee: employee@pharmazine.com / employee123")
+        print("Admin:      admin@sharkarpharmacy.com    / admin123")
+        print("Manager:    manager@sharkarpharmacy.com  / manager123")
+        print("Pharmacist: employee@sharkarpharmacy.com / employee123")
         print("========================\n")
         
     except Exception as e:
