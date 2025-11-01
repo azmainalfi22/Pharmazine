@@ -7,7 +7,9 @@ This module contains all pharmacy-specific API endpoints
 
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_, case
+from sqlalchemy import func, and_, or_, case, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from typing import List, Optional
 from datetime import datetime, date, timedelta
 import uuid
@@ -16,6 +18,10 @@ from barcode.writer import ImageWriter
 from io import BytesIO
 import qrcode
 import base64
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from pharmacy_models import (
     MedicineCategory, UnitType, MedicineType, Manufacturer, MedicineBatch,
@@ -35,6 +41,26 @@ from pharmacy_models import (
     MedicineStatistics, ManufacturerStatistics,
     PharmacyProductUpdate
 )
+
+# Database setup for pharmacy routes (avoiding circular import)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:pharmazine123@localhost:5432/pharmazine")
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Dependency to get database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Placeholder for current user - will be overridden by dependency injection
+def get_current_user():
+    return {"id": "system", "email": "system@pharmazine.com"}
 
 router = APIRouter(prefix="/api/pharmacy", tags=["Pharmacy Management"])
 

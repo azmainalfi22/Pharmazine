@@ -52,6 +52,15 @@ const Layout = ({ children }: LayoutProps) => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { 
+      path: '/sales', 
+      label: 'POS & Sales', 
+      icon: ShoppingCart,
+      submenu: [
+        { path: '/sales', label: 'Point of Sale', icon: ShoppingCart },
+        { path: '/sales/history', label: 'Sales History', icon: FileText },
+      ]
+    },
+    { 
       path: '/medicine-management', 
       label: 'Medicines', 
       icon: Pill,
@@ -108,24 +117,25 @@ const Layout = ({ children }: LayoutProps) => {
       ]
     },
     { path: '/purchase', label: 'Purchases', icon: ShoppingBag },
+    { path: '/returns', label: 'Returns & Waste', icon: RotateCcw },
+    { path: '/customers', label: 'Customers', icon: Users },
     { path: '/requisitions', label: 'Requisitions', icon: FileText },
     { path: '/payments', label: 'Payments', icon: CreditCard },
-    { path: '/services', label: 'Services', icon: Stethoscope },
-    { path: '/hrm', label: 'HR & Payroll', icon: Briefcase, roles: ['admin'] },
     { 
       path: '/reports', 
       label: 'Reports', 
-      icon: FileText,
+      icon: BarChart3,
       submenu: [
-        { path: '/reports/inventory', label: 'Inventory', icon: Package },
-        { path: '/reports/sales', label: 'Sales', icon: ShoppingCart },
-        { path: '/reports/stock-movement', label: 'Stock Movement', icon: TrendingUp },
-        { path: '/reports/low-stock', label: 'Low Stock Alert', icon: AlertTriangle },
-        { path: '/reports/profit-loss', label: 'Profit & Loss', icon: BarChart3 },
-        { path: '/reports/category-analysis', label: 'Category Analysis', icon: PieChart },
-        { path: '/reports/trend-analysis', label: 'Trend Analysis', icon: LineChart },
+        { path: '/reports', label: 'Overview', icon: BarChart3 },
+        { path: '/reports/sales', label: 'Sales Reports', icon: ShoppingCart },
+        { path: '/reports/stock', label: 'Stock Reports', icon: Package },
+        { path: '/reports/financial', label: 'Financial Reports', icon: DollarSign },
+        { path: '/reports/profit-loss', label: 'Profit & Loss', icon: TrendingUp },
       ]
     },
+    { path: '/services', label: 'Services', icon: Stethoscope },
+    { path: '/crm', label: 'CRM & Loyalty', icon: Users },
+    { path: '/hrm', label: 'HR & Payroll', icon: Briefcase, roles: ['admin'] },
     // Admin-only sections
     ...(isAdmin ? [{ path: '/finance', label: 'Finance', icon: DollarSign }] : []),
     ...(isAdmin ? [{ path: '/import', label: 'Import Data', icon: ArrowDownCircle }] : []),

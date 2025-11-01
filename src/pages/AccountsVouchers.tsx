@@ -1,0 +1,151 @@
+import { useState, useEffect } from "react";
+import { Plus, FileText, DollarSign, Receipt, CreditCard, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
+const API_BASE = "http://localhost:8000/api";
+
+export default function AccountsVouchers() {
+  const [activeTab, setActiveTab] = useState("journal");
+  const [loading, setLoading] = useState(false);
+  
+  const [voucherDialog, setVoucherDialog] = useState(false);
+  const [voucherForm, setVoucherForm] = useState({
+    type: "receipt",
+    date: format(new Date(), "yyyy-MM-dd"),
+    amount: 0,
+    description: "",
+    reference_id: "",
+    party_name: "",
+    payment_mode: "cash"
+  });
+
+  const handleSaveVoucher = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: JSON.stringify({
+          type: voucherForm.type,
+          amount: voucherForm.amount,
+          description: voucherForm.description,
+          reference_id: voucherForm.reference_id,
+          date: voucherForm.date
+        })
+      });
+
+      if (response.ok) {
+        toast.success("Voucher created successfully");
+        setVoucherDialog(false);
+      } else {
+        toast.error("Failed to create voucher");
+      }
+    } catch (error) {
+      toast.error("Error creating voucher");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="pharmacy-header">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Accounts & Vouchers
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage vouchers, receipts, and payments
+          </p>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="glass">
+          <TabsTrigger value="journal"><FileText className="w-4 h-4 mr-2" />Journal Entry</TabsTrigger>
+          <TabsTrigger value="receipt"><Receipt className="w-4 h-4 mr-2" />Receipt Voucher</TabsTrigger>
+          <TabsTrigger value="payment"><DollarSign className="w-4 h-4 mr-2" />Payment Voucher</TabsTrigger>
+          <TabsTrigger value="contra"><ArrowUpDown className="w-4 h-4 mr-2" />Contra</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="journal" className="space-y-4">
+          <Card className="pharmacy-card">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Journal Vouchers</CardTitle>
+                <Dialog open={voucherDialog} onOpenChange={setVoucherDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="pharmacy-button">
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Voucher
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass-strong">
+                    <DialogHeader>
+                      <DialogTitle>Create Voucher</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Date</Label>
+                        <Input
+                          type="date"
+                          value={voucherForm.date}
+                          onChange={(e) => setVoucherForm({ ...voucherForm, date: e.target.value })}
+                          className="pharmacy-input"
+                        />
+                      </div>
+                      <div>
+                        <Label>Amount</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={voucherForm.amount}
+                          onChange={(e) => setVoucherForm({ ...voucherForm, amount: parseFloat(e.target.value) || 0 })}
+                          className="pharmacy-input"
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Textarea
+                          value={voucherForm.description}
+                          onChange={(e) => setVoucherForm({ ...voucherForm, description: e.target.value })}
+                          className="pharmacy-input"
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setVoucherDialog(false)}>Cancel</Button>
+                      <Button className="pharmacy-button" onClick={handleSaveVoucher}>Create</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                No journal entries yet
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="receipt"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Receipt vouchers</CardContent></Card></TabsContent>
+        <TabsContent value="payment"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Payment vouchers</CardContent></Card></TabsContent>
+        <TabsContent value="contra"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Contra vouchers</CardContent></Card></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+

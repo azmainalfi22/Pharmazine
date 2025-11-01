@@ -22,6 +22,10 @@ from fastapi.responses import StreamingResponse, HTMLResponse
 # Load environment variables
 load_dotenv()
 
+# Import pharmacy routes
+import sys
+sys.path.append(str(Path(__file__).parent))
+
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:pharmazine123@localhost:5432/pharmazine")
 
@@ -53,6 +57,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include pharmacy routes
+try:
+    from pharmacy_routes import router as pharmacy_router
+    app.include_router(pharmacy_router)
+    print("[OK] Pharmacy routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load pharmacy routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading pharmacy routes: {e}")
 
 # Database setup
 if "sqlite" in DATABASE_URL:
@@ -485,19 +499,31 @@ def get_db():
 # Authentication helper functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        return pwd_context.verify(plain_password, hashed_password)
-    except Exception:
-        # Fallback verification
-        import hashlib
-        return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+        # Use bcrypt directly to avoid passlib compatibility issues
+        import bcrypt
+        return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+    except Exception as e:
+        # Fallback: try passlib
+        try:
+            return pwd_context.verify(plain_password, hashed_password)
+        except:
+            # Last fallback verification
+            import hashlib
+            return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
 
 def get_password_hash(password: str) -> str:
     try:
-        return pwd_context.hash(password)
+        # Use bcrypt directly
+        import bcrypt
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     except Exception:
-        # Fallback to simple hash if bcrypt fails
-        import hashlib
-        return hashlib.sha256(password.encode()).hexdigest()
+        # Fallback to passlib
+        try:
+            return pwd_context.hash(password)
+        except:
+            # Fallback to simple hash if bcrypt fails
+            import hashlib
+            return hashlib.sha256(password.encode()).hexdigest()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()

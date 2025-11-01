@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import EnhancedDashboard from "./pages/EnhancedDashboard";
 import Inventory from "./pages/Inventory";
 import Sales from "./pages/Sales";
 import Users from "./pages/Users";
@@ -15,12 +16,22 @@ import Settings from "./pages/Settings";
 import Setup from "./pages/Setup";
 import Reports from "./pages/Reports";
 import Purchase from "./pages/Purchase";
+import EnhancedPurchase from "./pages/EnhancedPurchase";
 import RequisitionsPage from "./pages/RequisitionsPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import FinancePage from "./pages/FinancePage";
 import ImportPage from "./pages/ImportPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import MedicineManagement from "./pages/MedicineManagement";
+import POSSystem from "./pages/POSSystem";
+import EnhancedCustomers from "./pages/EnhancedCustomers";
+import EnhancedReports from "./pages/EnhancedReports";
+import StockManagement from "./pages/StockManagement";
+import ReturnsManagement from "./pages/ReturnsManagement";
+import AccountsVouchers from "./pages/AccountsVouchers";
+import ServiceModule from "./pages/ServiceModule";
+import HRMModule from "./pages/HRMModule";
+import CRMModule from "./pages/CRMModule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +47,16 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedDashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/old"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -96,6 +117,16 @@ const App = () => (
             />
             <Route
               path="/inventory"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <StockManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory/old"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -261,6 +292,26 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
+                    <POSSystem />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales/pos"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <POSSystem />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales/old"
+              element={
+                <ProtectedRoute>
+                  <Layout>
                     <Sales />
                   </Layout>
                 </ProtectedRoute>
@@ -331,7 +382,17 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Setup />
+                    <EnhancedCustomers />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedCustomers />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -358,6 +419,16 @@ const App = () => (
             />
             <Route
               path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/old"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -441,6 +512,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
+                    <EnhancedPurchase />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchase/old"
+              element={
+                <ProtectedRoute>
+                  <Layout>
                     <Purchase />
                   </Layout>
                 </ProtectedRoute>
@@ -471,7 +552,27 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
+                    <AccountsVouchers />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/old"
+              element={
+                <ProtectedRoute>
+                  <Layout>
                     <FinancePage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/returns"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ReturnsManagement />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -492,6 +593,36 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <AuditLogsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/services"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ServiceModule />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hrm"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <HRMModule />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/crm"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CRMModule />
                   </Layout>
                 </ProtectedRoute>
               }

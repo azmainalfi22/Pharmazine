@@ -5,7 +5,7 @@ Phase 1: Database Models for Medicine Management
 This module contains all pharmacy-specific SQLAlchemy models and Pydantic schemas
 """
 
-from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, Text, ForeignKey, ARRAY, Date, Numeric
+from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, Text, ForeignKey, ARRAY, Date, Numeric, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from pydantic import BaseModel, Field, validator
@@ -23,47 +23,47 @@ class MedicineCategory(Base):
     """Medicine dosage forms: tablet, syrup, injection, etc."""
     __tablename__ = "medicine_categories"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     name = Column(String, nullable=False, unique=True)
     description = Column(Text)
     display_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class UnitType(Base):
     """Measurement units: mg, ml, piece, strip, etc."""
     __tablename__ = "unit_types"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     name = Column(String, nullable=False, unique=True)
     abbreviation = Column(String, nullable=False)
     category = Column(String)  # 'weight', 'volume', 'quantity'
     display_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class MedicineType(Base):
     """Therapeutic categories: painkiller, antibiotic, etc."""
     __tablename__ = "medicine_types"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     name = Column(String, nullable=False, unique=True)
     description = Column(Text)
     display_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class Manufacturer(Base):
     """Medicine manufacturers and suppliers"""
     __tablename__ = "manufacturers"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     name = Column(String, nullable=False)
     code = Column(String, unique=True)
     contact_person = Column(String)
@@ -82,15 +82,15 @@ class Manufacturer(Base):
     website = Column(String)
     notes = Column(Text)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class MedicineBatch(Base):
     """Individual medicine batches with expiry tracking"""
     __tablename__ = "medicine_batches"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     product_id = Column(String, nullable=False)
     batch_number = Column(String, nullable=False)
     manufacture_date = Column(Date)
@@ -111,15 +111,15 @@ class MedicineBatch(Base):
     is_active = Column(Boolean, default=True)
     is_expired = Column(Boolean, default=False)
     notes = Column(Text)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class BatchStockTransaction(Base):
     """Stock movements at batch level"""
     __tablename__ = "batch_stock_transactions"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     batch_id = Column(UUID(as_uuid=True), ForeignKey("medicine_batches.id"), nullable=False)
     transaction_type = Column(String, nullable=False)
     quantity = Column(Numeric, nullable=False)
@@ -127,14 +127,14 @@ class BatchStockTransaction(Base):
     reference_type = Column(String)
     notes = Column(Text)
     created_by = Column(String)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
 
 
 class DiscountConfig(Base):
     """Configurable discount rules"""
     __tablename__ = "discount_configs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     name = Column(String, nullable=False)
     description = Column(Text)
     discount_type = Column(String, nullable=False)
@@ -150,15 +150,15 @@ class DiscountConfig(Base):
     valid_to = Column(Date)
     is_active = Column(Boolean, default=True)
     priority = Column(Integer, default=0)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
-    updated_at = Column(DateTime, nullable=False, server_default="now()", onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
 
 
 class ExpiredMedicine(Base):
     """Log of expired medicines"""
     __tablename__ = "expired_medicines"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     batch_id = Column(UUID(as_uuid=True), ForeignKey("medicine_batches.id"), nullable=False)
     product_id = Column(String, nullable=False)
     batch_number = Column(String, nullable=False)
@@ -169,14 +169,14 @@ class ExpiredMedicine(Base):
     disposal_date = Column(Date)
     disposal_notes = Column(Text)
     handled_by = Column(String)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
 
 
 class WasteProduct(Base):
     """Log of damaged or wasted products"""
     __tablename__ = "waste_products"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     batch_id = Column(UUID(as_uuid=True), ForeignKey("medicine_batches.id"))
     product_id = Column(String, nullable=False)
     batch_number = Column(String)
@@ -188,21 +188,21 @@ class WasteProduct(Base):
     approved_by = Column(String)
     disposal_method = Column(String)
     notes = Column(Text)
-    created_at = Column(DateTime, nullable=False, server_default="now()")
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
 
 
 class BarcodePrintLog(Base):
     """Log of barcode printing"""
     __tablename__ = "barcode_print_log"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="uuid_generate_v4()")
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     product_id = Column(String, nullable=False)
     batch_id = Column(UUID(as_uuid=True), ForeignKey("medicine_batches.id"))
     quantity_printed = Column(Integer, nullable=False)
     printer_name = Column(String)
     paper_size = Column(String)
     printed_by = Column(String)
-    printed_at = Column(DateTime, nullable=False, server_default="now()")
+    printed_at = Column(DateTime, nullable=False, server_default=text("now()"))
 
 
 # ============================================
