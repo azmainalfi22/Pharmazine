@@ -18,6 +18,8 @@ const API_BASE = "http://localhost:8000/api";
 export default function AccountsVouchers() {
   const [activeTab, setActiveTab] = useState("journal");
   const [loading, setLoading] = useState(false);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
   
   const [voucherDialog, setVoucherDialog] = useState(false);
   const [voucherForm, setVoucherForm] = useState({
@@ -29,6 +31,27 @@ export default function AccountsVouchers() {
     party_name: "",
     payment_mode: "cash"
   });
+
+  useEffect(() => {
+    loadData();
+  }, [activeTab]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [transactionsRes, expensesRes] = await Promise.all([
+        fetch(`${API_BASE}/transactions`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }),
+        fetch(`${API_BASE}/expenses`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+      ]);
+
+      if (transactionsRes.ok) setTransactions(await transactionsRes.json());
+      if (expensesRes.ok) setExpenses(await expensesRes.json());
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSaveVoucher = async () => {
     setLoading(true);
@@ -48,6 +71,16 @@ export default function AccountsVouchers() {
       if (response.ok) {
         toast.success("Voucher created successfully");
         setVoucherDialog(false);
+        setVoucherForm({
+          type: "receipt",
+          date: format(new Date(), "yyyy-MM-dd"),
+          amount: 0,
+          description: "",
+          reference_id: "",
+          party_name: "",
+          payment_mode: "cash"
+        });
+        loadData();
       } else {
         toast.error("Failed to create voucher");
       }
@@ -134,16 +167,108 @@ export default function AccountsVouchers() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                No journal entries yet
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  No journal entries yet
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.map((transaction: any) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
+                          <TableCell><Badge variant="outline">{transaction.type}</Badge></TableCell>
+                          <TableCell>{transaction.description || "-"}</TableCell>
+                          <TableCell className="text-right font-medium">৳{transaction.amount.toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="receipt"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Receipt vouchers</CardContent></Card></TabsContent>
-        <TabsContent value="payment"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Payment vouchers</CardContent></Card></TabsContent>
-        <TabsContent value="contra"><Card className="pharmacy-card"><CardContent className="py-12 text-center text-muted-foreground">Contra vouchers</CardContent></Card></TabsContent>
+        <TabsContent value="receipt">
+          <Card className="pharmacy-card">
+            <CardHeader><CardTitle>Receipt Vouchers</CardTitle></CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>From</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.filter((t: any) => t.type === "cash_in").map((transaction: any) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell>{transaction.reference_id || "-"}</TableCell>
+                        <TableCell>{transaction.description || "-"}</TableCell>
+                        <TableCell className="text-right font-medium text-green-600">৳{transaction.amount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="payment">
+          <Card className="pharmacy-card">
+            <CardHeader><CardTitle>Payment Vouchers</CardTitle></CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>To</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.filter((t: any) => t.type === "cash_out" || t.type === "expense").map((transaction: any) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell>{transaction.reference_id || "-"}</TableCell>
+                        <TableCell>{transaction.description || "-"}</TableCell>
+                        <TableCell className="text-right font-medium text-red-600">৳{transaction.amount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="contra">
+          <Card className="pharmacy-card">
+            <CardHeader><CardTitle>Contra Entries</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                Bank transfers and cash movements
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

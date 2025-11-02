@@ -65,6 +65,24 @@ export default function EnhancedDashboard() {
         console.log("Expiry alerts not available");
       }
 
+      // Load pharmacy statistics
+      try {
+        const pharmaStatsResponse = await fetch(`${API_BASE}/pharmacy/statistics/medicines`, {
+          headers: getAuthHeader()
+        });
+        if (pharmaStatsResponse.ok) {
+          const pharmaStats = await pharmaStatsResponse.json();
+          // Update stats with pharmacy data
+          setStats(prev => ({
+            ...prev,
+            totalProducts: pharmaStats.total_medicines || prev.totalProducts,
+            lowStockProducts: pharmaStats.low_stock_count || prev.lowStockProducts
+          }));
+        }
+      } catch (error) {
+        console.log("Pharmacy statistics not available");
+      }
+
       // Load low stock items
       const productsResponse = await fetch(`${API_BASE}/products`, {
         headers: getAuthHeader()

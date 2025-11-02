@@ -23,6 +23,8 @@ export default function ReturnsManagement() {
   const [salesReturns, setSalesReturns] = useState<any[]>([]);
   const [purchaseReturns, setPurchaseReturns] = useState<any[]>([]);
   const [wasteProducts, setWasteProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [sales, setSales] = useState<any[]>([]);
 
   const [returnDialog, setReturnDialog] = useState(false);
   const [returnForm, setReturnForm] = useState({
@@ -45,9 +47,33 @@ export default function ReturnsManagement() {
     notes: ""
   });
 
+  useEffect(() => {
+    loadData();
+  }, [activeTab]);
+
   const getAuthHeader = () => {
     const token = localStorage.getItem("token");
     return { Authorization: `Bearer ${token}` };
+  };
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Load products and sales
+      const [productsRes, salesRes, wasteRes] = await Promise.all([
+        fetch(`${API_BASE}/products`, { headers: getAuthHeader() }),
+        fetch(`${API_BASE}/sales`, { headers: getAuthHeader() }),
+        fetch(`${API_BASE}/pharmacy/waste-products`, { headers: getAuthHeader() })
+      ]);
+
+      if (productsRes.ok) setProducts(await productsRes.json());
+      if (salesRes.ok) setSales(await salesRes.json());
+      if (wasteRes.ok) setWasteProducts(await wasteRes.json());
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSalesReturn = async () => {
@@ -101,6 +127,7 @@ export default function ReturnsManagement() {
           disposal_method: "",
           notes: ""
         });
+        loadData();
       } else {
         toast.error("Failed to log waste product");
       }
@@ -255,6 +282,24 @@ export default function ReturnsManagement() {
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
+                        <Label>Product *</Label>
+                        <Select
+                          value={wasteForm.product_id}
+                          onValueChange={(value) => setWasteForm({ ...wasteForm, product_id: value })}
+                        >
+                          <SelectTrigger className="pharmacy-input">
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map(product => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name} ({product.sku})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
                         <Label>Reason *</Label>
                         <Select
                           value={wasteForm.reason}
@@ -321,9 +366,43 @@ export default function ReturnsManagement() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                No waste entries yet
-              </div>
+              {loading ? (
+                <div className="text-center py-12">Loading...</div>
+              ) : wasteProducts.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  No waste entries yet
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Batch</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Disposal Method</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {wasteProducts.map((waste: any) => {
+                        const product = products.find(p => p.id === waste.product_id);
+                        return (
+                          <TableRow key={waste.id}>
+                            <TableCell className="font-medium">{product?.name || waste.product_id}</TableCell>
+                            <TableCell><Badge variant="outline">{waste.batch_number || "-"}</Badge></TableCell>
+                            <TableCell>{waste.quantity}</TableCell>
+                            <TableCell><Badge variant="secondary">{waste.reason}</Badge></TableCell>
+                            <TableCell>{waste.disposal_method || "-"}</TableCell>
+                            <TableCell>{format(new Date(waste.created_at), "dd MMM yyyy")}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

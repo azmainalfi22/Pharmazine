@@ -68,6 +68,26 @@ except ImportError as e:
 except Exception as e:
     print(f"[WARNING] Error loading pharmacy routes: {e}")
 
+# Include service routes
+try:
+    from service_routes import router as service_router
+    app.include_router(service_router)
+    print("[OK] Service routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load service routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading service routes: {e}")
+
+# Include HRM routes
+try:
+    from hrm_routes import router as hrm_router
+    app.include_router(hrm_router)
+    print("[OK] HRM routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load HRM routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading HRM routes: {e}")
+
 # Database setup
 if "sqlite" in DATABASE_URL:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -2333,7 +2353,7 @@ async def get_grn(grn_id: str, db: Session = Depends(get_db)):
     return grn
 
 @app.post("/api/purchases", dependencies=[Depends(require_admin())])
-async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)):
+async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
     if not payload.items or len(payload.items) == 0:
         raise HTTPException(status_code=400, detail="Purchase must include items")
     purchase_id = str(uuid.uuid4())
@@ -2345,7 +2365,7 @@ async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)
         date=payload.date or datetime.utcnow().date().isoformat(),
         total_amount=total_amount,
         payment_status=payload.payment_status or "pending",
-        created_by=payload.created_by,
+        created_by=payload.created_by or current_user.id,
         store_id=payload.store_id,
     )
     db.add(purchase)
@@ -2364,7 +2384,87 @@ async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)
             gst_percent=it.gst_percent
         ))
     db.commit()
-    return {"id": purchase_id, "total_amount": total_amount}
+    db.refresh(purchase)
+    items = db.query(PurchaseItem).filter(PurchaseItem.purchase_id == purchase_id).all()
+    return PurchaseResponse(
+        id=purchase.id,
+        supplier_id=purchase.supplier_id,
+        invoice_no=purchase.invoice_no,
+        date=purchase.date,
+        total_amount=purchase.total_amount,
+        payment_status=purchase.payment_status,
+        created_by=purchase.created_by,
+        store_id=purchase.store_id,
+        created_at=purchase.created_at,
+        items=[PurchaseItemResponse(**{k: getattr(it, k) for k in ['id', 'purchase_id', 'product_id', 'qty', 'unit', 'unit_price', 'total_price', 'batch_no', 'expiry_date', 'mrp', 'gst_percent']}) for it in items]
+    )
+
+@app.put("/api/purchases/{purchase_id}", dependencies=[Depends(require_admin())])
+async def update_purchase(purchase_id: str, payload: PurchaseCreate, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
+    purchase = db.query(Purchase).filter(Purchase.id == purchase_id).first()
+    if not purchase:
+        raise HTTPException(status_code=404, detail="Purchase not found")
+    
+    # Update purchase
+    purchase.supplier_id = payload.supplier_id
+    purchase.invoice_no = payload.invoice_no
+    if payload.date:
+        purchase.date = payload.date
+    if payload.payment_status:
+        purchase.payment_status = payload.payment_status
+    
+    # Delete old items
+    db.query(PurchaseItem).filter(PurchaseItem.purchase_id == purchase_id).delete()
+    
+    # Add new items
+    total_amount = 0
+    for it in payload.items:
+        total_price = it.qty * it.unit_price
+        total_amount += total_price
+        db.add(PurchaseItem(
+            id=str(uuid.uuid4()),
+            purchase_id=purchase_id,
+            product_id=it.product_id,
+            qty=it.qty,
+            unit=it.unit,
+            unit_price=it.unit_price,
+            total_price=total_price,
+            batch_no=it.batch_no,
+            expiry_date=it.expiry_date,
+            mrp=it.mrp,
+            gst_percent=it.gst_percent
+        ))
+    
+    purchase.total_amount = total_amount
+    db.commit()
+    db.refresh(purchase)
+    
+    items = db.query(PurchaseItem).filter(PurchaseItem.purchase_id == purchase_id).all()
+    return PurchaseResponse(
+        id=purchase.id,
+        supplier_id=purchase.supplier_id,
+        invoice_no=purchase.invoice_no,
+        date=purchase.date,
+        total_amount=purchase.total_amount,
+        payment_status=purchase.payment_status,
+        created_by=purchase.created_by,
+        store_id=purchase.store_id,
+        created_at=purchase.created_at,
+        items=[PurchaseItemResponse(**{k: getattr(it, k) for k in ['id', 'purchase_id', 'product_id', 'qty', 'unit', 'unit_price', 'total_price', 'batch_no', 'expiry_date', 'mrp', 'gst_percent']}) for it in items]
+    )
+
+@app.delete("/api/purchases/{purchase_id}", dependencies=[Depends(require_admin())])
+async def delete_purchase(purchase_id: str, db: Session = Depends(get_db)):
+    purchase = db.query(Purchase).filter(Purchase.id == purchase_id).first()
+    if not purchase:
+        raise HTTPException(status_code=404, detail="Purchase not found")
+    
+    # Delete items first
+    db.query(PurchaseItem).filter(PurchaseItem.purchase_id == purchase_id).delete()
+    # Delete purchase
+    db.delete(purchase)
+    db.commit()
+    return {"message": "Purchase deleted successfully"}
 
 @app.post("/api/grn", dependencies=[Depends(require_admin())])
 async def confirm_grn(payload: GRNCreate, db: Session = Depends(get_db)):

@@ -23,3 +23,4 @@ for password, hash_val in passwords.items():
     except Exception as e:
         print(f"{password:15} -> ERROR: {e}")
 
+

@@ -299,19 +299,27 @@ export default function EnhancedPurchase() {
           mrp: item.mrp,
           gst_percent: item.gst_percent
         })),
-        payment_status: purchaseForm.payment_status,
+        payment_status: isHold ? "hold" : purchaseForm.payment_status,
         created_by: null
       };
 
-      const response = await fetch(`${API_BASE}/purchases`, {
-        method: "POST",
+      const url = editingPurchase 
+        ? `${API_BASE}/purchases/${editingPurchase.id}`
+        : `${API_BASE}/purchases`;
+      const method = editingPurchase ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json", ...getAuthHeader() },
         body: JSON.stringify(payload)
       });
 
       if (response.ok) {
-        toast.success(isHold ? "Purchase saved as draft" : "Purchase created successfully");
+        toast.success(editingPurchase 
+          ? "Purchase updated successfully" 
+          : (isHold ? "Purchase saved as draft" : "Purchase created successfully"));
         setPurchaseItems([]);
+        setEditingPurchase(null);
         setPurchaseForm({
           supplier_id: "",
           purchase_order_number: "",
@@ -334,14 +342,65 @@ export default function EnhancedPurchase() {
         loadPurchases();
       } else {
         const error = await response.json();
-        toast.error(error.detail || "Failed to create purchase");
+        toast.error(error.detail || `Failed to ${editingPurchase ? 'update' : 'create'} purchase`);
       }
     } catch (error) {
-      toast.error("Error creating purchase");
+      toast.error(`Error ${editingPurchase ? 'updating' : 'creating'} purchase`);
       console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeletePurchase = async (purchaseId: string) => {
+    if (!confirm("Are you sure you want to delete this purchase?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/purchases/${purchaseId}`, {
+        method: "DELETE",
+        headers: getAuthHeader()
+      });
+
+      if (response.ok) {
+        toast.success("Purchase deleted successfully");
+        loadPurchases();
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || "Failed to delete purchase");
+      }
+    } catch (error) {
+      toast.error("Error deleting purchase");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditPurchase = async (purchase: Purchase) => {
+    setEditingPurchase(purchase);
+    setPurchaseForm({
+      supplier_id: purchase.supplier_id,
+      purchase_order_number: purchase.purchase_order_number || "",
+      bill_number: purchase.bill_number || "",
+      invoice_no: purchase.invoice_no,
+      date: purchase.date,
+      delivery_date: purchase.delivery_date || "",
+      discount_amount: purchase.discount_amount || 0,
+      vat_amount: purchase.vat_amount || 0,
+      cgst_amount: purchase.cgst_amount || 0,
+      sgst_amount: purchase.sgst_amount || 0,
+      igst_amount: purchase.igst_amount || 0,
+      paid_amount: purchase.paid_amount || 0,
+      payment_due_date: purchase.payment_due_date || "",
+      payment_status: purchase.payment_status,
+      print_size: purchase.print_size || "A4",
+      notes: purchase.notes || ""
+    });
+    setPurchaseItems(purchase.items || []);
+    setActiveTab("create");
   };
 
   const filteredPurchases = purchases.filter(p =>
@@ -742,11 +801,24 @@ export default function EnhancedPurchase() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex gap-2 justify-end">
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" title="Print">
                                 <Printer className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditPurchase(purchase)}
+                                title="Edit"
+                              >
                                 <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleDeletePurchase(purchase.id)}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
                           </TableCell>

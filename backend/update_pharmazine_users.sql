@@ -47,3 +47,4 @@ VALUES (
 INSERT INTO user_roles (id, user_id, role, created_at)
 VALUES ('employee-role-001', 'employee-pharmazine-001', 'employee', NOW());
 
+
