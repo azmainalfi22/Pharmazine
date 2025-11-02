@@ -118,7 +118,7 @@ const Reports = () => {
   };
 
   const exportToPDF = () => {
-    toast.info('PDF export feature coming soon');
+    toast.info('Use browser print (Ctrl+P) to export as PDF');
   };
 
   return (

@@ -57,7 +57,11 @@ const Setup = () => {
         {activeView === 'suppliers' && <SupplierSetup />}
 
         {/* Companies Content */}
-        {activeView === 'companies' && <div>Company Setup coming soon</div>}
+        {activeView === 'companies' && (
+          <div className="text-center py-12 text-muted-foreground">
+            Company settings are available in Settings → Company tab
+          </div>
+        )}
       </div>
     </div>
   );

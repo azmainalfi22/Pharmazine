@@ -569,8 +569,27 @@ export default function EnhancedReports() {
               <CardDescription>Customer purchase patterns and outstanding balances</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                Customer analytics coming soon...
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-primary">{stockData.length}</div>
+                      <div className="text-sm text-muted-foreground">Total Customers</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-green-600">{salesData.length}</div>
+                      <div className="text-sm text-muted-foreground">Active</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-blue-600">৳0</div>
+                      <div className="text-sm text-muted-foreground">Avg Purchase</div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -584,8 +603,27 @@ export default function EnhancedReports() {
               <CardDescription>Supplier-wise purchase analysis and trends</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                Purchase analytics coming soon...
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-primary">0</div>
+                      <div className="text-sm text-muted-foreground">Total Purchases</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-blue-600">৳0</div>
+                      <div className="text-sm text-muted-foreground">Purchase Value</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="pharmacy-card">
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-green-600">0</div>
+                      <div className="text-sm text-muted-foreground">Suppliers</div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -207,13 +207,13 @@ export default function CRMModule() {
                   <p className="text-sm text-muted-foreground mb-2">100 points = ৳50 discount</p>
                   <Badge variant="default">Active</Badge>
                 </div>
-                <div className="p-4 rounded-lg glass-subtle border-2 border-gray-200">
+                <div className="p-4 rounded-lg glass-subtle border-2 border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="w-5 h-5 text-blue-500" />
                     <h3 className="font-medium">Referral Bonus</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">Refer a friend, get 50 points</p>
-                  <Badge variant="secondary">Coming Soon</Badge>
+                  <Badge variant="default">Active</Badge>
                 </div>
               </div>
             </CardContent>
