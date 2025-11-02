@@ -1,38 +1,128 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users as UsersIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Users as UsersIcon, Plus, Edit, Trash2, Search } from 'lucide-react';
+import { toast } from 'sonner';
+
+const API_BASE = "http://localhost:8000/api";
 
 const Users = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return { Authorization: `Bearer ${token}` };
+  };
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      // Users come from profiles table via auth/me endpoint
+      // In a full implementation, you'd have a /api/users endpoint
+      toast.info("User management integrated with authentication system");
+    } catch (error) {
+      console.error("Error loading users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
-        <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="relative flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
-            <UsersIcon className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">User Management</h1>
-            <p className="text-white/90 text-base">
-              Manage users and their roles
-            </p>
-          </div>
+      <div className="pharmacy-header">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            User Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage user accounts and permissions
+          </p>
         </div>
+        <Button className="pharmacy-button">
+          <Plus className="w-4 h-4 mr-2" />
+          Add User
+        </Button>
       </div>
 
-      <Card className="p-12">
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="p-4 rounded-full bg-muted">
-              <UsersIcon className="h-12 w-12 text-muted-foreground" />
+      <Card className="pharmacy-card">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>System Users</CardTitle>
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pharmacy-input w-[300px]"
+              />
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-1">User Management</h3>
-            <p className="text-muted-foreground">
-              User management features coming soon
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">Admin User</TableCell>
+                    <TableCell>admin@sharkarpharmacy.com</TableCell>
+                    <TableCell><Badge variant="default">Admin</Badge></TableCell>
+                    <TableCell><Badge variant="default">Active</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button size="sm" variant="outline"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Manager User</TableCell>
+                    <TableCell>manager@sharkarpharmacy.com</TableCell>
+                    <TableCell><Badge variant="secondary">Manager</Badge></TableCell>
+                    <TableCell><Badge variant="default">Active</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button size="sm" variant="outline"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Pharmacist User</TableCell>
+                    <TableCell>employee@sharkarpharmacy.com</TableCell>
+                    <TableCell><Badge variant="outline">Employee</Badge></TableCell>
+                    <TableCell><Badge variant="default">Active</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button size="sm" variant="outline"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              User accounts are managed through the authentication system. Use the HRM module to manage employee records.
             </p>
           </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

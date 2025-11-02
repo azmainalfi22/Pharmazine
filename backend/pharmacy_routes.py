@@ -723,8 +723,13 @@ def get_manufacturer_statistics(db: Session = Depends(get_db)):
     
     outstanding = db.query(func.sum(Manufacturer.current_balance)).scalar() or 0
     
-    # This month purchases (would need purchases table join)
-    this_month_purchases = 0  # TODO: Implement with purchases table
+    # This month purchases from Purchase table
+    from main import Purchase
+    from datetime import date
+    first_day_of_month = date.today().replace(day=1)
+    this_month_purchases = db.query(func.sum(Purchase.total_amount)).filter(
+        Purchase.date >= first_day_of_month.isoformat()
+    ).scalar() or 0
     
     return ManufacturerStatistics(
         total_manufacturers=total,
