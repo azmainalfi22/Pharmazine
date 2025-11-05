@@ -25,7 +25,7 @@
 
 ### **Admin Account (Full Access)**
 ```
-Email:    admin@voltdealer.com
+Email:    admin@sharkarpharmacy.com
 Password: admin123
 ```
 ✅ Can access all features including:
@@ -45,7 +45,7 @@ Password: admin123
 
 ### **Manager Account (Limited Admin)**
 ```
-Email:    manager1@voltdealer.com
+Email:    manager@sharkarpharmacy.com
 Password: manager123
 ```
 ✅ Can access:
@@ -60,7 +60,7 @@ Password: manager123
 
 ### **Salesman/Employee Account (Sales Only)**
 ```
-Email:    employee1@voltdealer.com
+Email:    employee@sharkarpharmacy.com
 Password: employee123
 ```
 ✅ Can access:
@@ -142,13 +142,13 @@ docker ps
 ### **View Container Logs:**
 ```powershell
 # Frontend logs
-docker logs volt-dealer-frontend
+docker logs pharmazine-frontend
 
 # Backend logs
-docker logs volt-dealer-backend
+docker logs pharmazine-backend
 
 # Database logs
-docker logs volt-dealer-postgres
+docker logs pharmazine-postgres
 ```
 
 ### **Restart All Services:**
@@ -256,10 +256,10 @@ docker compose up -d
 docker ps | findstr frontend
 
 # Restart frontend
-docker restart volt-dealer-frontend
+docker restart pharmazine-frontend
 
 # Check logs
-docker logs volt-dealer-frontend
+docker logs pharmazine-frontend
 ```
 
 ### **Problem: Login not working**
@@ -269,7 +269,7 @@ docker logs volt-dealer-frontend
 docker ps | findstr backend
 
 # Check backend logs
-docker logs volt-dealer-backend
+docker logs pharmazine-backend
 
 # Test API health
 Invoke-WebRequest -Uri http://localhost:9000/api/health
@@ -282,7 +282,7 @@ Invoke-WebRequest -Uri http://localhost:9000/api/health
 docker ps | findstr postgres
 
 # Restart database
-docker restart volt-dealer-postgres
+docker restart pharmazine-postgres
 ```
 
 ### **Problem: Containers showing as "unhealthy"**
@@ -291,8 +291,8 @@ This is usually a health check timing issue. If the application is accessible, y
 
 ```powershell
 # Restart specific container
-docker restart volt-dealer-backend
-docker restart volt-dealer-frontend
+docker restart pharmazine-backend
+docker restart pharmazine-frontend
 ```
 
 ---

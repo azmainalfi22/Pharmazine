@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Redis service
   redis:
@@ -32,7 +30,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - ./init-db-comprehensive.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./backend/migrations:/docker-entrypoint-initdb.d/migrations:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-pharmazine}"]
       interval: 30s
@@ -56,7 +55,7 @@ services:
     ports:
       - "9000:8000"
     volumes:
-      - ./backend:/app/backend:ro
+      - ./backend:/app/backend
       - backend_logs:/app/logs
     depends_on:
       postgres:
@@ -76,8 +75,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        - VITE_API_BASE_URL=http://backend:8000/api
     container_name: pharmazine-frontend
     restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9000/api}
     ports:
       - "80:80"
       - "443:443"
@@ -93,7 +96,7 @@ services:
     networks:
       - pharmazine-network
 
-  # Database initialization service
+  # Database initialization and sample data loader
   db-init:
     build:
       context: .
@@ -104,7 +107,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["python", "backend/seed_data.py"]
+    command: ["python", "backend/comprehensive_sample_data.py"]
     networks:
       - pharmazine-network
     restart: "no"

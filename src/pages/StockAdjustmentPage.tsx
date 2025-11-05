@@ -126,22 +126,26 @@ const StockAdjustmentPage = () => {
     try {
       setLoading(true);
       
-      // Convert to the new API format
-      const items = adjustmentItems.map(item => ({
-        item_pk_no: parseInt(item.id), // Convert string ID to number
-        item_name: item.itemName,
-        receive_quantity: item.adjustedQuantity,
-        unit_price: 0, // No unit price for adjustments
-        adj_reason: item.reason,
-        au_entry_by: 1 // Default user ID
-      }));
-
-      const response = await apiClient.createStockAdjustment(adjustmentType, items);
+      // Create stock transactions for each item
+      for (const item of adjustmentItems) {
+        // Determine the correct transaction type based on adjustment direction
+        const transactionType = item.difference > 0 ? 'stock_adjustment_in' : 'stock_adjustment_out';
+        const quantity = Math.abs(item.difference);
+        
+        await apiClient.createStockTransaction({
+          product_id: item.id,
+          transaction_type: transactionType,
+          quantity: quantity,
+          unit_price: 0,
+          reference_id: `ADJ_${adjustmentType.toUpperCase()}_${Date.now()}`,
+          notes: `Stock adjustment (${adjustmentType}): ${item.reason}`,
+          reason: item.reason,
+        });
+      }
       
-      toast.success(`Stock adjustment (${adjustmentType}) processed successfully! Chalan: ${response.chalan_no}`);
+      toast.success(`Stock ${adjustmentType === 'write_on' ? 'addition' : 'reduction'} completed successfully!`);
       
       setAdjustmentItems([]);
-      
       fetchProducts();
       
     } catch (error) {

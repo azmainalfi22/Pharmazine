@@ -1,7 +1,9 @@
-// API client for Volt Dealer Suite frontend
+// API client for Sharkar Pharmacy Management System
 // This replaces the PostgreSQL client with HTTP API calls
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+import { API_CONFIG } from '@/config/api';
+
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Database types (matching the original Supabase types)
 export type Json =
@@ -15,10 +17,13 @@ export type Json =
 export type AppRole = 'admin' | 'manager' | 'employee'
 export type PaymentMethod = 'cash' | 'bkash' | 'upay' | 'visa' | 'bank_transfer'
 export type TransactionType = 
-  | 'purchase' | 'sale' | 'adjustment' | 'return' | 'opening_stock'
-  | 'sales_return' | 'transfer_in' | 'transfer_out' | 'stock_adjustment_in'
-  | 'stock_adjustment_out' | 'misc_receive' | 'misc_issue' | 'supplier_return'
-  | 'production_out' | 'purchase_return'
+  | 'purchase' 
+  | 'sales'
+  | 'sales_return' 
+  | 'supplier_return' 
+  | 'opening_stock'
+  | 'stock_adjustment_in'
+  | 'stock_adjustment_out'
 
 // Database table types
 export interface Profile {
@@ -362,16 +367,16 @@ export class ApiClient {
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
     // Load token from localStorage on initialization
-    this.token = localStorage.getItem('volt_dealer_token')
+    this.token = localStorage.getItem('token')
   }
 
   // Set authentication token
   setToken(token: string | null) {
     this.token = token
     if (token) {
-      localStorage.setItem('volt_dealer_token', token)
+      localStorage.setItem('token', token)
     } else {
-      localStorage.removeItem('volt_dealer_token')
+      localStorage.removeItem('token')
     }
   }
 
@@ -867,9 +872,89 @@ export class ApiClient {
     return this.fetch<DashboardStats>('/dashboard/stats')
   }
 
+  async getRealtimeDashboard(): Promise<any> {
+    return this.fetch<any>('/dashboard/realtime')
+  }
+
   // Health check
   async healthCheck(): Promise<{ status: string; database: string }> {
     return this.fetch<{ status: string; database: string }>('/health')
+  }
+
+  // Analytics methods
+  async getSalesAnalytics(days: number = 30): Promise<any[]> {
+    return this.fetch<any[]>(`/products/sales-analytics?days=${days}`)
+  }
+
+  // Notification methods
+  async triggerLowStockAlert(): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/notifications/low-stock')
+  }
+
+  async triggerExpiryAlert(): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/notifications/expiry-alerts')
+  }
+
+  async triggerDailySummary(): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/notifications/daily-summary')
+  }
+
+  // RBAC methods
+  async getUserPermissions(): Promise<any> {
+    return this.fetch<any>('/rbac/permissions')
+  }
+
+  // Backup methods
+  async getBackups(): Promise<any> {
+    return this.fetch<any>('/backups')
+  }
+
+  async createBackup(): Promise<{ message: string; path: string }> {
+    return this.fetch<{ message: string; path: string }>('/backups/create', {
+      method: 'POST'
+    })
+  }
+
+  // Auto-reorder methods
+  async getReorderRecommendations(days: number = 30, abcClass?: string): Promise<any> {
+    const url = abcClass 
+      ? `/auto-reorder/recommendations?days=${days}&abc_class=${abcClass}`
+      : `/auto-reorder/recommendations?days=${days}`;
+    return this.fetch<any>(url)
+  }
+
+  async getReorderBySupplier(days: number = 30): Promise<any> {
+    return this.fetch<any>(`/auto-reorder/by-supplier?days=${days}`)
+  }
+
+  async generatePOFromReorder(supplierId: string, days: number = 30): Promise<any> {
+    return this.fetch<any>(`/auto-reorder/generate-po/${supplierId}?days=${days}`, {
+      method: 'POST'
+    })
+  }
+
+  // Patient history methods
+  async getPatientMedicationHistory(customerId: string, days: number = 365): Promise<any> {
+    return this.fetch<any>(`/patients/${customerId}/medication-history?days=${days}`)
+  }
+
+  async getPatientStatistics(customerId: string): Promise<any> {
+    return this.fetch<any>(`/patients/${customerId}/statistics`)
+  }
+
+  async getRefillReminders(daysAhead: number = 7): Promise<any> {
+    return this.fetch<any>(`/refill-reminders?days_ahead=${daysAhead}`)
+  }
+
+  // Performance methods
+  async getSystemPerformance(): Promise<any> {
+    return this.fetch<any>('/system/performance')
+  }
+
+  async optimizeDatabase(): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/system/optimize', {
+      method: 'POST'
+    })
   }
 
   // New Stock Management Methods

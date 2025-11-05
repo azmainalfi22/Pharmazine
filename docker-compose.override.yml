@@ -21,8 +21,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    volumes:
-      - ./dist:/usr/share/nginx/html:ro
     ports:
       - "3000:80"
 

@@ -31,20 +31,31 @@ export default function CRMModule() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            CRM & Loyalty
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Customer campaigns, loyalty programs, and rewards
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 p-8 rounded-2xl border-2 border-violet-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                CRM & Loyalty Program
+              </h1>
+              <p className="text-white/90 text-base">
+                Customer campaigns, loyalty programs, and rewards
+              </p>
+            </div>
+          </div>
+          
+          <Button className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm shadow-lg">
+            <Plus className="w-4 h-4" />
+            New Campaign
+          </Button>
         </div>
-        <Button className="pharmacy-button">
-          <Plus className="w-4 h-4 mr-2" />
-          New Campaign
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

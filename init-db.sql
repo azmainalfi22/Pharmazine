@@ -19,4 +19,4 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Grant necessary permissions
-GRANT ALL PRIVILEGES ON DATABASE volt_dealer_suite TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE pharmazine TO postgres;

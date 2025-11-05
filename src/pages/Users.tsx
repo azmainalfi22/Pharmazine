@@ -37,20 +37,31 @@ const Users = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            User Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage user accounts and permissions
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-700 via-gray-700 to-slate-800 p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <UsersIcon className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                User Management
+              </h1>
+              <p className="text-white/90 text-base">
+                Manage user accounts and permissions
+              </p>
+            </div>
+          </div>
+          
+          <Button className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm shadow-lg">
+            <Plus className="w-4 h-4" />
+            Add User
+          </Button>
         </div>
-        <Button className="pharmacy-button">
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
-        </Button>
       </div>
 
       <Card className="pharmacy-card">

@@ -12,8 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api/hrm";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface Employee {
   id: string;
@@ -113,10 +112,10 @@ export default function HRMModule() {
     setLoading(true);
     try {
       const [employeesRes, leavesRes, attendanceRes, payrollRes] = await Promise.all([
-        fetch(`${API_BASE}/employees`, { headers: getAuthHeader() }),
-        fetch(`${API_BASE}/leaves`, { headers: getAuthHeader() }),
-        fetch(`${API_BASE}/attendance`, { headers: getAuthHeader() }),
-        fetch(`${API_BASE}/payroll`, { headers: getAuthHeader() })
+        fetch(`${API_CONFIG.HRM_BASE}/employees`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.HRM_BASE}/leaves`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.HRM_BASE}/attendance`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.HRM_BASE}/payroll`, { headers: getAuthHeaders() })
       ]);
 
       if (employeesRes.ok) setEmployees(await employeesRes.json());
@@ -139,13 +138,13 @@ export default function HRMModule() {
     setLoading(true);
     try {
       const url = editingEmployee
-        ? `${API_BASE}/employees/${editingEmployee.id}`
-        : `${API_BASE}/employees`;
+        ? `${API_CONFIG.HRM_BASE}/employees/${editingEmployee.id}`
+        : `${API_CONFIG.HRM_BASE}/employees`;
       const method = editingEmployee ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(employeeForm)
       });
 
@@ -182,9 +181,9 @@ export default function HRMModule() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/employees/${id}`, {
+      const response = await fetch(`${API_CONFIG.HRM_BASE}/employees/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -208,9 +207,9 @@ export default function HRMModule() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/leaves`, {
+      const response = await fetch(`${API_CONFIG.HRM_BASE}/leaves`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(leaveForm)
       });
 
@@ -240,9 +239,9 @@ export default function HRMModule() {
   const handleApproveLeave = async (id: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/leaves/${id}/approve`, {
+      const response = await fetch(`${API_CONFIG.HRM_BASE}/leaves/${id}/approve`, {
         method: "POST",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -264,9 +263,9 @@ export default function HRMModule() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/leaves/${id}/reject?reason=${encodeURIComponent(reason)}`, {
+      const response = await fetch(`${API_CONFIG.HRM_BASE}/leaves/${id}/reject?reason=${encodeURIComponent(reason)}`, {
         method: "POST",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -288,23 +287,43 @@ export default function HRMModule() {
   );
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Human Resource Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage employees, attendance, payroll, and leaves
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 p-8 rounded-2xl border-2 border-amber-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                Human Resource Management
+              </h1>
+              <p className="text-white/90 text-base">
+                Manage employees, attendance, payroll, and leaves
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+              <div className="text-xs text-white/70 font-medium">EMPLOYEES</div>
+              <div className="text-2xl font-bold text-white">{employees.length}</div>
+            </div>
+            <Button 
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm shadow-lg" 
+              onClick={() => {
+                setActiveTab("employees");
+                setEmployeeDialog(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Employee
+            </Button>
+          </div>
         </div>
-        <Button className="pharmacy-button" onClick={() => {
-          setActiveTab("employees");
-          setEmployeeDialog(true);
-        }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Employee
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

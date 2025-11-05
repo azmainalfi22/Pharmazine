@@ -137,18 +137,19 @@ const OpeningStockPage = () => {
     try {
       setLoading(true);
       
-      // Convert to the new API format
-      const items = openingStockItems.map(item => ({
-        item_pk_no: parseInt(item.id), // Convert string ID to number
-        item_name: item.itemName,
-        receive_quantity: item.quantity,
-        unit_price: item.unitPrice,
-        au_entry_by: 1 // Default user ID
-      }));
-
-      const response = await apiClient.createOpeningStock(items);
+      // Create stock transactions for each item
+      for (const item of openingStockItems) {
+        await apiClient.createStockTransaction({
+          product_id: item.id,
+          transaction_type: 'opening_stock',
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          reference_id: `OPENING_${Date.now()}`,
+          notes: `Opening stock entry for ${item.itemName}`,
+        });
+      }
       
-      toast.success(`Opening stock saved successfully! Chalan: ${response.chalan_no}`);
+      toast.success('Opening stock saved successfully!');
       
       // Reset form
       setOpeningStockItems([]);

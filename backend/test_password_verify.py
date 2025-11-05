@@ -24,3 +24,10 @@ for password, hash_val in passwords.items():
         print(f"{password:15} -> ERROR: {e}")
 
 
+
+
+
+
+
+
+

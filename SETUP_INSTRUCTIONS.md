@@ -1,8 +1,8 @@
-# Volt Dealer Suite - Setup Instructions
+# Sharkar Pharmacy Management System - Setup Instructions
 
 ## 🚀 Quick Start Guide
 
-The Volt Dealer Suite has been successfully converted from Supabase to PostgreSQL! Here's how to get it running:
+The Sharkar Pharmacy Management System has been successfully converted from Supabase to PostgreSQL! Here's how to get it running:
 
 ### Current Status
 ✅ **Frontend**: Ready and configured  
@@ -23,7 +23,7 @@ The Volt Dealer Suite has been successfully converted from Supabase to PostgreSQ
 1. Open pgAdmin
 2. Connect to your PostgreSQL server
 3. Right-click "Databases" → "Create" → "Database"
-4. Name: `volt_dealer_suite`
+4. Name: `pharmazine`
 5. Click "Save"
 
 **Option B: Using Command Line**
@@ -31,14 +31,14 @@ The Volt Dealer Suite has been successfully converted from Supabase to PostgreSQ
 2. Navigate to PostgreSQL bin directory (usually `C:\Program Files\PostgreSQL\15\bin`)
 3. Run: `psql -U postgres`
 4. Enter your password when prompted
-5. Run: `CREATE DATABASE volt_dealer_suite;`
+5. Run: `CREATE DATABASE pharmazine;`
 6. Run: `\q` to exit
 
 ### Step 3: Import Database Schema and Data
 
 1. Open Command Prompt as Administrator
-2. Navigate to your project directory: `cd W:\D_folder\volt-dealer-suite`
-3. Run: `psql -U postgres -d volt_dealer_suite -f database_setup.sql`
+2. Navigate to your project directory: `cd W:\D_folder\Pharmazine`
+3. Run: `psql -U postgres -d pharmazine -f database_setup.sql`
 4. Enter your password when prompted
 
 ### Step 4: Update Environment Configuration
@@ -69,17 +69,17 @@ npm run dev:full
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@voltdealer.com | Any password (demo mode) |
-| **Manager** | manager1@voltdealer.com | Any password (demo mode) |
-| **Employee** | employee1@voltdealer.com | Any password (demo mode) |
+| **Admin** | admin@sharkarpharmacy.com | admin123 |
+| **Manager** | manager@sharkarpharmacy.com | manager123 |
+| **Employee** | employee@sharkarpharmacy.com | employee123 |
 
 ### Troubleshooting
 
 **Database Connection Issues:**
 - Ensure PostgreSQL service is running
-- Check if the database `volt_dealer_suite` exists
+- Check if the database `pharmazine` exists
 - Verify password in `.env.local` file
-- Test connection: `psql -U postgres -d volt_dealer_suite`
+- Test connection: `psql -U postgres -d pharmazine`
 
 **Port Issues:**
 - Frontend runs on port 8080 (or next available)

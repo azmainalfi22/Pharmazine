@@ -1,6 +1,6 @@
-# Volt Dealer Suite - Docker Deployment
+# Sharkar Pharmacy Management System - Docker Deployment
 
-This document provides comprehensive instructions for deploying the Volt Dealer Suite using Docker with Redis, Nginx, PostgreSQL, and containerized frontend/backend services.
+This document provides comprehensive instructions for deploying the Sharkar Pharmacy Management System using Docker with Redis, Nginx, PostgreSQL, and containerized frontend/backend services.
 
 ## 🐳 Architecture Overview
 
@@ -25,7 +25,7 @@ The Docker setup includes:
 
 ```bash
 git clone <repository-url>
-cd volt-dealer-suite
+cd Pharmazine
 ```
 
 ### 2. Environment Configuration
@@ -77,7 +77,7 @@ docker-compose up --build -d
 
 # Access development tools
 # - Redis Commander: http://localhost:8081
-# - pgAdmin: http://localhost:8082 (admin@voltdealer.com / admin123)
+# - pgAdmin: http://localhost:8082 (admin@sharkarpharmacy.com / admin123)
 ```
 
 ## 📊 Service Management
@@ -118,20 +118,20 @@ docker-compose up --scale backend=3 -d
 
 ```bash
 # Create backup
-docker-compose exec postgres pg_dump -U postgres volt_dealer_suite > backup.sql
+docker-compose exec postgres pg_dump -U postgres pharmazine > backup.sql
 
 # Restore from backup
-docker-compose exec -T postgres psql -U postgres volt_dealer_suite < backup.sql
+docker-compose exec -T postgres psql -U postgres pharmazine < backup.sql
 ```
 
 ### Access Database
 
 ```bash
 # Connect to PostgreSQL
-docker-compose exec postgres psql -U postgres -d volt_dealer_suite
+docker-compose exec postgres psql -U postgres -d pharmazine
 
 # Connect to Redis
-docker-compose exec redis redis-cli -a voltdealer123
+docker-compose exec redis redis-cli -a pharmazine123
 ```
 
 ## 🔒 Security Configuration
@@ -230,14 +230,14 @@ docker-compose exec backend ping redis
 ## 📝 Default Credentials
 
 ### Demo Accounts
-- **Admin**: admin@voltdealer.com / admin123
-- **Manager**: manager1@voltdealer.com / manager123
-- **Employee**: employee1@voltdealer.com / employee123
+- **Admin**: admin@sharkarpharmacy.com / admin123
+- **Manager**: manager@sharkarpharmacy.com / manager123
+- **Employee**: employee@sharkarpharmacy.com / employee123
 
 ### Service Credentials
-- **PostgreSQL**: postgres / voltdealer123
-- **Redis**: (no user) / voltdealer123
-- **pgAdmin**: admin@voltdealer.com / admin123
+- **PostgreSQL**: postgres / pharmazine123
+- **Redis**: (no user) / pharmazine123
+- **pgAdmin**: admin@sharkarpharmacy.com / admin123
 
 ## 🔧 Customization
 
@@ -247,7 +247,7 @@ Key environment variables you can customize:
 
 ```bash
 # Database
-POSTGRES_DB=volt_dealer_suite
+POSTGRES_DB=pharmazine
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_password
 

@@ -1,7 +1,7 @@
 @echo off
-REM FastAPI Backend Startup Script for Volt Dealer Suite (Windows)
+REM FastAPI Backend Startup Script for Sharkar Pharmacy Management System (Windows)
 
-echo 🚀 Starting Volt Dealer Suite FastAPI Backend...
+echo 🚀 Starting Sharkar Pharmacy Management System FastAPI Backend...
 
 REM Check if Python is installed
 python --version >nul 2>&1
@@ -34,15 +34,15 @@ echo 📥 Installing dependencies...
 pip install -r requirements.txt
 
 REM Set environment variables
-set DATABASE_URL=postgresql://postgres:password@localhost:5432/volt_dealer_suite
+set DATABASE_URL=postgresql://postgres:password@localhost:5432/pharmazine
 
 REM Check if PostgreSQL is running
 echo 🔍 Checking PostgreSQL connection...
-python -c "import psycopg2; psycopg2.connect('postgresql://postgres:password@localhost:5432/volt_dealer_suite')" 2>nul
+python -c "import psycopg2; psycopg2.connect('postgresql://postgres:password@localhost:5432/pharmazine')" 2>nul
 if errorlevel 1 (
     echo ❌ Cannot connect to PostgreSQL database.
-    echo Please ensure PostgreSQL is running and the database 'volt_dealer_suite' exists.
-    echo You can create the database with: createdb volt_dealer_suite
+    echo Please ensure PostgreSQL is running and the database 'pharmazine' exists.
+    echo You can create the database with: createdb pharmazine
     pause
     exit /b 1
 )

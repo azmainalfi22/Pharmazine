@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Package, Calendar, AlertCircle, TrendingUp, DollarSign } from "lucide-react";
+import { Search, Package, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,69 +56,9 @@ export default function BatchTab({ batches, loading, searchTerm, setSearchTerm }
     b.rack_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const stats = {
-    total: batches.length,
-    expired: batches.filter(b => b.is_expired).length,
-    expiringSoon: batches.filter(b => {
-      const days = differenceInDays(new Date(b.expiry_date), new Date());
-      return days > 0 && days <= 90;
-    }).length,
-    totalValue: batches.reduce((sum, b) => sum + (b.quantity_remaining * b.purchase_price), 0)
-  };
 
   return (
     <div className="space-y-4">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="pharmacy-stat-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Batches</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
-              <Package className="w-8 h-8 text-primary opacity-20" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="pharmacy-stat-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Expiring Soon</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</p>
-              </div>
-              <AlertCircle className="w-8 h-8 text-orange-600 opacity-20" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="pharmacy-stat-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Expired</p>
-                <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
-              </div>
-              <Calendar className="w-8 h-8 text-red-600 opacity-20" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="pharmacy-stat-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Value</p>
-                <p className="text-2xl font-bold">${stats.totalValue.toFixed(2)}</p>
-              </div>
-              <DollarSign className="w-8 h-8 text-green-600 opacity-20" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Batch List */}
       <Card className="pharmacy-card">
         <CardHeader>
@@ -203,10 +143,10 @@ export default function BatchTab({ batches, loading, searchTerm, setSearchTerm }
                           {batch.quantity_sold}
                         </TableCell>
                         <TableCell className="text-right">
-                          ${batch.purchase_price?.toFixed(2) || "0.00"}
+                          ${(batch.purchase_price || 0).toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          ${batch.mrp?.toFixed(2) || "0.00"}
+                          ${(batch.mrp || 0).toFixed(2)}
                         </TableCell>
                         <TableCell>
                           {batch.rack_number ? (
@@ -217,7 +157,7 @@ export default function BatchTab({ batches, loading, searchTerm, setSearchTerm }
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge 
-                            variant={expiryStatus.color as any}
+                            variant={expiryStatus.color as "default" | "destructive" | "secondary"}
                             className="pharmacy-badge"
                           >
                             {expiryStatus.status}

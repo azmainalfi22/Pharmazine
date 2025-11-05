@@ -1,8 +1,8 @@
 @echo off
-REM Volt Dealer Suite - PostgreSQL Setup Script for Windows
-REM This script helps set up PostgreSQL database for the Volt Dealer Suite
+REM Sharkar Pharmacy Management System - PostgreSQL Setup Script for Windows
+REM This script helps set up PostgreSQL database for the Sharkar Pharmacy Management System
 
-echo 🚀 Volt Dealer Suite - PostgreSQL Database Setup
+echo 🚀 Sharkar Pharmacy Management System - PostgreSQL Database Setup
 echo ==================================================
 
 REM Check if PostgreSQL is installed
@@ -28,7 +28,7 @@ if %errorlevel% neq 0 (
 echo ✅ PostgreSQL service is running
 
 REM Database configuration
-set DB_NAME=volt_dealer_suite
+set DB_NAME=pharmazine
 set DB_USER=postgres
 set DB_HOST=localhost
 set DB_PORT=5432
@@ -85,7 +85,7 @@ echo ✅ Database schema and sample data created successfully
 REM Create environment file
 echo 📝 Creating environment configuration file...
 (
-echo # Volt Dealer Suite - Environment Configuration
+echo # Sharkar Pharmacy Management System - Environment Configuration
 echo # PostgreSQL Database Configuration
 echo VITE_DATABASE_URL=postgresql://%DB_USER%:%DB_PASSWORD%@%DB_HOST%:%DB_PORT%/%DB_NAME%
 echo VITE_DATABASE_HOST=%DB_HOST%
@@ -95,7 +95,7 @@ echo VITE_DATABASE_USER=%DB_USER%
 echo VITE_DATABASE_PASSWORD=%DB_PASSWORD%
 echo.
 echo # Application Configuration
-echo VITE_APP_NAME=Volt Dealer Suite
+echo VITE_APP_NAME=Sharkar Pharmacy Management System
 echo VITE_APP_VERSION=1.0.0
 echo VITE_APP_DESCRIPTION=Electronics and Electrical Products Inventory Management System
 echo.
@@ -118,15 +118,15 @@ echo    - Sample products: %PRODUCTS_COUNT%
 echo    - Sample users: %USERS_COUNT%
 
 echo.
-echo 🎉 Volt Dealer Suite PostgreSQL setup completed successfully!
+echo 🎉 Sharkar Pharmacy Management System PostgreSQL setup completed successfully!
 echo.
 echo 📋 Next Steps:
 echo    1. Start the development server: npm run dev
 echo    2. Open your browser to: http://localhost:5173
 echo    3. Login with demo credentials:
-echo       - Admin: admin@voltdealer.com
-echo       - Manager: manager1@voltdealer.com
-echo       - Employee: employee1@voltdealer.com
+echo       - Admin: admin@sharkarpharmacy.com
+echo       - Manager: manager@sharkarpharmacy.com
+echo       - Employee: employee@sharkarpharmacy.com
 echo.
 echo 🔧 Database Management:
 echo    - Connect to database: psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d %DB_NAME%

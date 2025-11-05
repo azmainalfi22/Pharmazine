@@ -12,8 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 export default function AccountsVouchers() {
   const [activeTab, setActiveTab] = useState("journal");
@@ -40,8 +39,8 @@ export default function AccountsVouchers() {
     setLoading(true);
     try {
       const [transactionsRes, expensesRes] = await Promise.all([
-        fetch(`${API_BASE}/transactions`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }),
-        fetch(`${API_BASE}/expenses`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+        fetch(`${API_CONFIG.BASE_URL}/transactions`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.BASE_URL}/expenses`, { headers: getAuthHeaders() })
       ]);
 
       if (transactionsRes.ok) setTransactions(await transactionsRes.json());
@@ -56,9 +55,9 @@ export default function AccountsVouchers() {
   const handleSaveVoucher = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/transactions`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/transactions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           type: voucherForm.type,
           amount: voucherForm.amount,
@@ -92,15 +91,30 @@ export default function AccountsVouchers() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Accounts & Vouchers
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage vouchers, receipts, and payments
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-600 via-gray-600 to-slate-700 p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <DollarSign className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                Accounts & Vouchers
+              </h1>
+              <p className="text-white/90 text-base">
+                Manage vouchers, receipts, and payments
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+            <div className="text-xs text-white/70 font-medium">VOUCHERS</div>
+            <div className="text-2xl font-bold text-white">{vouchers.length}</div>
+          </div>
         </div>
       </div>
 

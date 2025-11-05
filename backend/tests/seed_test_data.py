@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 BASE_URL = "http://localhost:9000/api"
 
 # Test credentials
-ADMIN_EMAIL = "admin@voltdealer.com"
+ADMIN_EMAIL = "admin@sharkarpharmacy.com"
 ADMIN_PASSWORD = "admin123"
 
 # Sample data

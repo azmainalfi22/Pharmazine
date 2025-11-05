@@ -13,8 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api/services";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface Service {
   id: string;
@@ -104,9 +103,9 @@ export default function ServiceModule() {
     setLoading(true);
     try {
       const [servicesRes, bookingsRes, categoriesRes] = await Promise.all([
-        fetch(`${API_BASE}`, { headers: getAuthHeader() }),
-        fetch(`${API_BASE}/bookings/all`, { headers: getAuthHeader() }),
-        fetch(`${API_BASE}/categories`, { headers: getAuthHeader() })
+        fetch(`${API_CONFIG.SERVICES_BASE}`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.SERVICES_BASE}/bookings/all`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.SERVICES_BASE}/categories`, { headers: getAuthHeaders() })
       ]);
 
       if (servicesRes.ok) {
@@ -137,13 +136,13 @@ export default function ServiceModule() {
     setLoading(true);
     try {
       const url = editingService
-        ? `${API_BASE}/${editingService.id}`
-        : `${API_BASE}`;
+        ? `${API_CONFIG.SERVICES_BASE}/${editingService.id}`
+        : `${API_CONFIG.SERVICES_BASE}`;
       const method = editingService ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(serviceForm)
       });
 
@@ -180,9 +179,9 @@ export default function ServiceModule() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/${id}`, {
+      const response = await fetch(`${API_CONFIG.SERVICES_BASE}/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -207,13 +206,13 @@ export default function ServiceModule() {
     setLoading(true);
     try {
       const url = editingBooking
-        ? `${API_BASE}/bookings/${editingBooking.id}`
-        : `${API_BASE}/bookings`;
+        ? `${API_CONFIG.SERVICES_BASE}/bookings/${editingBooking.id}`
+        : `${API_CONFIG.SERVICES_BASE}/bookings`;
       const method = editingBooking ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(bookingForm)
       });
 
@@ -247,9 +246,9 @@ export default function ServiceModule() {
   const handleConfirmBooking = async (id: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/bookings/${id}/confirm`, {
+      const response = await fetch(`${API_CONFIG.SERVICES_BASE}/bookings/${id}/confirm`, {
         method: "POST",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -271,9 +270,9 @@ export default function ServiceModule() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/bookings/${id}/cancel`, {
+      const response = await fetch(`${API_CONFIG.SERVICES_BASE}/bookings/${id}/cancel`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ reason })
       });
 
@@ -301,23 +300,43 @@ export default function ServiceModule() {
   );
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Service Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage consultations, lab tests, and service bookings
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 p-8 rounded-2xl border-2 border-pink-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <Stethoscope className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                Service Management
+              </h1>
+              <p className="text-white/90 text-base">
+                Manage consultations, lab tests, and service bookings
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+              <div className="text-xs text-white/70 font-medium">SERVICES</div>
+              <div className="text-2xl font-bold text-white">{services.length}</div>
+            </div>
+            <Button 
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm shadow-lg" 
+              onClick={() => {
+                setActiveTab("services");
+                setServiceDialog(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Service
+            </Button>
+          </div>
         </div>
-        <Button className="pharmacy-button" onClick={() => {
-          setActiveTab("services");
-          setServiceDialog(true);
-        }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Service
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

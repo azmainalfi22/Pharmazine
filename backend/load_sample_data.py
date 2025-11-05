@@ -282,7 +282,7 @@ def create_sample_transactions(session):
     
     # Skip sample transactions if users table doesn't exist
     try:
-        admin = session.execute(text("SELECT id FROM users WHERE email = 'admin@voltdealer.com'")).fetchone()
+        admin = session.execute(text("SELECT id FROM users WHERE email = 'admin@sharkarpharmacy.com'")).fetchone()
         admin_id = admin[0] if admin else None
     except:
         print("[WARNING] Users table not found, skipping sample transactions")

@@ -150,7 +150,7 @@ export default function ManufacturerTab({
       postal_code: manufacturer.postal_code,
       tax_number: manufacturer.tax_number,
       payment_terms: manufacturer.payment_terms,
-      credit_limit: manufacturer.credit_limit,
+      credit_limit: manufacturer.credit_limit || 0,
       website: manufacturer.website,
       notes: manufacturer.notes,
       is_active: manufacturer.is_active
@@ -476,12 +476,12 @@ export default function ManufacturerTab({
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <CreditCard className="w-3 h-3" />
-                        ${manufacturer.credit_limit?.toFixed(2) || "0.00"}
+                        ${(manufacturer.credit_limit || 0).toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      <span className={manufacturer.current_balance > 0 ? "text-red-600" : "text-green-600"}>
-                        ${manufacturer.current_balance?.toFixed(2) || "0.00"}
+                      <span className={(manufacturer.current_balance || 0) > 0 ? "text-red-600" : "text-green-600"}>
+                        ${(manufacturer.current_balance || 0).toFixed(2)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">

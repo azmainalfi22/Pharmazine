@@ -88,6 +88,16 @@ except ImportError as e:
 except Exception as e:
     print(f"[WARNING] Error loading HRM routes: {e}")
 
+# Include Finance routes
+try:
+    from finance_routes import router as finance_router
+    app.include_router(finance_router)
+    print("[OK] Finance routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load finance routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading finance routes: {e}")
+
 # Database setup
 if "sqlite" in DATABASE_URL:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -793,7 +803,7 @@ class ProductCreate(BaseModel):
 
 class StockTransactionCreate(BaseModel):
     product_id: str
-    transaction_type: str = Field(..., pattern="^(in|out|adjust)$")
+    transaction_type: str = Field(..., pattern="^(purchase|sales|sales_return|supplier_return|opening_stock|stock_adjustment_in|stock_adjustment_out)$")
     quantity: int = Field(..., gt=0, description="Quantity must be positive")
     unit_price: Optional[float] = Field(None, ge=0)
     
@@ -895,7 +905,7 @@ class CategoryResponse(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -906,7 +916,7 @@ class SubcategoryResponse(BaseModel):
     name: str
     description: Optional[str] = None
     category_id: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -930,7 +940,7 @@ class SupplierResponse(BaseModel):
     email: Optional[str] = None
     address: Optional[str] = None
     payment_terms: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -1073,7 +1083,7 @@ class SaleResponse(BaseModel):
     net_amount: float
     payment_method: str
     payment_status: str
-    emi_enabled: bool
+    emi_enabled: Optional[bool] = None
     emi_months: Optional[int] = None
     emi_amount: Optional[float] = None
     emi_interest_rate: Optional[float] = None
@@ -1313,6 +1323,31 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
         data={"sub": user.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/users/me")
+async def get_current_user_profile(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    """Get current authenticated user profile"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+    user = db.query(Profile).filter(Profile.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "phone": user.phone,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at
+    }
 
 @app.post("/api/auth/register", response_model=ProfileResponse)
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
@@ -1717,6 +1752,320 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         "lowStockProducts": low_stock_products
     }
 
+@app.get("/api/products/sales-analytics")
+async def get_product_sales_analytics(days: int = 30, db: Session = Depends(get_db)):
+    """Get product sales analytics for calculating days of supply and ABC analysis"""
+    from datetime import timedelta
+    
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Get sales items within date range
+    sales_data = db.query(
+        SaleItem.product_id,
+        func.sum(SaleItem.quantity).label('total_sold'),
+        func.count(SaleItem.id).label('order_count'),
+        func.sum(SaleItem.quantity * SaleItem.unit_price).label('total_revenue')
+    ).join(Sale, SaleItem.sale_id == Sale.id
+    ).filter(Sale.created_at >= start_date
+    ).group_by(SaleItem.product_id).all()
+    
+    result = []
+    for item in sales_data:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            avg_daily_sales = float(item.total_sold) / days if days > 0 else 0
+            days_of_supply = product.stock_quantity / avg_daily_sales if avg_daily_sales > 0 else 999
+            
+            result.append({
+                "product_id": item.product_id,
+                "product_name": product.name,
+                "sku": product.sku,
+                "total_sold": float(item.total_sold),
+                "order_count": item.order_count,
+                "total_revenue": float(item.total_revenue),
+                "avg_daily_sales": round(avg_daily_sales, 2),
+                "current_stock": product.stock_quantity,
+                "days_of_supply": round(days_of_supply, 1) if days_of_supply < 999 else None
+            })
+    
+    # Sort by revenue for ABC analysis
+    result.sort(key=lambda x: x['total_revenue'], reverse=True)
+    
+    # Calculate cumulative revenue percentage for ABC classification
+    total_revenue = sum(item['total_revenue'] for item in result)
+    cumulative = 0
+    for item in result:
+        cumulative += item['total_revenue']
+        cumulative_pct = (cumulative / total_revenue * 100) if total_revenue > 0 else 0
+        if cumulative_pct <= 80:
+            item['abc_class'] = 'A'
+        elif cumulative_pct <= 95:
+            item['abc_class'] = 'B'
+        else:
+            item['abc_class'] = 'C'
+    
+    return result
+
+@app.get("/api/notifications/low-stock")
+async def trigger_low_stock_notification(db: Session = Depends(get_db)):
+    """Manually trigger low stock notification"""
+    try:
+        from notifications import check_and_send_low_stock_alerts
+        check_and_send_low_stock_alerts(db)
+        return {"message": "Low stock alerts sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send alerts: {str(e)}")
+
+@app.get("/api/notifications/expiry-alerts")
+async def trigger_expiry_notification(db: Session = Depends(get_db)):
+    """Manually trigger expiry alerts"""
+    try:
+        from notifications import check_and_send_expiry_alerts
+        check_and_send_expiry_alerts(db)
+        return {"message": "Expiry alerts sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send alerts: {str(e)}")
+
+@app.get("/api/notifications/daily-summary")
+async def trigger_daily_summary(db: Session = Depends(get_db)):
+    """Manually trigger daily summary"""
+    try:
+        from notifications import send_daily_summary_report
+        send_daily_summary_report(db)
+        return {"message": "Daily summary sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send summary: {str(e)}")
+
+@app.get("/api/rbac/permissions")
+async def get_user_permissions(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    """Get current user permissions"""
+    try:
+        from rbac import get_current_user_permissions
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        permissions = get_current_user_permissions(db, user_id)
+        return permissions
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/backups")
+async def list_backups(dependencies=[Depends(require_admin())]):
+    """List all available backups"""
+    try:
+        from backup_system import BackupSystem
+        backup_system = BackupSystem()
+        backups = backup_system.list_backups()
+        return {"backups": backups, "count": len(backups)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/backups/create")
+async def create_backup(dependencies=[Depends(require_admin())]):
+    """Create a new backup"""
+    try:
+        from backup_system import BackupSystem
+        backup_system = BackupSystem()
+        backup_path = backup_system.create_backup()
+        
+        if backup_path:
+            return {"message": "Backup created successfully", "path": backup_path}
+        else:
+            raise HTTPException(status_code=500, detail="Backup creation failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-reorder/recommendations")
+async def get_reorder_recommendations(
+    days: int = 30,
+    abc_class: str = None,
+    db: Session = Depends(get_db)
+):
+    """Get auto-reorder recommendations"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days, abc_class)
+        
+        return {
+            "recommendations": recommendations,
+            "count": len(recommendations),
+            "total_estimated_cost": sum(r['estimated_cost'] for r in recommendations)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-reorder/by-supplier")
+async def get_reorder_by_supplier(days: int = 30, db: Session = Depends(get_db)):
+    """Get reorder recommendations grouped by supplier"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days)
+        grouped = reorder_system.group_recommendations_by_supplier(recommendations)
+        
+        result = []
+        for supplier_id, items in grouped.items():
+            total_cost = sum(i['estimated_cost'] for i in items)
+            result.append({
+                'supplier_id': supplier_id,
+                'product_count': len(items),
+                'total_estimated_cost': total_cost,
+                'products': items
+            })
+        
+        return {"suppliers": result, "total_suppliers": len(result)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-reorder/generate-po/{supplier_id}")
+async def generate_purchase_order_from_reorder(
+    supplier_id: str,
+    days: int = 30,
+    db: Session = Depends(get_db)
+):
+    """Generate draft purchase order from auto-reorder recommendations"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days)
+        
+        # Filter by supplier
+        supplier_recs = [r for r in recommendations if r.get('supplier_id') == supplier_id]
+        
+        if not supplier_recs:
+            raise HTTPException(status_code=404, detail="No recommendations for this supplier")
+        
+        po_draft = reorder_system.generate_purchase_order_draft(supplier_id, supplier_recs)
+        return po_draft
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/patients/{customer_id}/medication-history")
+async def get_patient_medication_history(customer_id: str, days: int = 365, db: Session = Depends(get_db)):
+    """Get medication history for a patient"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        history = service.get_patient_history(customer_id, days)
+        return {"history": history, "count": len(history)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/patients/{customer_id}/statistics")
+async def get_patient_statistics(customer_id: str, db: Session = Depends(get_db)):
+    """Get statistics for a patient"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        stats = service.get_patient_statistics(customer_id)
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/refill-reminders")
+async def get_refill_reminders(days_ahead: int = 7, db: Session = Depends(get_db)):
+    """Get patients due for refill reminders"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        reminders = service.get_refill_reminders(days_ahead)
+        return {"reminders": reminders, "count": len(reminders)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/system/performance")
+async def get_system_performance(db: Session = Depends(get_db)):
+    """Get system performance metrics"""
+    try:
+        from performance_monitor import PerformanceMonitor, DatabaseOptimizer
+        
+        optimizer = DatabaseOptimizer(db)
+        
+        return {
+            "slow_queries": PerformanceMonitor.get_slow_queries(10),
+            "slow_api_calls": PerformanceMonitor.get_slow_api_calls(10),
+            "table_sizes": optimizer.get_table_sizes()[:10],
+            "index_usage": optimizer.get_index_usage()[:10],
+            "unused_indexes": optimizer.get_unused_indexes()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/system/optimize")
+async def optimize_database(db: Session = Depends(get_db), dependencies=[Depends(require_admin())]):
+    """Optimize database performance"""
+    try:
+        from performance_monitor import DatabaseOptimizer
+        
+        optimizer = DatabaseOptimizer(db)
+        optimizer.analyze_tables()
+        
+        return {"message": "Database optimized successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/realtime")
+async def get_realtime_dashboard(db: Session = Depends(get_db)):
+    """Get real-time dashboard statistics"""
+    from datetime import date
+    from sqlalchemy import and_
+    
+    today = date.today()
+    
+    # Today's sales
+    today_sales = db.query(func.sum(Sale.net_amount)).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    today_transactions = db.query(func.count(Sale.id)).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    today_customers = db.query(func.count(func.distinct(Sale.customer_name))).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    # Stock alerts
+    low_stock_count = db.query(func.count(Product.id)).filter(
+        Product.stock_quantity <= Product.min_stock_level
+    ).scalar() or 0
+    
+    out_of_stock_count = db.query(func.count(Product.id)).filter(
+        Product.stock_quantity == 0
+    ).scalar() or 0
+    
+    # Expiring products
+    from datetime import timedelta
+    expiry_date = datetime.utcnow() + timedelta(days=30)
+    expiring_count = db.query(func.count(Product.id)).filter(
+        and_(
+            Product.expiry_date.isnot(None),
+            Product.expiry_date <= expiry_date,
+            Product.stock_quantity > 0
+        )
+    ).scalar() or 0
+    
+    # Inventory value
+    inventory_value = db.query(func.sum(Product.stock_quantity * Product.cost_price)).scalar() or 0
+    
+    return {
+        "today_sales": float(today_sales),
+        "today_transactions": int(today_transactions),
+        "today_customers": int(today_customers),
+        "low_stock_count": int(low_stock_count),
+        "out_of_stock_count": int(out_of_stock_count),
+        "expiring_soon_count": int(expiring_count),
+        "total_inventory_value": float(inventory_value),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 @app.post("/api/stock-transactions", response_model=StockTransactionResponse)
 async def create_stock_transaction(transaction: StockTransactionCreate, db: Session = Depends(get_db)):
     # Create the stock transaction
@@ -1732,7 +2081,7 @@ async def create_stock_transaction(transaction: StockTransactionCreate, db: Sess
         raise HTTPException(status_code=404, detail="Product not found")
     
     # Determine if this is stock in or out
-    is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'transfer_in', 'stock_adjustment_in', 'misc_receive']
+    is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'stock_adjustment_in']
     quantity_change = transaction.quantity if is_stock_in else -transaction.quantity
     
     # Update stock quantity
@@ -1755,7 +2104,7 @@ async def delete_stock_transaction(transaction_id: str, db: Session = Depends(ge
     # Reverse the stock change
     product = db.query(Product).filter(Product.id == transaction.product_id).first()
     if product:
-        is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'transfer_in', 'stock_adjustment_in', 'misc_receive']
+        is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'stock_adjustment_in']
         quantity_change = transaction.quantity if is_stock_in else -transaction.quantity
         product.stock_quantity -= quantity_change
     

@@ -7,32 +7,39 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import EnhancedDashboard from "./pages/EnhancedDashboard";
-import Inventory from "./pages/Inventory";
-import Sales from "./pages/Sales";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import Setup from "./pages/Setup";
-import Reports from "./pages/Reports";
-import Purchase from "./pages/Purchase";
 import EnhancedPurchase from "./pages/EnhancedPurchase";
 import RequisitionsPage from "./pages/RequisitionsPage";
 import PaymentsPage from "./pages/PaymentsPage";
-import FinancePage from "./pages/FinancePage";
+import PaymentsFinance from "./pages/PaymentsFinance";
 import ImportPage from "./pages/ImportPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import MedicineManagement from "./pages/MedicineManagement";
 import POSSystem from "./pages/POSSystem";
+import SalesHistory from "./pages/SalesHistory";
 import EnhancedCustomers from "./pages/EnhancedCustomers";
 import EnhancedReports from "./pages/EnhancedReports";
 import StockManagement from "./pages/StockManagement";
-import ReturnsManagement from "./pages/ReturnsManagement";
+import StockMovements from "./pages/StockMovements";
+import LowStockAlerts from "./pages/LowStockAlerts";
+import InventoryAnalytics from "./pages/InventoryAnalytics";
+import AutoReorderPage from "./pages/AutoReorderPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import BackupManagementPage from "./pages/BackupManagementPage";
+import SystemSettingsPage from "./pages/SystemSettingsPage";
+import PerformanceDashboard from "./pages/PerformanceDashboard";
 import AccountsVouchers from "./pages/AccountsVouchers";
 import ServiceModule from "./pages/ServiceModule";
 import HRMModule from "./pages/HRMModule";
 import CRMModule from "./pages/CRMModule";
 import NotFound from "./pages/NotFound";
+import SalesReturnPage from "./pages/SalesReturnPage";
+import OpeningStockPage from "./pages/OpeningStockPage";
+import StockAdjustmentPage from "./pages/StockAdjustmentPage";
+import SupplierReturnPage from "./pages/SupplierReturnPage";
 
 const queryClient = new QueryClient();
 
@@ -56,16 +63,6 @@ const App = () => (
               }
             />
             <Route
-              path="/dashboard/old"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/medicine-management"
               element={
                 <ProtectedRoute>
@@ -77,6 +74,26 @@ const App = () => (
             />
             <Route
               path="/medicine-management/categories"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/types"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/units"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -116,6 +133,66 @@ const App = () => (
               }
             />
             <Route
+              path="/medicine-management/low-stock"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/waste"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/statistics"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/barcode"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/discounts"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicine-management/transactions"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MedicineManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/inventory"
               element={
                 <ProtectedRoute>
@@ -126,52 +203,92 @@ const App = () => (
               }
             />
             <Route
-              path="/inventory/old"
+              path="/inventory/movements"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
+                    <StockMovements />
                   </Layout>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/inventory/stock-in"
+              path="/inventory/low-stock"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
+                    <LowStockAlerts />
                   </Layout>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/inventory/stock-out"
+              path="/inventory/analytics"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
+                    <InventoryAnalytics />
                   </Layout>
                 </ProtectedRoute>
               }
             />
-            {/* Stock IN Activity Routes */}
             <Route
-              path="/inventory/stock-in/purchase"
+              path="/inventory/auto-reorder"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
+                    <AutoReorderPage />
                   </Layout>
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/settings/notifications"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <NotificationsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/backups"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <BackupManagementPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/system"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SystemSettingsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/performance"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PerformanceDashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            {/* Stock IN Activity Routes - Removed duplicate purchase route */}
             <Route
               path="/inventory/stock-in/sales-return"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
+                    <SalesReturnPage />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -181,17 +298,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-in/transfer-in"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
+                    <OpeningStockPage />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -201,88 +308,18 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-in/misc-receive"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
+                    <StockAdjustmentPage />
                   </Layout>
                 </ProtectedRoute>
               }
             />
             {/* Stock OUT Activity Routes */}
             <Route
-              path="/inventory/stock-out/sales"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/inventory/stock-out/supplier-return"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-out/production-out"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-out/purchase-return"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-out/stock-adjustment"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-out/transfer-out"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory/stock-out/misc-issue"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
+                    <SupplierReturnPage />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -308,21 +345,11 @@ const App = () => (
               }
             />
             <Route
-              path="/sales/old"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Sales />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/sales/history"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Sales />
+                    <SalesHistory />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -428,11 +455,11 @@ const App = () => (
               }
             />
             <Route
-              path="/reports/old"
+              path="/reports/medicine"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -442,7 +469,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -452,27 +479,27 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/reports/stock-movement"
+              path="/reports/stock"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/reports/low-stock"
+              path="/reports/financial"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -482,7 +509,48 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/customer"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/purchase"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            {/* Legacy routes - redirect to appropriate tabs */}
+            <Route
+              path="/reports/stock-movement"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/low-stock"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -492,7 +560,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -502,7 +570,17 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Reports />
+                    <EnhancedReports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/inventory"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EnhancedReports />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -513,16 +591,6 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <EnhancedPurchase />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/purchase/old"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Purchase />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -542,7 +610,67 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <PaymentsPage />
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/collection"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/vouchers"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/receivables"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/payables"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/cashflow"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsFinance />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -553,26 +681,6 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <AccountsVouchers />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/finance/old"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <FinancePage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/returns"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <ReturnsManagement />
                   </Layout>
                 </ProtectedRoute>
               }

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Volt Dealer Suite - PostgreSQL Setup Script
-# This script helps set up PostgreSQL database for the Volt Dealer Suite
+# Sharkar Pharmacy Management System - PostgreSQL Setup Script
+# This script helps set up PostgreSQL database for the Sharkar Pharmacy Management System
 
-echo "🚀 Volt Dealer Suite - PostgreSQL Database Setup"
+echo "🚀 Sharkar Pharmacy Management System - PostgreSQL Database Setup"
 echo "=================================================="
 
 # Check if PostgreSQL is installed
@@ -27,7 +27,7 @@ fi
 echo "✅ PostgreSQL service is running"
 
 # Database configuration
-DB_NAME="volt_dealer_suite"
+DB_NAME="pharmazine"
 DB_USER="postgres"
 DB_HOST="localhost"
 DB_PORT="5432"
@@ -76,7 +76,7 @@ fi
 # Create environment file
 echo "📝 Creating environment configuration file..."
 cat > .env.local << EOF
-# Volt Dealer Suite - Environment Configuration
+# Sharkar Pharmacy Management System - Environment Configuration
 # PostgreSQL Database Configuration
 VITE_DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
 VITE_DATABASE_HOST=$DB_HOST
@@ -86,7 +86,7 @@ VITE_DATABASE_USER=$DB_USER
 VITE_DATABASE_PASSWORD=$DB_PASSWORD
 
 # Application Configuration
-VITE_APP_NAME=Volt Dealer Suite
+VITE_APP_NAME=Sharkar Pharmacy Management System
 VITE_APP_VERSION=1.0.0
 VITE_APP_DESCRIPTION=Electronics and Electrical Products Inventory Management System
 
@@ -109,15 +109,15 @@ echo "   - Sample products: $PRODUCTS_COUNT"
 echo "   - Sample users: $USERS_COUNT"
 
 echo ""
-echo "🎉 Volt Dealer Suite PostgreSQL setup completed successfully!"
+echo "🎉 Sharkar Pharmacy Management System PostgreSQL setup completed successfully!"
 echo ""
 echo "📋 Next Steps:"
 echo "   1. Start the development server: npm run dev"
 echo "   2. Open your browser to: http://localhost:5173"
 echo "   3. Login with demo credentials:"
-echo "      - Admin: admin@voltdealer.com"
-echo "      - Manager: manager1@voltdealer.com"
-echo "      - Employee: employee1@voltdealer.com"
+echo "      - Admin: admin@sharkarpharmacy.com"
+echo "      - Manager: manager@sharkarpharmacy.com"
+echo "      - Employee: employee@sharkarpharmacy.com"
 echo ""
 echo "🔧 Database Management:"
 echo "   - Connect to database: psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME"
