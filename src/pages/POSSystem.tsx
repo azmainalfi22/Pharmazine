@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Minus, Search, ShoppingCart, Trash2, Receipt, User, CreditCard, DollarSign, Barcode, Package, X } from "lucide-react";
+import { Plus, Minus, Search, ShoppingCart, Trash2, Receipt, User, CreditCard, DollarSign, Barcode, Package, X, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface CartItem {
   product_id: string;
@@ -85,15 +84,10 @@ export default function POSSystem() {
     }
   }, []);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const loadProducts = async () => {
     try {
-      const response = await fetch(`${API_BASE}/products`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -106,20 +100,31 @@ export default function POSSystem() {
 
   const loadBatches = async (productId: string) => {
     try {
-      const response = await fetch(`${API_BASE}/pharmacy/batches?product_id=${productId}`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/batches?product_id=${productId}`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
-        setBatches(data.filter((b: Batch) => b.quantity_remaining > 0));
+        // Filter out expired batches and batches with no stock
+        const today = new Date();
+        const validBatches = data.filter((b: Batch) => {
+          const expiryDate = new Date(b.expiry_date);
+          return b.quantity_remaining > 0 && expiryDate >= today;
+        });
+        setBatches(validBatches);
+        
+        if (validBatches.length === 0 && data.length > 0) {
+          toast.info("All batches for this product are either expired or out of stock");
+        }
       }
     } catch (error) {
       console.error("Error loading batches:", error);
+      toast.error("Error loading batches");
       setBatches([]);
     }
   };
 
-  const handleBarcodeScann = async (barcode: string) => {
+  const handleBarcodeScan = async (barcode: string) => {
     if (!barcode.trim()) return;
 
     const product = products.find(p => 
@@ -129,13 +134,19 @@ export default function POSSystem() {
     );
 
     if (product) {
+      toast.success(`Product found: ${product.name}`);
       handleProductSelect(product);
       setSearchTerm("");
       if (barcodeInputRef.current) {
         barcodeInputRef.current.value = "";
+        barcodeInputRef.current.focus();
       }
     } else {
-      toast.error("Product not found");
+      toast.error(`Product not found for barcode: ${barcode}`);
+      if (barcodeInputRef.current) {
+        barcodeInputRef.current.value = "";
+        barcodeInputRef.current.focus();
+      }
     }
   };
 
@@ -148,13 +159,41 @@ export default function POSSystem() {
   const handleAddToCart = (batch: Batch) => {
     if (!selectedProduct) return;
 
+    // Check if batch has available stock
+    if (batch.quantity_remaining <= 0) {
+      toast.error("This batch is out of stock");
+      return;
+    }
+
+    // Warn if batch is near expiry
+    const expiryDate = new Date(batch.expiry_date);
+    const today = new Date();
+    const daysUntilExpiry = Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiry < 0) {
+      toast.error("Cannot sell expired batch");
+      return;
+    }
+    
+    if (daysUntilExpiry < 30) {
+      toast.warning(`This batch expires in ${daysUntilExpiry} days`);
+    }
+
     const existingIndex = cart.findIndex(
       item => item.product_id === selectedProduct.id && item.batch_number === batch.batch_number
     );
 
     if (existingIndex >= 0) {
       const updated = [...cart];
-      updated[existingIndex].quantity += 1;
+      const newQuantity = updated[existingIndex].quantity + 1;
+      
+      // Check if we have enough stock
+      if (newQuantity > batch.quantity_remaining) {
+        toast.error(`Only ${batch.quantity_remaining} units available in this batch`);
+        return;
+      }
+      
+      updated[existingIndex].quantity = newQuantity;
       updated[existingIndex].total_price = calculateItemTotal(updated[existingIndex]);
       setCart(updated);
     } else {
@@ -190,6 +229,17 @@ export default function POSSystem() {
 
   const updateCartItem = (index: number, updates: Partial<CartItem>) => {
     const updated = [...cart];
+    const item = updated[index];
+    
+    // If updating quantity, find the batch and check stock
+    if (updates.quantity !== undefined) {
+      const batch = batches.find(b => b.batch_number === item.batch_number);
+      if (batch && updates.quantity > batch.quantity_remaining) {
+        toast.error(`Only ${batch.quantity_remaining} units available in this batch`);
+        return;
+      }
+    }
+    
     updated[index] = { ...updated[index], ...updates };
     updated[index].total_price = calculateItemTotal(updated[index]);
     setCart(updated);
@@ -254,9 +304,9 @@ export default function POSSystem() {
         created_by: null
       };
 
-      const saleResponse = await fetch(`${API_BASE}/sales`, {
+      const saleResponse = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(salePayload)
       });
 
@@ -268,9 +318,9 @@ export default function POSSystem() {
 
       // Add sale items
       for (const item of cart) {
-        await fetch(`${API_BASE}/sales/items`, {
+        await fetch(`${API_CONFIG.BASE_URL}/sales/items`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", ...getAuthHeader() },
+          headers: getAuthHeaders(),
           body: JSON.stringify({
             sale_id: sale.id,
             product_id: item.product_id,
@@ -383,14 +433,55 @@ export default function POSSystem() {
   const totals = calculateCartTotal();
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
+    <div className="flex flex-col h-screen">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-teal-600 to-green-700 p-6 border-b-2 border-green-200/20 shadow-xl">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <ShoppingCart className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white drop-shadow-lg">Point of Sale</h1>
+              <p className="text-white/90 text-sm mt-0.5">Quick sales and invoice generation</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+              <div className="text-xs text-white/70 font-medium">PRODUCTS</div>
+              <div className="text-xl font-bold text-white">{products.length}</div>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+              <div className="text-xs text-white/70 font-medium">CART ITEMS</div>
+              <div className="text-xl font-bold text-white">{cart.length}</div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={loadProducts}
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 overflow-auto">
         {/* Left Section - Product Search & Cart */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* Product Search */}
           <Card className="pharmacy-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Product Search</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Search className="w-5 h-5 text-primary" />
+                Product Search
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="relative">
@@ -402,7 +493,7 @@ export default function POSSystem() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleBarcodeScann(searchTerm);
+                      handleBarcodeScan(searchTerm);
                     }
                   }}
                   className="pl-10 pharmacy-input"

@@ -28,15 +28,25 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Settings
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Configure your system preferences
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-600 via-slate-600 to-gray-700 p-8 rounded-2xl border-2 border-gray-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <SettingsIcon className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                Settings
+              </h1>
+              <p className="text-white/90 text-base">
+                Configure your system preferences
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

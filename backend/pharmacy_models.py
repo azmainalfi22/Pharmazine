@@ -336,9 +336,25 @@ class ManufacturerUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class ManufacturerResponse(ManufacturerBase):
+class ManufacturerResponse(BaseModel):
     id: str
-    current_balance: Decimal
+    name: str
+    code: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postal_code: Optional[str] = None
+    tax_number: Optional[str] = None
+    payment_terms: Optional[str] = None
+    credit_limit: float = 0.0
+    current_balance: float = 0.0
+    website: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
     created_at: datetime
     updated_at: datetime
     
@@ -382,12 +398,26 @@ class MedicineBatchUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-class MedicineBatchResponse(MedicineBatchBase):
+class MedicineBatchResponse(BaseModel):
     id: str
-    quantity_remaining: Decimal
-    quantity_sold: Decimal
-    quantity_returned: Decimal
-    quantity_damaged: Decimal
+    product_id: str
+    batch_number: str
+    manufacture_date: Optional[date] = None
+    expiry_date: date
+    manufacturer_id: Optional[str] = None
+    purchase_id: Optional[str] = None
+    quantity_received: float
+    quantity_remaining: float
+    quantity_sold: float = 0.0
+    quantity_returned: float = 0.0
+    quantity_damaged: float = 0.0
+    purchase_price: float
+    mrp: float = 0.0
+    selling_price: float = 0.0
+    discount_percentage: float = 0.0
+    store_id: Optional[str] = None
+    rack_number: Optional[str] = None
+    notes: Optional[str] = None
     is_active: bool
     is_expired: bool
     created_at: datetime
@@ -455,8 +485,24 @@ class DiscountConfigUpdate(BaseModel):
     priority: Optional[int] = None
 
 
-class DiscountConfigResponse(DiscountConfigBase):
+class DiscountConfigResponse(BaseModel):
     id: str
+    name: str
+    description: Optional[str] = None
+    discount_type: str
+    discount_percentage: float = 0.0
+    discount_amount: float = 0.0
+    min_quantity: float = 0.0
+    max_quantity: float = 0.0
+    category_id: Optional[str] = None
+    medicine_category_id: Optional[str] = None
+    product_id: Optional[str] = None
+    customer_type: Optional[str] = None
+    valid_from: Optional[date] = None
+    valid_to: Optional[date] = None
+    applicable_to: Optional[str] = None
+    is_active: bool = True
+    priority: int = 0
     created_at: datetime
     updated_at: datetime
     
@@ -468,9 +514,9 @@ class WasteProductBase(BaseModel):
     batch_id: Optional[str] = None
     product_id: str
     batch_number: Optional[str] = None
-    quantity: Decimal
+    quantity: float
     reason: str
-    value_loss: Optional[Decimal] = None
+    value_loss: float = 0.0
     store_id: Optional[str] = None
     reported_by: Optional[str] = None
     approved_by: Optional[str] = None
@@ -535,9 +581,9 @@ class ExpiryAlertResponse(BaseModel):
     generic_name: Optional[str]
     brand_name: Optional[str]
     expiry_date: date
-    quantity_remaining: Decimal
-    purchase_price: Decimal
-    value_at_risk: Decimal
+    quantity_remaining: float
+    purchase_price: float
+    value_at_risk: float
     manufacturer: Optional[str]
     store: Optional[str]
     days_to_expiry: int
@@ -549,15 +595,14 @@ class ExpiryAlertResponse(BaseModel):
 
 class LowStockAlertResponse(BaseModel):
     product_id: str
-    sku: str
-    name: str
+    product_name: str
     generic_name: Optional[str]
     brand_name: Optional[str]
-    reorder_level: int
-    current_stock: Decimal
-    shortage: Decimal
-    manufacturer: Optional[str]
-    manufacturer_phone: Optional[str]
+    current_stock: float
+    reorder_level: float
+    stock_percentage: float
+    total_value: float
+    alert_level: str
     
     class Config:
         from_attributes = True

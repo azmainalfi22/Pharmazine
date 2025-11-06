@@ -1,4 +1,4 @@
-// Backend API server for Volt Dealer Suite
+// Backend API server for Sharkar Pharmacy Management System
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -18,7 +18,7 @@ app.use(express.json());
 const dbConfig = {
   host: process.env.VITE_DATABASE_HOST || 'localhost',
   port: parseInt(process.env.VITE_DATABASE_PORT || '5432'),
-  database: process.env.VITE_DATABASE_NAME || 'volt_dealer_suite',
+  database: process.env.VITE_DATABASE_NAME || 'pharmazine',
   user: process.env.VITE_DATABASE_USER || 'postgres',
   password: process.env.VITE_DATABASE_PASSWORD || 'password',
   ssl: process.env.VITE_NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -251,7 +251,7 @@ app.get('/api/health', async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Volt Dealer Suite API server running on port ${PORT}`);
+  console.log(`🚀 Sharkar Pharmacy Management System API server running on port ${PORT}`);
   console.log(`📊 Database: ${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`);
   console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
 });

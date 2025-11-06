@@ -34,7 +34,10 @@ import {
   DollarSign,
   Pill,
   Stethoscope,
-  Briefcase
+  Briefcase,
+  Bell,
+  Database,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +48,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { signOut, user } = useAuth();
   const location = useLocation();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['medicine-management', 'inventory', 'inventory/stock-in', 'inventory/stock-out']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['inventory', 'purchase']);
 
   const isAdmin = (user?.roles || []).some(r => r.role === 'admin');
 
@@ -56,20 +59,9 @@ const Layout = ({ children }: LayoutProps) => {
       label: 'POS & Sales', 
       icon: ShoppingCart,
       submenu: [
-        { path: '/sales', label: 'Point of Sale', icon: ShoppingCart },
-        { path: '/sales/history', label: 'Sales History', icon: FileText },
-      ]
-    },
-    { 
-      path: '/medicine-management', 
-      label: 'Medicines', 
-      icon: Pill,
-      submenu: [
-        { path: '/medicine-management', label: 'Overview', icon: LayoutDashboard },
-        { path: '/medicine-management/categories', label: 'Categories', icon: FolderTree },
-        { path: '/medicine-management/manufacturers', label: 'Manufacturers', icon: Building2 },
-        { path: '/medicine-management/batches', label: 'Batches', icon: Package },
-        { path: '/medicine-management/expiry-alerts', label: 'Expiry Alerts', icon: AlertTriangle },
+        { path: '/sales', label: 'New Sale (POS)', icon: CreditCard },
+        { path: '/sales/history', label: 'Sales History', icon: Receipt },
+        { path: '/inventory/stock-in/sales-return', label: 'Customer Returns', icon: RotateCcw },
       ]
     },
     { 
@@ -77,84 +69,96 @@ const Layout = ({ children }: LayoutProps) => {
       label: 'Inventory', 
       icon: Package,
       submenu: [
-        { path: '/inventory', label: 'Product Overview', icon: Package },
-        { 
-          path: '/inventory/stock-in', 
-          label: 'Stock IN', 
-          icon: ArrowDownCircle,
-          submenu: [
-            { path: '/inventory/stock-in/purchase', label: 'Purchase', icon: ShoppingCart },
-            { path: '/inventory/stock-in/sales-return', label: 'Sales Return', icon: RotateCcw },
-            { path: '/inventory/stock-in/opening-stock', label: 'Opening Stock', icon: Warehouse },
-            { path: '/inventory/stock-in/transfer-in', label: 'Transfer In', icon: ArrowRightLeft },
-            { path: '/inventory/stock-in/stock-adjustment', label: 'Adjustment', icon: Settings },
-            { path: '/inventory/stock-in/misc-receive', label: 'Misc Receive', icon: Package2 },
-          ]
-        },
-        { 
-          path: '/inventory/stock-out', 
-          label: 'Stock OUT', 
-          icon: ArrowUpCircle,
-          submenu: [
-            { path: '/inventory/stock-out/sales', label: 'Sales', icon: ShoppingCart },
-            { path: '/inventory/stock-out/supplier-return', label: 'Supplier Return', icon: RotateCcw },
-            { path: '/inventory/stock-out/production-out', label: 'Production Out', icon: Package },
-            { path: '/inventory/stock-out/purchase-return', label: 'Purchase Return', icon: ArrowRightLeft },
-            { path: '/inventory/stock-out/stock-adjustment', label: 'Adjustment', icon: Settings },
-            { path: '/inventory/stock-out/transfer-out', label: 'Transfer Out', icon: ArrowRightLeft },
-            { path: '/inventory/stock-out/misc-issue', label: 'Misc Issue', icon: Package2 },
-          ]
-        },
+        { path: '/inventory', label: 'Products & Stock', icon: Package },
+        { path: '/inventory/movements', label: 'Stock Movements', icon: ArrowRightLeft },
+        { path: '/inventory/low-stock', label: 'Low Stock Alerts', icon: AlertTriangle },
+        { path: '/inventory/analytics', label: 'ABC Analysis', icon: BarChart3 },
+        { path: '/inventory/auto-reorder', label: 'Auto-Reorder', icon: TrendingUp },
+        { path: '/inventory/stock-in/stock-adjustment', label: 'Physical Count', icon: Settings },
       ]
     },
     { 
-      path: '/sales', 
-      label: 'POS & Sales', 
-      icon: ShoppingCart,
+      path: '/purchase', 
+      label: 'Purchases & Suppliers', 
+      icon: ShoppingBag,
       submenu: [
-        { path: '/sales', label: 'POS Terminal', icon: CreditCard },
-        { path: '/sales/history', label: 'Sales History', icon: Receipt },
+        { path: '/setup/suppliers', label: 'Manage Suppliers', icon: Truck },
+        { path: '/purchase', label: 'Purchase Orders', icon: ShoppingCart },
+        { path: '/inventory/stock-out/supplier-return', label: 'Return to Supplier', icon: RotateCcw },
       ]
     },
-    { path: '/purchase', label: 'Purchases', icon: ShoppingBag },
-    { path: '/returns', label: 'Returns & Waste', icon: RotateCcw },
+    { 
+      path: '/medicine-management', 
+      label: 'Medicine Management', 
+      icon: Pill,
+      submenu: [
+        { path: '/medicine-management/statistics', label: 'Statistics & Analytics', icon: BarChart3 },
+        { path: '/medicine-management/categories', label: 'Dosage Forms', icon: FolderTree },
+        { path: '/medicine-management/types', label: 'Medicine Types', icon: Layers },
+        { path: '/medicine-management/units', label: 'Unit Types', icon: Package2 },
+        { path: '/medicine-management/manufacturers', label: 'Manufacturers', icon: Building2 },
+        { path: '/medicine-management/batches', label: 'Batch Tracking', icon: Package },
+        { path: '/medicine-management/expiry-alerts', label: 'Expiry Alerts', icon: AlertTriangle },
+        { path: '/medicine-management/low-stock', label: 'Low Stock Alerts', icon: TrendingUp },
+        { path: '/medicine-management/waste', label: 'Waste & Damaged', icon: AlertTriangle },
+        { path: '/medicine-management/transactions', label: 'Batch Transactions', icon: ArrowRightLeft },
+        { path: '/medicine-management/barcode', label: 'Barcode Generator', icon: Package2 },
+        { path: '/medicine-management/discounts', label: 'Discounts & Pricing', icon: DollarSign },
+      ]
+    },
     { path: '/customers', label: 'Customers', icon: Users },
-    { path: '/requisitions', label: 'Requisitions', icon: FileText },
-    { path: '/payments', label: 'Payments', icon: CreditCard },
+    { path: '/patient-history', label: 'Patient History', icon: FileText },
+    { path: '/messages', label: 'Internal Messages', icon: MessageSquare },
     { 
       path: '/reports', 
-      label: 'Reports', 
+      label: 'Reports & Analytics', 
       icon: BarChart3,
       submenu: [
-        { path: '/reports', label: 'Overview', icon: BarChart3 },
-        { path: '/reports/sales', label: 'Sales Reports', icon: ShoppingCart },
-        { path: '/reports/stock', label: 'Stock Reports', icon: Package },
-        { path: '/reports/financial', label: 'Financial Reports', icon: DollarSign },
-        { path: '/reports/profit-loss', label: 'Profit & Loss', icon: TrendingUp },
+        { path: '/reports/medicine', label: 'Medicine Report', icon: Pill },
+        { path: '/reports/sales', label: 'Sales Report', icon: ShoppingCart },
+        { path: '/reports/stock', label: 'Stock Report', icon: Package },
+        { path: '/reports/financial', label: 'Financial Report', icon: DollarSign },
+        { path: '/reports/customer', label: 'Customer Report', icon: Users },
+        { path: '/reports/purchase', label: 'Purchase Report', icon: TrendingUp },
       ]
     },
-    { path: '/services', label: 'Services', icon: Stethoscope },
-    { path: '/crm', label: 'CRM & Loyalty', icon: Users },
-    { path: '/hrm', label: 'HR & Payroll', icon: Briefcase, roles: ['admin'] },
+    { 
+      path: '/payments', 
+      label: 'Payments & Finance', 
+      icon: DollarSign,
+      submenu: [
+        { path: '/payments/dashboard', label: 'Financial Dashboard', icon: BarChart3 },
+        { path: '/payments/collection', label: 'Payment Collection', icon: CreditCard },
+        { path: '/payments/vouchers', label: 'Vouchers', icon: FileText },
+        { path: '/payments/receivables', label: 'Accounts Receivable', icon: TrendingUp },
+        { path: '/payments/payables', label: 'Accounts Payable', icon: TrendingUp },
+        { path: '/payments/cashflow', label: 'Cash Flow', icon: DollarSign },
+      ]
+    },
+    // Optional Modules
+    { path: '/services', label: 'Services & Appointments', icon: Stethoscope },
+    { path: '/crm', label: 'CRM & Loyalty', icon: TrendingUp },
     // Admin-only sections
-    ...(isAdmin ? [{ path: '/finance', label: 'Finance', icon: DollarSign }] : []),
-    ...(isAdmin ? [{ path: '/import', label: 'Import Data', icon: ArrowDownCircle }] : []),
-    ...(isAdmin ? [{ path: '/audit-logs', label: 'Audit Logs', icon: FileText }] : []),
-    ...(isAdmin ? [{ path: '/users', label: 'Users', icon: Users }] : []),
+    ...(isAdmin ? [{ path: '/hrm', label: 'HR & Payroll', icon: Briefcase }] : []),
+    ...(isAdmin ? [{ path: '/users', label: 'User Management', icon: Users }] : []),
     ...(isAdmin ? [{ 
       path: '/setup', 
-      label: 'Setup', 
+      label: 'System Setup', 
       icon: Settings,
       submenu: [
-        { path: '/setup', label: 'Categories', icon: FolderTree },
-        { path: '/setup/subcategories', label: 'Subcategories', icon: Layers },
-        { path: '/setup/countries', label: 'Countries', icon: Globe },
-        { path: '/setup/customers', label: 'Customers', icon: Users },
+        { path: '/setup', label: 'Product Categories', icon: FolderTree },
+        { path: '/inventory/stock-in/opening-stock', label: 'Opening Stock', icon: Warehouse },
         { path: '/setup/suppliers', label: 'Suppliers', icon: Truck },
-        { path: '/setup/companies', label: 'Companies', icon: Building2 },
+        { path: '/setup/companies', label: 'Company Info', icon: Building2 },
+        { path: '/settings/system', label: 'System Settings', icon: Settings },
+        { path: '/settings/configuration', label: 'Configuration', icon: Settings },
+        { path: '/settings/notifications', label: 'Notifications', icon: Bell },
+        { path: '/settings/backups', label: 'Backups', icon: Database },
+        { path: '/settings/performance', label: 'Performance', icon: TrendingUp },
+        { path: '/import', label: 'Import Data', icon: ArrowDownCircle },
+        { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
       ]
     }] : []),
-    { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const toggleSubmenu = (menuKey: string) => {
@@ -173,7 +177,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none" style={{ animationDelay: '2s' }}></div>
       
       {/* Glassmorphic Sidebar */}
-      <aside className="fixed left-0 top-0 z-50 h-screen w-72 backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 border-r border-white/20 dark:border-gray-700/30 shadow-2xl">
+      <aside className="fixed left-0 top-0 z-50 h-screen w-72 backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 shadow-2xl">
         {/* Glassmorphic overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/30 to-white/20 dark:from-gray-900/50 dark:via-gray-900/30 dark:to-gray-900/20 pointer-events-none"></div>
         

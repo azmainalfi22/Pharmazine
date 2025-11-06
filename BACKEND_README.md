@@ -1,4 +1,4 @@
-# Volt Dealer Suite - FastAPI Backend
+# Sharkar Pharmacy Management System - FastAPI Backend
 
 A comprehensive electronics dealer management system with Python FastAPI backend and PostgreSQL database.
 
@@ -19,7 +19,7 @@ A comprehensive electronics dealer management system with Python FastAPI backend
 
 2. **Create Database**
    ```bash
-   createdb volt_dealer_suite
+   createdb pharmazine
    ```
 
 3. **Set Database Password** (if needed)
@@ -32,7 +32,7 @@ A comprehensive electronics dealer management system with Python FastAPI backend
 
 1. **Clone/Navigate to Project Directory**
    ```bash
-   cd volt-dealer-suite
+   cd Pharmazine
    ```
 
 2. **Install Python Dependencies**
@@ -43,7 +43,7 @@ A comprehensive electronics dealer management system with Python FastAPI backend
 3. **Set Environment Variables**
    Create a `.env` file in the project root:
    ```env
-   DATABASE_URL=postgresql://postgres:password@localhost:5432/volt_dealer_suite
+   DATABASE_URL=postgresql://postgres:password@localhost:5432/pharmazine
    ```
 
 4. **Start the Backend Server**
@@ -84,9 +84,9 @@ A comprehensive electronics dealer management system with Python FastAPI backend
 3. **Access the Application**
    - Frontend: http://localhost:8080 (or the port shown in terminal)
    - Login with any of these demo accounts:
-     - `admin@voltdealer.com` (Admin)
-     - `manager1@voltdealer.com` (Manager)
-     - `employee1@voltdealer.com` (Employee)
+     - `admin@sharkarpharmacy.com` (Admin)
+     - `manager@sharkarpharmacy.com` (Manager)
+     - `employee@sharkarpharmacy.com` (Employee)
 
 ## 📊 Database Schema
 
@@ -178,7 +178,7 @@ The system includes the following main entities:
 
 ### Project Structure
 ```
-volt-dealer-suite/
+Pharmazine/
 ├── backend/
 │   ├── main.py              # FastAPI application
 │   └── seed_data.py         # Database seeding script
@@ -206,7 +206,7 @@ The system uses SQLAlchemy with automatic table creation. For production, consid
 1. **Database Connection Error**
    - Ensure PostgreSQL is running
    - Check database credentials in `.env`
-   - Verify database `volt_dealer_suite` exists
+   - Verify database `pharmazine` exists
 
 2. **Port Already in Use**
    - Backend: Change port in `uvicorn` command

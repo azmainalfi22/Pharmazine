@@ -1,4 +1,4 @@
-// PostgreSQL client configuration for Volt Dealer Suite
+// PostgreSQL client configuration for Sharkar Pharmacy Management System
 // This replaces the Supabase client with a direct PostgreSQL connection
 
 import { Pool } from 'pg';
@@ -7,7 +7,7 @@ import { Pool } from 'pg';
 const dbConfig = {
   host: import.meta.env.VITE_DATABASE_HOST || 'localhost',
   port: parseInt(import.meta.env.VITE_DATABASE_PORT || '5432'),
-  database: import.meta.env.VITE_DATABASE_NAME || 'volt_dealer_suite',
+  database: import.meta.env.VITE_DATABASE_NAME || 'pharmazine',
   user: import.meta.env.VITE_DATABASE_USER || 'postgres',
   password: import.meta.env.VITE_DATABASE_PASSWORD || 'password',
   ssl: import.meta.env.VITE_NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,

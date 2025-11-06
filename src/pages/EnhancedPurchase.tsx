@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Package, ShoppingCart, FileText, Printer, Save, X, Archive, RotateCcw, DollarSign, Calendar, User, Building2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package, ShoppingCart, FileText, Printer, Save, X, Archive, RotateCcw, DollarSign, Calendar, User, Building2, RefreshCw, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const API_BASE = "http://localhost:8000/api";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface PurchaseItem {
   id?: string;
@@ -66,6 +65,8 @@ interface Purchase {
 }
 
 export default function EnhancedPurchase() {
+  console.log("🛒 EnhancedPurchase component rendering");
+  
   const [activeTab, setActiveTab] = useState("create");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -133,12 +134,17 @@ export default function EnhancedPurchase() {
 
   const loadSuppliers = async () => {
     try {
-      const response = await fetch(`${API_BASE}/suppliers`, {
-        headers: getAuthHeader()
+      console.log("Loading suppliers from:", `${API_CONFIG.BASE_URL}/suppliers`);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/suppliers`, {
+        headers: getAuthHeaders()
       });
+      console.log("Suppliers response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("Suppliers loaded:", data.length);
         setSuppliers(data);
+      } else {
+        console.error("Failed to load suppliers, status:", response.status);
       }
     } catch (error) {
       console.error("Error loading suppliers:", error);
@@ -147,12 +153,17 @@ export default function EnhancedPurchase() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch(`${API_BASE}/products`, {
-        headers: getAuthHeader()
+      console.log("Loading products from:", `${API_CONFIG.BASE_URL}/products`);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+        headers: getAuthHeaders()
       });
+      console.log("Products response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("Products loaded:", data.length);
         setProducts(data);
+      } else {
+        console.error("Failed to load products, status:", response.status);
       }
     } catch (error) {
       console.error("Error loading products:", error);
@@ -162,8 +173,8 @@ export default function EnhancedPurchase() {
   const loadPurchases = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/purchases`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.BASE_URL}/purchases`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -304,13 +315,13 @@ export default function EnhancedPurchase() {
       };
 
       const url = editingPurchase 
-        ? `${API_BASE}/purchases/${editingPurchase.id}`
-        : `${API_BASE}/purchases`;
+        ? `${API_CONFIG.BASE_URL}/purchases/${editingPurchase.id}`
+        : `${API_CONFIG.BASE_URL}/purchases`;
       const method = editingPurchase ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload)
       });
 
@@ -359,9 +370,9 @@ export default function EnhancedPurchase() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/purchases/${purchaseId}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/purchases/${purchaseId}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
 
       if (response.ok) {
@@ -410,17 +421,41 @@ export default function EnhancedPurchase() {
 
   const totals = calculatePurchaseTotal();
 
+  console.log("EnhancedPurchase rendering - Active tab:", activeTab, "Purchase items:", purchaseItems.length, "Products:", products.length, "Suppliers:", suppliers.length);
+
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Purchase Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Create and manage purchase orders with batch tracking and multi-tax support
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-cyan-600 via-blue-600 to-cyan-700 p-8 rounded-2xl border-2 border-cyan-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+                <ShoppingCart className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                  Purchase Management
+                </h1>
+                <p className="text-white/90 text-base">
+                  Create and manage purchase orders with batch tracking
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+                <div className="text-xs text-white/70 font-medium">PURCHASE ITEMS</div>
+                <div className="text-xl font-bold text-white">{purchaseItems.length}</div>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
+                <div className="text-xs text-white/70 font-medium">TOTAL</div>
+                <div className="text-xl font-bold text-white">${totals.grandTotal.toFixed(0)}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -863,12 +898,21 @@ export default function EnhancedPurchase() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Batch Number *</Label>
+                  <Label>Batch Number * (or scan barcode)</Label>
                   <Input
                     value={itemForm.batch_no}
                     onChange={(e) => setItemForm({ ...itemForm, batch_no: e.target.value })}
-                    placeholder="e.g., BATCH001"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        // Auto-focus next field
+                        const nextInput = e.currentTarget.parentElement?.parentElement?.querySelector('[type="date"]') as HTMLInputElement;
+                        if (nextInput) nextInput.focus();
+                      }
+                    }}
+                    placeholder="e.g., BATCH001 or scan"
                     className="pharmacy-input"
+                    autoFocus
                   />
                 </div>
                 <div>

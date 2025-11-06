@@ -7,7 +7,7 @@ This module contains all pharmacy-specific API endpoints
 
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_, case, create_engine
+from sqlalchemy import func, and_, or_, case, create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from typing import List, Optional
@@ -82,7 +82,22 @@ def get_medicine_categories(
         query = query.filter(MedicineCategory.is_active == is_active)
     
     categories = query.order_by(MedicineCategory.display_order).offset(skip).limit(limit).all()
-    return categories
+    
+    # Convert UUID to string for response
+    result = []
+    for cat in categories:
+        cat_dict = {
+            "id": str(cat.id),
+            "name": cat.name,
+            "description": cat.description,
+            "display_order": cat.display_order,
+            "is_active": cat.is_active if cat.is_active is not None else True,
+            "created_at": cat.created_at,
+            "updated_at": cat.updated_at
+        }
+        result.append(MedicineCategoryResponse(**cat_dict))
+    
+    return result
 
 
 @router.post("/medicine-categories", response_model=MedicineCategoryResponse, status_code=status.HTTP_201_CREATED)
@@ -99,7 +114,7 @@ def create_medicine_category(
     
     db_category = MedicineCategory(
         id=uuid.uuid4(),
-        **category.dict()
+        **category.model_dump()
     )
     db.add(db_category)
     db.commit()
@@ -119,7 +134,7 @@ def update_medicine_category(
     if not db_category:
         raise HTTPException(status_code=404, detail="Medicine category not found")
     
-    for key, value in category.dict(exclude_unset=True).items():
+    for key, value in category.model_dump(exclude_unset=True).items():
         setattr(db_category, key, value)
     
     db_category.updated_at = datetime.utcnow()
@@ -166,7 +181,23 @@ def get_unit_types(
         query = query.filter(UnitType.is_active == is_active)
     
     units = query.order_by(UnitType.display_order).offset(skip).limit(limit).all()
-    return units
+    
+    # Convert UUID to string for response
+    result = []
+    for unit in units:
+        unit_dict = {
+            "id": str(unit.id),
+            "name": unit.name,
+            "abbreviation": unit.abbreviation,
+            "category": unit.category,
+            "display_order": unit.display_order,
+            "is_active": unit.is_active if unit.is_active is not None else True,
+            "created_at": unit.created_at,
+            "updated_at": unit.updated_at
+        }
+        result.append(UnitTypeResponse(**unit_dict))
+    
+    return result
 
 
 @router.post("/unit-types", response_model=UnitTypeResponse, status_code=status.HTTP_201_CREATED)
@@ -182,7 +213,7 @@ def create_unit_type(
     
     db_unit = UnitType(
         id=uuid.uuid4(),
-        **unit.dict()
+        **unit.model_dump()
     )
     db.add(db_unit)
     db.commit()
@@ -202,7 +233,7 @@ def update_unit_type(
     if not db_unit:
         raise HTTPException(status_code=404, detail="Unit type not found")
     
-    for key, value in unit.dict(exclude_unset=True).items():
+    for key, value in unit.model_dump(exclude_unset=True).items():
         setattr(db_unit, key, value)
     
     db_unit.updated_at = datetime.utcnow()
@@ -229,7 +260,22 @@ def get_medicine_types(
         query = query.filter(MedicineType.is_active == is_active)
     
     types = query.order_by(MedicineType.display_order).offset(skip).limit(limit).all()
-    return types
+    
+    # Convert UUID to string for response
+    result = []
+    for mt in types:
+        mt_dict = {
+            "id": str(mt.id),
+            "name": mt.name,
+            "description": mt.description,
+            "display_order": mt.display_order,
+            "is_active": mt.is_active if mt.is_active is not None else True,
+            "created_at": mt.created_at,
+            "updated_at": mt.updated_at
+        }
+        result.append(MedicineTypeResponse(**mt_dict))
+    
+    return result
 
 
 @router.post("/medicine-types", response_model=MedicineTypeResponse, status_code=status.HTTP_201_CREATED)
@@ -245,7 +291,7 @@ def create_medicine_type(
     
     db_type = MedicineType(
         id=uuid.uuid4(),
-        **med_type.dict()
+        **med_type.model_dump()
     )
     db.add(db_type)
     db.commit()
@@ -265,7 +311,7 @@ def update_medicine_type(
     if not db_type:
         raise HTTPException(status_code=404, detail="Medicine type not found")
     
-    for key, value in med_type.dict(exclude_unset=True).items():
+    for key, value in med_type.model_dump(exclude_unset=True).items():
         setattr(db_type, key, value)
     
     db_type.updated_at = datetime.utcnow()
@@ -302,7 +348,35 @@ def get_manufacturers(
         query = query.filter(Manufacturer.is_active == is_active)
     
     manufacturers = query.order_by(Manufacturer.name).offset(skip).limit(limit).all()
-    return manufacturers
+    
+    # Convert UUID to string for response
+    result = []
+    for mfr in manufacturers:
+        mfr_dict = {
+            "id": str(mfr.id),
+            "code": mfr.code,
+            "name": mfr.name,
+            "contact_person": mfr.contact_person,
+            "email": mfr.email,
+            "phone": mfr.phone,
+            "address": mfr.address,
+            "city": mfr.city,
+            "state": mfr.state,
+            "country": mfr.country,
+            "postal_code": mfr.postal_code,
+            "website": mfr.website,
+            "tax_number": mfr.tax_number,
+            "payment_terms": mfr.payment_terms,
+            "credit_limit": float(mfr.credit_limit) if mfr.credit_limit else 0,
+            "current_balance": float(mfr.current_balance) if mfr.current_balance else 0,
+            "is_active": mfr.is_active if mfr.is_active is not None else True,
+            "notes": mfr.notes,
+            "created_at": mfr.created_at,
+            "updated_at": mfr.updated_at
+        }
+        result.append(ManufacturerResponse(**mfr_dict))
+    
+    return result
 
 
 @router.get("/manufacturers/{manufacturer_id}", response_model=ManufacturerResponse)
@@ -335,7 +409,7 @@ def create_manufacturer(
         id=uuid.uuid4(),
         code=code,
         current_balance=manufacturer.opening_balance,
-        **manufacturer.dict(exclude={'code'})
+        **manufacturer.model_dump(exclude={'code'})
     )
     db.add(db_manufacturer)
     db.commit()
@@ -355,7 +429,7 @@ def update_manufacturer(
     if not db_manufacturer:
         raise HTTPException(status_code=404, detail="Manufacturer not found")
     
-    for key, value in manufacturer.dict(exclude_unset=True).items():
+    for key, value in manufacturer.model_dump(exclude_unset=True).items():
         setattr(db_manufacturer, key, value)
     
     db_manufacturer.updated_at = datetime.utcnow()
@@ -398,7 +472,38 @@ def get_medicine_batches(
         query = query.filter(MedicineBatch.store_id == store_id)
     
     batches = query.order_by(MedicineBatch.expiry_date).offset(skip).limit(limit).all()
-    return batches
+    
+    # Convert UUID to string for response
+    result = []
+    for batch in batches:
+        batch_dict = {
+            "id": str(batch.id),
+            "product_id": batch.product_id,
+            "batch_number": batch.batch_number,
+            "manufacture_date": batch.manufacture_date,
+            "expiry_date": batch.expiry_date,
+            "manufacturer_id": str(batch.manufacturer_id) if batch.manufacturer_id else None,
+            "purchase_id": str(batch.purchase_id) if batch.purchase_id else None,
+            "quantity_received": float(batch.quantity_received) if batch.quantity_received else 0.0,
+            "quantity_remaining": float(batch.quantity_remaining) if batch.quantity_remaining else 0.0,
+            "quantity_sold": float(batch.quantity_sold) if batch.quantity_sold else 0.0,
+            "quantity_returned": float(batch.quantity_returned) if batch.quantity_returned else 0.0,
+            "quantity_damaged": float(batch.quantity_damaged) if batch.quantity_damaged else 0.0,
+            "purchase_price": float(batch.purchase_price) if batch.purchase_price else 0.0,
+            "mrp": float(batch.mrp) if batch.mrp else 0.0,
+            "selling_price": float(batch.selling_price) if batch.selling_price else 0.0,
+            "discount_percentage": float(batch.discount_percentage) if batch.discount_percentage else 0.0,
+            "rack_number": batch.rack_number,
+            "store_id": str(batch.store_id) if batch.store_id else None,
+            "notes": batch.notes,
+            "is_active": batch.is_active if batch.is_active is not None else True,
+            "is_expired": batch.is_expired if batch.is_expired is not None else False,
+            "created_at": batch.created_at,
+            "updated_at": batch.updated_at
+        }
+        result.append(MedicineBatchResponse(**batch_dict))
+    
+    return result
 
 
 @router.get("/batches/{batch_id}", response_model=MedicineBatchResponse)
@@ -437,7 +542,7 @@ def create_medicine_batch(
         quantity_remaining=batch.quantity_received,
         is_expired=is_expired,
         is_active=not is_expired,
-        **batch.dict()
+        **batch.model_dump()
     )
     db.add(db_batch)
     
@@ -471,7 +576,7 @@ def update_medicine_batch(
     if not db_batch:
         raise HTTPException(status_code=404, detail="Batch not found")
     
-    for key, value in batch.dict(exclude_unset=True).items():
+    for key, value in batch.model_dump(exclude_unset=True).items():
         setattr(db_batch, key, value)
     
     db_batch.updated_at = datetime.utcnow()
@@ -491,23 +596,71 @@ def get_expiry_alerts(
     db: Session = Depends(get_db)
 ):
     """Get medicines expiring within specified days"""
-    query = db.execute(f"""
-        SELECT * FROM v_expiring_medicines 
-        WHERE days_to_expiry <= {days}
-        {f"AND alert_level = '{alert_level}'" if alert_level else ""}
-        ORDER BY expiry_date ASC
-    """)
+    # Use parameterized query to prevent SQL injection
+    if alert_level:
+        query = text("""
+            SELECT * FROM v_expiring_medicines 
+            WHERE days_to_expiry <= :days
+            AND alert_level = :alert_level
+            ORDER BY expiry_date ASC
+        """)
+        results = db.execute(query, {"days": days, "alert_level": alert_level}).fetchall()
+    else:
+        query = text("""
+            SELECT * FROM v_expiring_medicines 
+            WHERE days_to_expiry <= :days
+            ORDER BY expiry_date ASC
+        """)
+        results = db.execute(query, {"days": days}).fetchall()
     
-    results = query.fetchall()
     return [dict(row) for row in results]
 
 
 @router.get("/low-stock-alerts", response_model=List[LowStockAlertResponse])
 def get_low_stock_alerts(db: Session = Depends(get_db)):
     """Get medicines with low stock"""
-    query = db.execute("SELECT * FROM v_low_stock_medicines ORDER BY shortage DESC")
-    results = query.fetchall()
-    return [dict(row) for row in results]
+    from main import Product
+    
+    # Query products with stock calculation
+    query = db.query(Product).filter(Product.reorder_level > 0).all()
+    
+    results = []
+    for product in query:
+        # Calculate current stock from batches
+        batches = db.query(MedicineBatch).filter(
+            MedicineBatch.product_id == product.id,
+            MedicineBatch.is_active == True
+        ).all()
+        
+        current_stock = sum(float(b.quantity_remaining or 0) for b in batches)
+        reorder_level = float(product.reorder_level or 0)
+        
+        if current_stock <= reorder_level:
+            stock_percentage = (current_stock / reorder_level * 100) if reorder_level > 0 else 0
+            
+            # Determine alert level
+            if stock_percentage < 25:
+                alert_level = "critical"
+            elif stock_percentage < 50:
+                alert_level = "warning"
+            else:
+                alert_level = "info"
+            
+            total_value = sum(float(b.quantity_remaining or 0) * float(b.purchase_price or 0) for b in batches)
+            
+            results.append({
+                "product_id": product.id,
+                "product_name": product.name,
+                "generic_name": product.generic_name,
+                "brand_name": product.brand_name,
+                "current_stock": current_stock,
+                "reorder_level": reorder_level,
+                "stock_percentage": stock_percentage,
+                "total_value": total_value,
+                "alert_level": alert_level
+            })
+    
+    return results
 
 
 # ============================================
@@ -587,7 +740,7 @@ def create_waste_product(
     db_waste = WasteProduct(
         id=uuid.uuid4(),
         reported_by=current_user.get('id'),
-        **waste.dict()
+        **waste.model_dump()
     )
     db.add(db_waste)
     
@@ -762,7 +915,41 @@ def get_discount_configs(
         query = query.filter(DiscountConfig.discount_type == discount_type)
     
     configs = query.order_by(DiscountConfig.priority.desc()).offset(skip).limit(limit).all()
-    return configs
+    
+    # Convert to response format
+    result = []
+    for config in configs:
+        # Determine applicable_to based on what's set
+        applicable_to = "all"
+        if config.product_id:
+            applicable_to = "product"
+        elif config.medicine_category_id:
+            applicable_to = "category"
+        
+        config_dict = {
+            "id": str(config.id),
+            "name": config.name,
+            "description": config.description,
+            "discount_type": config.discount_type,
+            "discount_percentage": float(config.discount_percentage or 0),
+            "discount_amount": float(config.discount_amount or 0),
+            "min_quantity": float(config.min_quantity or 0),
+            "max_quantity": float(config.max_quantity or 0),
+            "category_id": str(config.category_id) if config.category_id else None,
+            "medicine_category_id": str(config.medicine_category_id) if config.medicine_category_id else None,
+            "product_id": config.product_id,
+            "customer_type": config.customer_type,
+            "valid_from": config.valid_from,
+            "valid_to": config.valid_to,
+            "applicable_to": applicable_to,
+            "is_active": config.is_active if config.is_active is not None else True,
+            "priority": config.priority or 0,
+            "created_at": config.created_at,
+            "updated_at": config.updated_at
+        }
+        result.append(DiscountConfigResponse(**config_dict))
+    
+    return result
 
 
 @router.post("/discount-configs", response_model=DiscountConfigResponse, status_code=status.HTTP_201_CREATED)
@@ -774,7 +961,7 @@ def create_discount_config(
     """Create discount configuration"""
     db_config = DiscountConfig(
         id=uuid.uuid4(),
-        **config.dict()
+        **config.model_dump()
     )
     db.add(db_config)
     db.commit()
@@ -782,24 +969,106 @@ def create_discount_config(
     return db_config
 
 
+@router.put("/discount-configs/{config_id}", response_model=DiscountConfigResponse)
+def update_discount_config(
+    config_id: str,
+    config: DiscountConfigUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Update discount configuration"""
+    db_config = db.query(DiscountConfig).filter(DiscountConfig.id == config_id).first()
+    if not db_config:
+        raise HTTPException(status_code=404, detail="Discount configuration not found")
+    
+    for key, value in config.model_dump(exclude_unset=True).items():
+        setattr(db_config, key, value)
+    
+    db_config.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_config)
+    return db_config
+
+
+@router.delete("/discount-configs/{config_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_discount_config(
+    config_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete discount configuration"""
+    db_config = db.query(DiscountConfig).filter(DiscountConfig.id == config_id).first()
+    if not db_config:
+        raise HTTPException(status_code=404, detail="Discount configuration not found")
+    
+    db.delete(db_config)
+    db.commit()
+    return None
+
+
+# ============================================
+# BATCH TRANSACTIONS ENDPOINTS
+# ============================================
+
+@router.get("/batch-transactions", response_model=List[BatchStockTransactionResponse])
+def get_batch_transactions(
+    skip: int = 0,
+    limit: int = 100,
+    transaction_type: Optional[str] = None,
+    batch_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all batch stock transactions"""
+    query = db.query(BatchStockTransaction)
+    
+    if transaction_type:
+        query = query.filter(BatchStockTransaction.transaction_type == transaction_type)
+    
+    if batch_id:
+        query = query.filter(BatchStockTransaction.batch_id == batch_id)
+    
+    transactions = query.order_by(BatchStockTransaction.created_at.desc()).offset(skip).limit(limit).all()
+    
+    # Convert to response format
+    result = []
+    for txn in transactions:
+        txn_dict = {
+            "id": str(txn.id),
+            "batch_id": str(txn.batch_id),
+            "transaction_type": txn.transaction_type,
+            "quantity": txn.quantity,
+            "reference_type": txn.reference_type,
+            "reference_id": str(txn.reference_id) if txn.reference_id else None,
+            "notes": txn.notes,
+            "created_at": txn.created_at,
+            "created_by": txn.created_by
+        }
+        result.append(BatchStockTransactionResponse(**txn_dict))
+    
+    return result
+
+
+@router.post("/batch-transactions", response_model=BatchStockTransactionResponse, status_code=status.HTTP_201_CREATED)
+def create_batch_transaction(
+    transaction: BatchStockTransactionCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new batch stock transaction"""
+    db_transaction = BatchStockTransaction(
+        id=uuid.uuid4(),
+        created_by=current_user.get("id"),
+        **transaction.model_dump()
+    )
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
-
-def get_db():
-    """Database session dependency"""
-    # This should be imported from main.py
-    from main import SessionLocal
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def get_current_user():
-    """Get current authenticated user"""
-    # This should be imported from main.py
-    # For now, placeholder
-    return {"id": "admin", "role": "admin"}
+# Note: get_db() and get_current_user() are defined at the top of this file
+# to avoid circular imports with main.py
 

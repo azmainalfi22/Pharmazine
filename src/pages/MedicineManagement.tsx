@@ -1,8 +1,15 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Package, AlertTriangle, BarChart3, QrCode, Printer, FileDown, Calendar, TrendingUp, DollarSign } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Plus, Search, Edit, Trash2, Package, AlertTriangle, BarChart3, QrCode, Printer, FileDown, Calendar, TrendingUp, DollarSign, Pill, Building2, Percent, ArrowRightLeft } from "lucide-react";
 import ManufacturerTab from "@/components/medicine/ManufacturerTab";
 import BatchTab from "@/components/medicine/BatchTab";
 import ExpiryAlertTab from "@/components/medicine/ExpiryAlertTab";
+import LowStockAlertTab from "@/components/medicine/LowStockAlertTab";
+import WasteProductTab from "@/components/medicine/WasteProductTab";
+import StatisticsTab from "@/components/medicine/StatisticsTab";
+import BarcodeTab from "@/components/medicine/BarcodeTab";
+import DiscountTab from "@/components/medicine/DiscountTab";
+import BatchTransactionTab from "@/components/medicine/BatchTransactionTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api/pharmacy";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 // Interfaces
 interface MedicineCategory {
@@ -106,8 +112,40 @@ interface ExpiryAlert {
   alert_level: string;
 }
 
+interface LowStockAlert {
+  product_id: string;
+  product_name: string;
+  generic_name?: string;
+  brand_name?: string;
+  current_stock: number;
+  reorder_level: number;
+  stock_percentage: number;
+  total_value: number;
+  alert_level: string;
+}
+
 export default function MedicineManagement() {
-  const [activeTab, setActiveTab] = useState("categories");
+  const location = useLocation();
+  
+  // Determine initial tab based on route
+  const getInitialTab = () => {
+    const path = location.pathname;
+    if (path === "/medicine-management/manufacturers") return "manufacturers";
+    if (path === "/medicine-management/batches") return "batches";
+    if (path === "/medicine-management/expiry-alerts") return "expiry";
+    if (path === "/medicine-management/low-stock") return "low-stock";
+    if (path === "/medicine-management/waste") return "waste";
+    if (path === "/medicine-management/statistics") return "statistics";
+    if (path === "/medicine-management/barcode") return "barcode";
+    if (path === "/medicine-management/discounts") return "discounts";
+    if (path === "/medicine-management/transactions") return "transactions";
+    if (path === "/medicine-management/types") return "types";
+    if (path === "/medicine-management/units") return "units";
+    if (path === "/medicine-management/categories") return "categories";
+    return "statistics"; // default - show statistics first
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   
@@ -146,6 +184,17 @@ export default function MedicineManagement() {
   const [expiryAlerts, setExpiryAlerts] = useState<ExpiryAlert[]>([]);
   const [expiryFilter, setExpiryFilter] = useState("all");
 
+  // Low Stock Alerts State
+  const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
+
+  // Update tab when route changes
+  useEffect(() => {
+    const newTab = getInitialTab();
+    if (newTab !== activeTab) {
+      setActiveTab(newTab);
+    }
+  }, [location.pathname]);
+  
   // Load data when tab changes
   useEffect(() => {
     if (activeTab === "categories") loadCategories();
@@ -154,6 +203,7 @@ export default function MedicineManagement() {
     if (activeTab === "manufacturers") loadManufacturers();
     if (activeTab === "batches") loadBatches();
     if (activeTab === "expiry") loadExpiryAlerts();
+    if (activeTab === "low-stock") loadLowStockAlerts();
   }, [activeTab]);
 
   // Reload expiry alerts when filter changes
@@ -161,17 +211,13 @@ export default function MedicineManagement() {
     if (activeTab === "expiry") loadExpiryAlerts();
   }, [expiryFilter]);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
 
   // ===== CATEGORY FUNCTIONS =====
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/medicine-categories`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/medicine-categories`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -196,12 +242,12 @@ export default function MedicineManagement() {
     setLoading(true);
     try {
       const url = editingCategory
-        ? `${API_BASE}/medicine-categories/${editingCategory.id}`
-        : `${API_BASE}/medicine-categories`;
+        ? `${API_CONFIG.PHARMACY_BASE}/medicine-categories/${editingCategory.id}`
+        : `${API_CONFIG.PHARMACY_BASE}/medicine-categories`;
       
       const response = await fetch(url, {
         method: editingCategory ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(categoryForm)
       });
 
@@ -228,9 +274,9 @@ export default function MedicineManagement() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/medicine-categories/${id}`, {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/medicine-categories/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Category deleted successfully");
@@ -250,8 +296,8 @@ export default function MedicineManagement() {
   const loadUnitTypes = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/unit-types`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/unit-types`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -276,12 +322,12 @@ export default function MedicineManagement() {
     setLoading(true);
     try {
       const url = editingUnit
-        ? `${API_BASE}/unit-types/${editingUnit.id}`
-        : `${API_BASE}/unit-types`;
+        ? `${API_CONFIG.PHARMACY_BASE}/unit-types/${editingUnit.id}`
+        : `${API_CONFIG.PHARMACY_BASE}/unit-types`;
       
       const response = await fetch(url, {
         method: editingUnit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(unitForm)
       });
 
@@ -308,9 +354,9 @@ export default function MedicineManagement() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/unit-types/${id}`, {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/unit-types/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Unit type deleted successfully");
@@ -330,8 +376,8 @@ export default function MedicineManagement() {
   const loadMedicineTypes = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/medicine-types`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/medicine-types`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -356,12 +402,12 @@ export default function MedicineManagement() {
     setLoading(true);
     try {
       const url = editingType
-        ? `${API_BASE}/medicine-types/${editingType.id}`
-        : `${API_BASE}/medicine-types`;
+        ? `${API_CONFIG.PHARMACY_BASE}/medicine-types/${editingType.id}`
+        : `${API_CONFIG.PHARMACY_BASE}/medicine-types`;
       
       const response = await fetch(url, {
         method: editingType ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(typeForm)
       });
 
@@ -388,9 +434,9 @@ export default function MedicineManagement() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/medicine-types/${id}`, {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/medicine-types/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Medicine type deleted successfully");
@@ -410,8 +456,8 @@ export default function MedicineManagement() {
   const loadManufacturers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/manufacturers`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/manufacturers`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -436,12 +482,12 @@ export default function MedicineManagement() {
     setLoading(true);
     try {
       const url = editingManufacturer
-        ? `${API_BASE}/manufacturers/${editingManufacturer.id}`
-        : `${API_BASE}/manufacturers`;
+        ? `${API_CONFIG.PHARMACY_BASE}/manufacturers/${editingManufacturer.id}`
+        : `${API_CONFIG.PHARMACY_BASE}/manufacturers`;
       
       const response = await fetch(url, {
         method: editingManufacturer ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(manufacturerForm)
       });
 
@@ -472,9 +518,9 @@ export default function MedicineManagement() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/manufacturers/${id}`, {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/manufacturers/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Manufacturer deleted successfully");
@@ -494,8 +540,8 @@ export default function MedicineManagement() {
   const loadBatches = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/batches`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/batches`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -516,11 +562,11 @@ export default function MedicineManagement() {
     setLoading(true);
     try {
       const url = expiryFilter === "all" 
-        ? `${API_BASE}/expiry-alerts`
-        : `${API_BASE}/expiry-alerts?days=${expiryFilter}`;
+        ? `${API_CONFIG.PHARMACY_BASE}/expiry-alerts`
+        : `${API_CONFIG.PHARMACY_BASE}/expiry-alerts?days=${expiryFilter}`;
       
       const response = await fetch(url, {
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -530,6 +576,27 @@ export default function MedicineManagement() {
       }
     } catch (error) {
       toast.error("Error loading expiry alerts");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ===== LOW STOCK ALERT FUNCTIONS =====
+  const loadLowStockAlerts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/low-stock-alerts`, {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLowStockAlerts(data);
+      } else {
+        toast.error("Failed to load low stock alerts");
+      }
+    } catch (error) {
+      toast.error("Error loading low stock alerts");
       console.error(error);
     } finally {
       setLoading(false);
@@ -588,36 +655,79 @@ export default function MedicineManagement() {
   );
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Medicine Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage medicine categories, types, manufacturers, batches, and expiry tracking
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-700 p-8 rounded-2xl border-2 border-indigo-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+                <Pill className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                  Medicine Management
+                </h1>
+                <p className="text-white/90 text-base">
+                  Manage categories, types, manufacturers, batches, and expiry tracking
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{categories.length}</div>
+              <div className="text-xs text-white/70 mt-1">Categories</div>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{medicineTypes.length}</div>
+              <div className="text-xs text-white/70 mt-1">Types</div>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{unitTypes.length}</div>
+              <div className="text-xs text-white/70 mt-1">Units</div>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{manufacturers.length}</div>
+              <div className="text-xs text-white/70 mt-1">Manufacturers</div>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{batches.length}</div>
+              <div className="text-xs text-white/70 mt-1">Batches</div>
+            </div>
+            <div className="bg-red-500/30 backdrop-blur-md rounded-xl p-3 border border-red-300/30 shadow-lg text-center">
+              <div className="text-2xl font-bold text-white">{expiryAlerts.length}</div>
+              <div className="text-xs text-white/70 mt-1">Expiring</div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSearchTerm(""); }} className="space-y-4">
-        <TabsList className="glass">
+        <TabsList className="glass grid-cols-2 md:grid-cols-5 lg:grid-cols-10">
+          <TabsTrigger value="statistics">
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Statistics
+          </TabsTrigger>
           <TabsTrigger value="categories">
             <Package className="w-4 h-4 mr-2" />
             Categories
           </TabsTrigger>
           <TabsTrigger value="units">
-            <BarChart3 className="w-4 h-4 mr-2" />
+            <Package className="w-4 h-4 mr-2" />
             Units
           </TabsTrigger>
           <TabsTrigger value="types">
-            <QrCode className="w-4 h-4 mr-2" />
+            <Pill className="w-4 h-4 mr-2" />
             Types
           </TabsTrigger>
           <TabsTrigger value="manufacturers">
-            <Package className="w-4 h-4 mr-2" />
+            <Building2 className="w-4 h-4 mr-2" />
             Manufacturers
           </TabsTrigger>
           <TabsTrigger value="batches">
@@ -626,10 +736,33 @@ export default function MedicineManagement() {
           </TabsTrigger>
           <TabsTrigger value="expiry">
             <AlertTriangle className="w-4 h-4 mr-2" />
-            Expiry Alerts
+            Expiry
             {expiryAlerts.length > 0 && (
               <Badge variant="destructive" className="ml-2">{expiryAlerts.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="low-stock">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Low Stock
+            {lowStockAlerts.length > 0 && (
+              <Badge variant="default" className="ml-2">{lowStockAlerts.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="waste">
+            <Trash2 className="w-4 h-4 mr-2" />
+            Waste
+          </TabsTrigger>
+          <TabsTrigger value="transactions">
+            <ArrowRightLeft className="w-4 h-4 mr-2" />
+            Transactions
+          </TabsTrigger>
+          <TabsTrigger value="barcode">
+            <QrCode className="w-4 h-4 mr-2" />
+            Barcode
+          </TabsTrigger>
+          <TabsTrigger value="discounts">
+            <Percent className="w-4 h-4 mr-2" />
+            Discounts
           </TabsTrigger>
         </TabsList>
 
@@ -1155,6 +1288,50 @@ export default function MedicineManagement() {
             setSearchTerm={setSearchTerm}
             expiryFilter={expiryFilter}
             setExpiryFilter={setExpiryFilter}
+          />
+        </TabsContent>
+
+        {/* LOW STOCK ALERTS TAB */}
+        <TabsContent value="low-stock" className="space-y-4">
+          <LowStockAlertTab
+            alerts={lowStockAlerts}
+            loading={loading}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+        </TabsContent>
+
+        {/* WASTE PRODUCTS TAB */}
+        <TabsContent value="waste" className="space-y-4">
+          <WasteProductTab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+        </TabsContent>
+
+        {/* STATISTICS TAB */}
+        <TabsContent value="statistics" className="space-y-4">
+          <StatisticsTab />
+        </TabsContent>
+
+        {/* BARCODE GENERATION TAB */}
+        <TabsContent value="barcode" className="space-y-4">
+          <BarcodeTab />
+        </TabsContent>
+
+        {/* DISCOUNTS TAB */}
+        <TabsContent value="discounts" className="space-y-4">
+          <DiscountTab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+        </TabsContent>
+
+        {/* BATCH TRANSACTIONS TAB */}
+        <TabsContent value="transactions" className="space-y-4">
+          <BatchTransactionTab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
           />
         </TabsContent>
       </Tabs>

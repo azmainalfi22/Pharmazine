@@ -1,10 +1,10 @@
 @echo off
-REM Volt Dealer Suite Docker Deployment Script for Windows
+REM Sharkar Pharmacy Management System Docker Deployment Script for Windows
 REM This script automates the Docker deployment process
 
 setlocal enabledelayedexpansion
 
-echo 🐳 Volt Dealer Suite Docker Deployment
+echo 🐳 Sharkar Pharmacy Management System Docker Deployment
 echo ======================================
 echo.
 
@@ -60,7 +60,7 @@ REM Wait for PostgreSQL
 echo [INFO] Waiting for PostgreSQL...
 set timeout=60
 :wait_postgres
-docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U postgres -d volt_dealer_suite >nul 2>&1
+docker-compose -f docker-compose.prod.yml exec postgres pg_isready -U postgres -d pharmazine >nul 2>&1
 if not errorlevel 1 (
     echo [SUCCESS] PostgreSQL is ready
     goto postgres_ready
@@ -119,9 +119,9 @@ echo   Backend API: http://localhost/api
 echo   API Documentation: http://localhost/api/docs
 echo.
 echo Default Login Credentials:
-echo   Admin: admin@voltdealer.com / admin123
-echo   Manager: manager1@voltdealer.com / manager123
-echo   Employee: employee1@voltdealer.com / employee123
+echo   Admin: admin@sharkarpharmacy.com / admin123
+echo   Manager: manager@sharkarpharmacy.com / manager123
+echo   Employee: employee@sharkarpharmacy.com / employee123
 echo.
 echo Management Commands:
 echo   View logs: docker-compose -f docker-compose.prod.yml logs -f

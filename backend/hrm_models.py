@@ -65,31 +65,112 @@ class Attendance(Base):
 
 
 class Leave(Base):
-    __tablename__ = "leaves"
+    __tablename__ = "leave_applications"
     
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id"), nullable=False)
-    leave_type = Column(String, nullable=False)  # sick, casual, annual, unpaid
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=False)
-    total_days = Column(Float, nullable=False)
-    reason = Column(Text)
-    status = Column(String, default='pending')  # pending, approved, rejected
-    applied_date = Column(Date, default=date.today)
+    application_number = Column(String, unique=True)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    leave_type_id = Column(UUID(as_uuid=True), ForeignKey("leave_types.id"))
+    leave_type = Column(String)  # For backward compatibility
+    from_date = Column(Date, nullable=False)
+    to_date = Column(Date, nullable=False)
+    total_days = Column(Numeric, nullable=False)
+    reason = Column(Text, nullable=False)
+    contact_during_leave = Column(Text)
+    status = Column(String, default='pending')  # pending, approved, rejected, cancelled
     approved_by = Column(String)
-    approved_date = Column(Date)
+    approved_at = Column(DateTime)
     rejection_reason = Column(Text)
     created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+    
+    # Aliases for backward compatibility
+    @property
+    def start_date(self):
+        return self.from_date
+    
+    @property
+    def end_date(self):
+        return self.to_date
+    
+    @property
+    def applied_date(self):
+        return self.created_at.date() if self.created_at else None
+    
+    @property
+    def approved_date(self):
+        return self.approved_at.date() if self.approved_at else None
+
+
+class LeaveType(Base):
+    __tablename__ = "leave_types"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    name = Column(String, nullable=False, unique=True)
+    code = Column(String, nullable=False, unique=True)
+    annual_quota = Column(Integer, default=0)
+    is_paid = Column(Boolean, default=True)
+    is_carry_forward = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
+
+
+class EmployeeDocument(Base):
+    __tablename__ = "employee_documents"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    document_type = Column(String, nullable=False)  # resume, id_proof, address_proof, education, experience, other
+    document_name = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    file_size = Column(Integer)
+    uploaded_by = Column(String)
+    uploaded_at = Column(DateTime, nullable=False, server_default=text("now()"))
+
+
+class EmployeeLoan(Base):
+    __tablename__ = "employee_loans"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    loan_number = Column(String, unique=True, nullable=False)
+    employee_id = Column(String, ForeignKey("employees.id"), nullable=False)
+    loan_type = Column(String, nullable=False)  # advance, loan
+    loan_amount = Column(Numeric, nullable=False)
+    interest_rate = Column(Numeric, default=0)
+    emi_amount = Column(Numeric, nullable=False)
+    total_installments = Column(Integer, nullable=False)
+    paid_installments = Column(Integer, default=0)
+    remaining_amount = Column(Numeric)
+    status = Column(String, default='active')  # active, paid, defaulted
+    disbursement_date = Column(Date)
+    approved_by = Column(String)
+    notes = Column(Text)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
+
+
+class SalaryComponent(Base):
+    __tablename__ = "salary_components"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    component_name = Column(String, nullable=False, unique=True)
+    component_type = Column(String, nullable=False)  # earning, deduction
+    calculation_type = Column(String, default='fixed')  # fixed, percentage, formula
+    default_amount = Column(Numeric, default=0)
+    is_taxable = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, server_default=text("now()"))
 
 
 class Payroll(Base):
     __tablename__ = "payroll"
     
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    payroll_number = Column(String, unique=True)
     employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id"), nullable=False)
     month = Column(Integer, nullable=False)
     year = Column(Integer, nullable=False)
+    days_worked = Column(Numeric, default=0)
+    days_absent = Column(Numeric, default=0)
     basic_salary = Column(Numeric, nullable=False)
     allowances = Column(Numeric, default=0)
     overtime_amount = Column(Numeric, default=0)
@@ -97,13 +178,28 @@ class Payroll(Base):
     deductions = Column(Numeric, default=0)
     tax_deduction = Column(Numeric, default=0)
     gross_salary = Column(Numeric, nullable=False)
+    total_deductions = Column(Numeric, default=0)
     net_salary = Column(Numeric, nullable=False)
     payment_date = Column(Date)
     payment_method = Column(String)  # bank_transfer, cash, cheque
     payment_status = Column(String, default='pending')  # pending, paid
+    payment_reference = Column(String)
+    processed_by = Column(String)
+    processed_at = Column(DateTime)
     notes = Column(Text)
     created_at = Column(DateTime, nullable=False, server_default=text("now()"))
     updated_at = Column(DateTime, nullable=False, server_default=text("now()"), onupdate=datetime.utcnow)
+
+
+class PayrollDetail(Base):
+    __tablename__ = "payroll_details"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    payroll_id = Column(UUID(as_uuid=True), ForeignKey("payroll.id"), nullable=False)
+    component_id = Column(UUID(as_uuid=True), ForeignKey("salary_components.id"))
+    component_name = Column(String, nullable=False)
+    component_type = Column(String, nullable=False)
+    amount = Column(Numeric, nullable=False)
 
 
 # ============================================
@@ -183,29 +279,33 @@ class AttendanceResponse(AttendanceBase):
 
 class LeaveBase(BaseModel):
     employee_id: str
-    leave_type: str
-    start_date: date
-    end_date: date
+    leave_type_id: Optional[str] = None
+    leave_type: Optional[str] = None  # For backward compatibility
+    from_date: date
+    to_date: date
     total_days: float
-    reason: Optional[str] = None
+    reason: str
+    contact_during_leave: Optional[str] = None
+
 
 class LeaveCreate(LeaveBase):
     pass
+
 
 class LeaveUpdate(BaseModel):
     status: Optional[str] = None
     approved_by: Optional[str] = None
     rejection_reason: Optional[str] = None
 
+
 class LeaveResponse(LeaveBase):
     id: str
+    application_number: Optional[str]
     status: str
-    applied_date: date
     approved_by: Optional[str]
-    approved_date: Optional[date]
+    approved_at: Optional[datetime]
     rejection_reason: Optional[str]
     created_at: datetime
-    updated_at: datetime
     
     class Config:
         from_attributes = True
@@ -235,6 +335,128 @@ class PayrollResponse(PayrollBase):
     payment_status: str
     created_at: datetime
     updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Leave Types
+class LeaveTypeBase(BaseModel):
+    name: str
+    code: str
+    annual_quota: int = 0
+    is_paid: bool = True
+    is_carry_forward: bool = False
+    is_active: bool = True
+
+
+class LeaveTypeCreate(LeaveTypeBase):
+    pass
+
+
+class LeaveTypeResponse(LeaveTypeBase):
+    id: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Employee Documents
+class EmployeeDocumentBase(BaseModel):
+    employee_id: str
+    document_type: str
+    document_name: str
+    file_path: str
+    file_size: Optional[int] = None
+    uploaded_by: Optional[str] = None
+
+
+class EmployeeDocumentCreate(EmployeeDocumentBase):
+    pass
+
+
+class EmployeeDocumentResponse(EmployeeDocumentBase):
+    id: str
+    uploaded_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Employee Loans
+class EmployeeLoanBase(BaseModel):
+    employee_id: str
+    loan_type: str
+    loan_amount: Decimal
+    interest_rate: Decimal = Decimal("0")
+    emi_amount: Decimal
+    total_installments: int
+    disbursement_date: Optional[date] = None
+    notes: Optional[str] = None
+
+
+class EmployeeLoanCreate(EmployeeLoanBase):
+    pass
+
+
+class EmployeeLoanUpdate(BaseModel):
+    paid_installments: Optional[int] = None
+    remaining_amount: Optional[Decimal] = None
+    status: Optional[str] = None
+
+
+class EmployeeLoanResponse(EmployeeLoanBase):
+    id: str
+    loan_number: str
+    paid_installments: int
+    remaining_amount: Optional[Decimal]
+    status: str
+    approved_by: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Salary Components
+class SalaryComponentBase(BaseModel):
+    component_name: str
+    component_type: str
+    calculation_type: str = "fixed"
+    default_amount: Decimal = Decimal("0")
+    is_taxable: bool = True
+    is_active: bool = True
+
+
+class SalaryComponentCreate(SalaryComponentBase):
+    pass
+
+
+class SalaryComponentResponse(SalaryComponentBase):
+    id: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Payroll Details
+class PayrollDetailBase(BaseModel):
+    payroll_id: str
+    component_id: Optional[str] = None
+    component_name: str
+    component_type: str
+    amount: Decimal
+
+
+class PayrollDetailCreate(PayrollDetailBase):
+    pass
+
+
+class PayrollDetailResponse(PayrollDetailBase):
+    id: str
     
     class Config:
         from_attributes = True

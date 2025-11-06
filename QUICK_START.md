@@ -1,4 +1,4 @@
-# Quick Setup Guide - Volt Dealer Suite
+# Quick Setup Guide - Sharkar Pharmacy Management System
 
 ## 🚀 Get Started in 5 Minutes
 
@@ -22,10 +22,10 @@ chmod +x setup_postgresql.sh
 **Option B: Manual Setup**
 ```bash
 # 1. Create database
-createdb volt_dealer_suite
+createdb pharmazine
 
 # 2. Run setup script
-psql -d volt_dealer_suite -f database_setup.sql
+psql -d pharmazine -f database_setup.sql
 
 # 3. Create environment file
 cp env.example .env.local
@@ -47,9 +47,9 @@ Open your browser and go to: **http://localhost:5173**
 ### Step 5: Login with Demo Accounts
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@voltdealer.com | Any password |
-| **Manager** | manager1@voltdealer.com | Any password |
-| **Employee** | employee1@voltdealer.com | Any password |
+| **Admin** | admin@sharkarpharmacy.com | admin123 |
+| **Manager** | manager@sharkarpharmacy.com | manager123 |
+| **Employee** | employee@sharkarpharmacy.com | employee123 |
 
 ## 🎯 What You'll See
 

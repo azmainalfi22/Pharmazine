@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, User, Phone, Mail, MapPin, CreditCard, Calendar, TrendingUp, Receipt, DollarSign } from "lucide-react";
+import { Plus, Search, Edit, Trash2, User, Phone, Mail, MapPin, CreditCard, Calendar, TrendingUp, Receipt, DollarSign, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-const API_BASE = "http://localhost:8000/api";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface Customer {
   id: string;
@@ -67,16 +66,11 @@ export default function EnhancedCustomers() {
     loadCustomers();
   }, []);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const loadCustomers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/customers`, {
-        headers: getAuthHeader()
+      const response = await fetch(`${API_CONFIG.BASE_URL}/customers`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -98,12 +92,12 @@ export default function EnhancedCustomers() {
     setLoading(true);
     try {
       const url = editing
-        ? `${API_BASE}/customers/${editing.id}`
-        : `${API_BASE}/customers`;
+        ? `${API_CONFIG.BASE_URL}/customers/${editing.id}`
+        : `${API_CONFIG.BASE_URL}/customers`;
       
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(form)
       });
 
@@ -129,9 +123,9 @@ export default function EnhancedCustomers() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/customers/${id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/customers/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Customer deleted successfully");
@@ -200,17 +194,81 @@ export default function EnhancedCustomers() {
     totalOutstanding: customers.reduce((sum, c) => sum + (c.current_balance || 0), 0)
   };
 
+  const activeCustomers = customers.filter(c => c.is_active).length;
+  const totalRevenue = customers.reduce((sum, c) => sum + (c.current_balance || 0), 0);
+
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="pharmacy-header">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Customer Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage customer profiles, credit limits, and outstanding balances
-          </p>
+    <div className="p-6 space-y-6">
+      {/* Prominent Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
+        <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                  Customer Management
+                </h1>
+                <p className="text-white/90 text-base">
+                  Manage customer profiles, credit limits, and purchase history
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={loadCustomers}
+                className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm shadow-lg"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <Users className="h-5 w-5 text-white/80" />
+                <span className="text-xs text-white/70 font-medium">TOTAL</span>
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">{customers.length}</div>
+              <div className="text-xs text-white/70">All Customers</div>
+            </div>
+
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <TrendingUp className="h-5 w-5 text-white/80" />
+                <span className="text-xs text-white/70 font-medium">ACTIVE</span>
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">{activeCustomers}</div>
+              <div className="text-xs text-white/70">Active</div>
+            </div>
+
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <DollarSign className="h-5 w-5 text-white/80" />
+                <span className="text-xs text-white/70 font-medium">OUTSTANDING</span>
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">${totalRevenue.toFixed(0)}</div>
+              <div className="text-xs text-white/70">Total Balance</div>
+            </div>
+
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <Calendar className="h-5 w-5 text-white/80" />
+                <span className="text-xs text-white/70 font-medium">DATE</span>
+              </div>
+              <div className="text-lg font-bold text-white mb-1">{format(new Date(), "dd MMM")}</div>
+              <div className="text-xs text-white/70">{format(new Date(), "yyyy")}</div>
+            </div>
+          </div>
         </div>
       </div>
 

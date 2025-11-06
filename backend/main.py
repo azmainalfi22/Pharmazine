@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, func
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel, EmailStr, validator, Field
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import os
 import uuid
 import secrets
@@ -87,6 +87,115 @@ except ImportError as e:
     print(f"[WARNING] Could not load HRM routes: {e}")
 except Exception as e:
     print(f"[WARNING] Error loading HRM routes: {e}")
+
+# Include Finance routes
+try:
+    from finance_routes import router as finance_router
+    app.include_router(finance_router)
+    print("[OK] Finance routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load finance routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading finance routes: {e}")
+
+# Include CRM routes
+try:
+    from crm_routes import router as crm_router
+    app.include_router(crm_router)
+    print("[OK] CRM routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load CRM routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading CRM routes: {e}")
+
+# Include Patient History
+try:
+    from patient_history import PatientMedicationHistory
+    print("[OK] Patient History models loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Patient History models: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Patient History models: {e}")
+
+# Include CRM models
+try:
+    from crm_models import MarketingCampaign, CustomerLoyaltyPoints, LoyaltyReward, RewardRedemption
+    print("[OK] CRM models loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load CRM models: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading CRM models: {e}")
+
+# Include HRM models
+try:
+    from hrm_models import (
+        LeaveType, EmployeeDocument, EmployeeLoan, 
+        SalaryComponent, PayrollDetail
+    )
+    print("[OK] Enhanced HRM models loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load HRM models: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading HRM models: {e}")
+
+# Include Service models
+try:
+    from service_models import ServiceInvoice, ServicePackage, ServiceReview
+    print("[OK] Enhanced Service models loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Service models: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Service models: {e}")
+
+# Include Auto-Reorder routes
+try:
+    from auto_reorder_routes import router as auto_reorder_router
+    app.include_router(auto_reorder_router)
+    print("[OK] Auto-Reorder routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Auto-Reorder routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Auto-Reorder routes: {e}")
+
+# Include Notification routes
+try:
+    from notification_routes import router as notification_router
+    app.include_router(notification_router)
+    print("[OK] Notification routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Notification routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Notification routes: {e}")
+
+# Include Backup routes
+try:
+    from backup_routes import router as backup_router
+    app.include_router(backup_router)
+    print("[OK] Backup routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Backup routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Backup routes: {e}")
+
+# Include System Configuration routes
+try:
+    from system_config_routes import router as system_config_router
+    app.include_router(system_config_router)
+    print("[OK] System Configuration routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load System Configuration routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading System Configuration routes: {e}")
+
+# Include Internal Messages routes
+try:
+    from messages_routes import router as messages_router
+    app.include_router(messages_router)
+    print("[OK] Internal Messages routes loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Could not load Internal Messages routes: {e}")
+except Exception as e:
+    print(f"[WARNING] Error loading Internal Messages routes: {e}")
 
 # Database setup
 if "sqlite" in DATABASE_URL:
@@ -169,6 +278,46 @@ class Customer(Base):
     phone = Column(String)
     address = Column(Text)
     company = Column(String)
+    customer_group = Column(String)
+    credit_limit = Column(Float, default=0)
+    opening_balance = Column(Float, default=0)
+    current_balance = Column(Float, default=0)
+    birthday = Column(Date)
+    anniversary = Column(Date)
+    tax_number = Column(String)
+    discount_percentage = Column(Float, default=0)
+    payment_terms = Column(String)
+    notes = Column(Text)
+    is_active = Column(Boolean, default=True)
+    # Enhanced fields from Phase 2 migration
+    title = Column(String)  # Mr, Mrs, Dr, etc.
+    middle_name = Column(String)
+    last_name = Column(String)
+    date_of_birth = Column(Date)
+    anniversary_date = Column(Date)
+    gender = Column(String)
+    blood_group = Column(String)
+    allergies = Column(Text)
+    chronic_conditions = Column(Text)
+    email_verified = Column(Boolean, default=False)
+    phone_verified = Column(Boolean, default=False)
+    whatsapp_number = Column(String)
+    alternate_phone = Column(String)
+    email2 = Column(String)
+    address_line1 = Column(String)
+    address_line2 = Column(String)
+    city = Column(String)
+    state = Column(String)
+    country = Column(String, default='India')
+    postal_code = Column(String)
+    landmark = Column(String)
+    customer_type = Column(String, default='retail')  # retail, wholesale, hospital, clinic, doctor
+    payment_deadline_days = Column(Integer, default=0)
+    total_purchases = Column(Float, default=0)
+    total_paid = Column(Float, default=0)
+    last_purchase_date = Column(Date)
+    loyalty_points = Column(Integer, default=0)
+    loyalty_tier = Column(String)  # Bronze, Silver, Gold
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -697,6 +846,16 @@ class CustomerCreate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     company: Optional[str] = None
+    customer_group: Optional[str] = None
+    credit_limit: Optional[float] = 0
+    opening_balance: Optional[float] = 0
+    birthday: Optional[str] = None
+    anniversary: Optional[str] = None
+    tax_number: Optional[str] = None
+    discount_percentage: Optional[float] = 0
+    payment_terms: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = True
 
 class CompanyCreate(BaseModel):
     name: str
@@ -793,7 +952,7 @@ class ProductCreate(BaseModel):
 
 class StockTransactionCreate(BaseModel):
     product_id: str
-    transaction_type: str = Field(..., pattern="^(in|out|adjust)$")
+    transaction_type: str = Field(..., pattern="^(purchase|sales|sales_return|supplier_return|opening_stock|stock_adjustment_in|stock_adjustment_out)$")
     quantity: int = Field(..., gt=0, description="Quantity must be positive")
     unit_price: Optional[float] = Field(None, ge=0)
     
@@ -895,7 +1054,7 @@ class CategoryResponse(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -906,7 +1065,7 @@ class SubcategoryResponse(BaseModel):
     name: str
     description: Optional[str] = None
     category_id: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -930,7 +1089,7 @@ class SupplierResponse(BaseModel):
     email: Optional[str] = None
     address: Optional[str] = None
     payment_terms: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -943,6 +1102,17 @@ class CustomerResponse(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     company: Optional[str] = None
+    customer_group: Optional[str] = None
+    credit_limit: Optional[float] = 0
+    opening_balance: Optional[float] = 0
+    current_balance: Optional[float] = 0
+    birthday: Optional[date] = None
+    anniversary: Optional[date] = None
+    tax_number: Optional[str] = None
+    discount_percentage: Optional[float] = 0
+    payment_terms: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = True
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -1073,7 +1243,7 @@ class SaleResponse(BaseModel):
     net_amount: float
     payment_method: str
     payment_status: str
-    emi_enabled: bool
+    emi_enabled: Optional[bool] = None
     emi_months: Optional[int] = None
     emi_amount: Optional[float] = None
     emi_interest_rate: Optional[float] = None
@@ -1314,6 +1484,31 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@app.get("/api/users/me")
+async def get_current_user_profile(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    """Get current authenticated user profile"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+    user = db.query(Profile).filter(Profile.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "phone": user.phone,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at
+    }
+
 @app.post("/api/auth/register", response_model=ProfileResponse)
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
     # Check if user already exists
@@ -1474,7 +1669,7 @@ async def get_sale_items(sale_id: str, db: Session = Depends(get_db)):
 async def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
     db_category = Category(
         id=str(uuid.uuid4()),
-        **category.dict()
+        **category.model_dump()
     )
     db.add(db_category)
     db.commit()
@@ -1486,7 +1681,7 @@ async def create_category(category: CategoryCreate, db: Session = Depends(get_db
 async def create_subcategory(subcategory: SubcategoryCreate, db: Session = Depends(get_db)):
     db_subcategory = Subcategory(
         id=str(uuid.uuid4()),
-        **subcategory.dict()
+        **subcategory.model_dump()
     )
     db.add(db_subcategory)
     db.commit()
@@ -1499,7 +1694,7 @@ async def update_subcategory(subcategory_id: str, subcategory: SubcategoryCreate
     if not db_subcategory:
         raise HTTPException(status_code=404, detail="Subcategory not found")
     
-    for key, value in subcategory.dict().items():
+    for key, value in subcategory.model_dump().items():
         setattr(db_subcategory, key, value)
     
     db.commit()
@@ -1520,7 +1715,7 @@ async def delete_subcategory(subcategory_id: str, db: Session = Depends(get_db))
 async def create_country(country: CountryCreate, db: Session = Depends(get_db)):
     db_country = Country(
         id=str(uuid.uuid4()),
-        **country.dict()
+        **country.model_dump()
     )
     db.add(db_country)
     db.commit()
@@ -1533,7 +1728,7 @@ async def update_country(country_id: str, country: CountryCreate, db: Session = 
     if not db_country:
         raise HTTPException(status_code=404, detail="Country not found")
     
-    for key, value in country.dict().items():
+    for key, value in country.model_dump().items():
         setattr(db_country, key, value)
     
     db.commit()
@@ -1554,7 +1749,7 @@ async def delete_country(country_id: str, db: Session = Depends(get_db)):
 async def create_supplier(supplier: SupplierCreate, db: Session = Depends(get_db)):
     db_supplier = Supplier(
         id=str(uuid.uuid4()),
-        **supplier.dict()
+        **supplier.model_dump()
     )
     db.add(db_supplier)
     db.commit()
@@ -1565,7 +1760,7 @@ async def create_supplier(supplier: SupplierCreate, db: Session = Depends(get_db
 async def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
     db_customer = Customer(
         id=str(uuid.uuid4()),
-        **customer.dict()
+        **customer.model_dump()
     )
     db.add(db_customer)
     db.commit()
@@ -1576,7 +1771,7 @@ async def create_customer(customer: CustomerCreate, db: Session = Depends(get_db
 async def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     db_company = Company(
         id=str(uuid.uuid4()),
-        **company.dict()
+        **company.model_dump()
     )
     db.add(db_company)
     db.commit()
@@ -1592,7 +1787,7 @@ async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     
     db_product = Product(
         id=str(uuid.uuid4()),
-        **product.dict()
+        **product.model_dump()
     )
     db.add(db_product)
     db.commit()
@@ -1607,7 +1802,7 @@ async def update_category(category_id: str, category: CategoryCreate, db: Sessio
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
     old_state = {"name": db_category.name, "description": db_category.description}
-    for key, value in category.dict().items():
+    for key, value in category.model_dump().items():
         setattr(db_category, key, value)
     
     db.commit()
@@ -1632,7 +1827,7 @@ async def update_supplier(supplier_id: str, supplier: SupplierCreate, db: Sessio
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
     
-    for key, value in supplier.dict().items():
+    for key, value in supplier.model_dump().items():
         setattr(db_supplier, key, value)
     
     db.commit()
@@ -1655,7 +1850,7 @@ async def update_customer(customer_id: str, customer: CustomerCreate, db: Sessio
     if not db_customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
-    for key, value in customer.dict().items():
+    for key, value in customer.model_dump().items():
         setattr(db_customer, key, value)
     
     db.commit()
@@ -1684,7 +1879,7 @@ async def update_product(product_id: str, product: ProductCreate, db: Session = 
         if existing_product:
             raise HTTPException(status_code=400, detail="Product with this SKU already exists")
     
-    for key, value in product.dict().items():
+    for key, value in product.model_dump().items():
         setattr(db_product, key, value)
     
     db.commit()
@@ -1717,12 +1912,326 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         "lowStockProducts": low_stock_products
     }
 
+@app.get("/api/products/sales-analytics")
+async def get_product_sales_analytics(days: int = 30, db: Session = Depends(get_db)):
+    """Get product sales analytics for calculating days of supply and ABC analysis"""
+    from datetime import timedelta
+    
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Get sales items within date range
+    sales_data = db.query(
+        SaleItem.product_id,
+        func.sum(SaleItem.quantity).label('total_sold'),
+        func.count(SaleItem.id).label('order_count'),
+        func.sum(SaleItem.quantity * SaleItem.unit_price).label('total_revenue')
+    ).join(Sale, SaleItem.sale_id == Sale.id
+    ).filter(Sale.created_at >= start_date
+    ).group_by(SaleItem.product_id).all()
+    
+    result = []
+    for item in sales_data:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            avg_daily_sales = float(item.total_sold) / days if days > 0 else 0
+            days_of_supply = product.stock_quantity / avg_daily_sales if avg_daily_sales > 0 else 999
+            
+            result.append({
+                "product_id": item.product_id,
+                "product_name": product.name,
+                "sku": product.sku,
+                "total_sold": float(item.total_sold),
+                "order_count": item.order_count,
+                "total_revenue": float(item.total_revenue),
+                "avg_daily_sales": round(avg_daily_sales, 2),
+                "current_stock": product.stock_quantity,
+                "days_of_supply": round(days_of_supply, 1) if days_of_supply < 999 else None
+            })
+    
+    # Sort by revenue for ABC analysis
+    result.sort(key=lambda x: x['total_revenue'], reverse=True)
+    
+    # Calculate cumulative revenue percentage for ABC classification
+    total_revenue = sum(item['total_revenue'] for item in result)
+    cumulative = 0
+    for item in result:
+        cumulative += item['total_revenue']
+        cumulative_pct = (cumulative / total_revenue * 100) if total_revenue > 0 else 0
+        if cumulative_pct <= 80:
+            item['abc_class'] = 'A'
+        elif cumulative_pct <= 95:
+            item['abc_class'] = 'B'
+        else:
+            item['abc_class'] = 'C'
+    
+    return result
+
+@app.get("/api/notifications/low-stock")
+async def trigger_low_stock_notification(db: Session = Depends(get_db)):
+    """Manually trigger low stock notification"""
+    try:
+        from notifications import check_and_send_low_stock_alerts
+        check_and_send_low_stock_alerts(db)
+        return {"message": "Low stock alerts sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send alerts: {str(e)}")
+
+@app.get("/api/notifications/expiry-alerts")
+async def trigger_expiry_notification(db: Session = Depends(get_db)):
+    """Manually trigger expiry alerts"""
+    try:
+        from notifications import check_and_send_expiry_alerts
+        check_and_send_expiry_alerts(db)
+        return {"message": "Expiry alerts sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send alerts: {str(e)}")
+
+@app.get("/api/notifications/daily-summary")
+async def trigger_daily_summary(db: Session = Depends(get_db)):
+    """Manually trigger daily summary"""
+    try:
+        from notifications import send_daily_summary_report
+        send_daily_summary_report(db)
+        return {"message": "Daily summary sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send summary: {str(e)}")
+
+@app.get("/api/rbac/permissions")
+async def get_user_permissions(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    """Get current user permissions"""
+    try:
+        from rbac import get_current_user_permissions
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        permissions = get_current_user_permissions(db, user_id)
+        return permissions
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/backups")
+async def list_backups(dependencies=[Depends(require_admin())]):
+    """List all available backups"""
+    try:
+        from backup_system import BackupSystem
+        backup_system = BackupSystem()
+        backups = backup_system.list_backups()
+        return {"backups": backups, "count": len(backups)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/backups/create")
+async def create_backup(dependencies=[Depends(require_admin())]):
+    """Create a new backup"""
+    try:
+        from backup_system import BackupSystem
+        backup_system = BackupSystem()
+        backup_path = backup_system.create_backup()
+        
+        if backup_path:
+            return {"message": "Backup created successfully", "path": backup_path}
+        else:
+            raise HTTPException(status_code=500, detail="Backup creation failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-reorder/recommendations")
+async def get_reorder_recommendations(
+    days: int = 30,
+    abc_class: str = None,
+    db: Session = Depends(get_db)
+):
+    """Get auto-reorder recommendations"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days, abc_class)
+        
+        return {
+            "recommendations": recommendations,
+            "count": len(recommendations),
+            "total_estimated_cost": sum(r['estimated_cost'] for r in recommendations)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-reorder/by-supplier")
+async def get_reorder_by_supplier(days: int = 30, db: Session = Depends(get_db)):
+    """Get reorder recommendations grouped by supplier"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days)
+        grouped = reorder_system.group_recommendations_by_supplier(recommendations)
+        
+        result = []
+        for supplier_id, items in grouped.items():
+            total_cost = sum(i['estimated_cost'] for i in items)
+            result.append({
+                'supplier_id': supplier_id,
+                'product_count': len(items),
+                'total_estimated_cost': total_cost,
+                'products': items
+            })
+        
+        return {"suppliers": result, "total_suppliers": len(result)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-reorder/generate-po/{supplier_id}")
+async def generate_purchase_order_from_reorder(
+    supplier_id: str,
+    days: int = 30,
+    db: Session = Depends(get_db)
+):
+    """Generate draft purchase order from auto-reorder recommendations"""
+    try:
+        from auto_reorder import AutoReorderSystem
+        reorder_system = AutoReorderSystem(db)
+        recommendations = reorder_system.get_reorder_recommendations(days)
+        
+        # Filter by supplier
+        supplier_recs = [r for r in recommendations if r.get('supplier_id') == supplier_id]
+        
+        if not supplier_recs:
+            raise HTTPException(status_code=404, detail="No recommendations for this supplier")
+        
+        po_draft = reorder_system.generate_purchase_order_draft(supplier_id, supplier_recs)
+        return po_draft
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/patients/{customer_id}/medication-history")
+async def get_patient_medication_history(customer_id: str, days: int = 365, db: Session = Depends(get_db)):
+    """Get medication history for a patient"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        history = service.get_patient_history(customer_id, days)
+        return {"history": history, "count": len(history)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/patients/{customer_id}/statistics")
+async def get_patient_statistics(customer_id: str, db: Session = Depends(get_db)):
+    """Get statistics for a patient"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        stats = service.get_patient_statistics(customer_id)
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/refill-reminders")
+async def get_refill_reminders(days_ahead: int = 7, db: Session = Depends(get_db)):
+    """Get patients due for refill reminders"""
+    try:
+        from patient_history import PatientHistoryService
+        service = PatientHistoryService(db)
+        reminders = service.get_refill_reminders(days_ahead)
+        return {"reminders": reminders, "count": len(reminders)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/system/performance")
+async def get_system_performance(db: Session = Depends(get_db)):
+    """Get system performance metrics"""
+    try:
+        from performance_monitor import PerformanceMonitor, DatabaseOptimizer
+        
+        optimizer = DatabaseOptimizer(db)
+        
+        return {
+            "slow_queries": PerformanceMonitor.get_slow_queries(10),
+            "slow_api_calls": PerformanceMonitor.get_slow_api_calls(10),
+            "table_sizes": optimizer.get_table_sizes()[:10],
+            "index_usage": optimizer.get_index_usage()[:10],
+            "unused_indexes": optimizer.get_unused_indexes()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/system/optimize")
+async def optimize_database(db: Session = Depends(get_db), dependencies=[Depends(require_admin())]):
+    """Optimize database performance"""
+    try:
+        from performance_monitor import DatabaseOptimizer
+        
+        optimizer = DatabaseOptimizer(db)
+        optimizer.analyze_tables()
+        
+        return {"message": "Database optimized successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/realtime")
+async def get_realtime_dashboard(db: Session = Depends(get_db)):
+    """Get real-time dashboard statistics"""
+    from datetime import date
+    from sqlalchemy import and_
+    
+    today = date.today()
+    
+    # Today's sales
+    today_sales = db.query(func.sum(Sale.net_amount)).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    today_transactions = db.query(func.count(Sale.id)).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    today_customers = db.query(func.count(func.distinct(Sale.customer_name))).filter(
+        func.date(Sale.created_at) == today
+    ).scalar() or 0
+    
+    # Stock alerts
+    low_stock_count = db.query(func.count(Product.id)).filter(
+        Product.stock_quantity <= Product.min_stock_level
+    ).scalar() or 0
+    
+    out_of_stock_count = db.query(func.count(Product.id)).filter(
+        Product.stock_quantity == 0
+    ).scalar() or 0
+    
+    # Expiring products
+    from datetime import timedelta
+    expiry_date = datetime.utcnow() + timedelta(days=30)
+    expiring_count = db.query(func.count(Product.id)).filter(
+        and_(
+            Product.expiry_date.isnot(None),
+            Product.expiry_date <= expiry_date,
+            Product.stock_quantity > 0
+        )
+    ).scalar() or 0
+    
+    # Inventory value
+    inventory_value = db.query(func.sum(Product.stock_quantity * Product.cost_price)).scalar() or 0
+    
+    return {
+        "today_sales": float(today_sales),
+        "today_transactions": int(today_transactions),
+        "today_customers": int(today_customers),
+        "low_stock_count": int(low_stock_count),
+        "out_of_stock_count": int(out_of_stock_count),
+        "expiring_soon_count": int(expiring_count),
+        "total_inventory_value": float(inventory_value),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 @app.post("/api/stock-transactions", response_model=StockTransactionResponse)
 async def create_stock_transaction(transaction: StockTransactionCreate, db: Session = Depends(get_db)):
     # Create the stock transaction
     db_transaction = StockTransaction(
         id=str(uuid.uuid4()),
-        **transaction.dict()
+        **transaction.model_dump()
     )
     db.add(db_transaction)
     
@@ -1732,7 +2241,7 @@ async def create_stock_transaction(transaction: StockTransactionCreate, db: Sess
         raise HTTPException(status_code=404, detail="Product not found")
     
     # Determine if this is stock in or out
-    is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'transfer_in', 'stock_adjustment_in', 'misc_receive']
+    is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'stock_adjustment_in']
     quantity_change = transaction.quantity if is_stock_in else -transaction.quantity
     
     # Update stock quantity
@@ -1755,7 +2264,7 @@ async def delete_stock_transaction(transaction_id: str, db: Session = Depends(ge
     # Reverse the stock change
     product = db.query(Product).filter(Product.id == transaction.product_id).first()
     if product:
-        is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'transfer_in', 'stock_adjustment_in', 'misc_receive']
+        is_stock_in = transaction.transaction_type in ['purchase', 'sales_return', 'opening_stock', 'stock_adjustment_in']
         quantity_change = transaction.quantity if is_stock_in else -transaction.quantity
         product.stock_quantity -= quantity_change
     
@@ -1767,7 +2276,7 @@ async def delete_stock_transaction(transaction_id: str, db: Session = Depends(ge
 async def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
     db_sale = Sale(
         id=str(uuid.uuid4()),
-        **sale.dict()
+        **sale.model_dump()
     )
     db.add(db_sale)
     db.commit()
@@ -1778,7 +2287,7 @@ async def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
 async def create_sale_item(item: SaleItemCreate, db: Session = Depends(get_db)):
     db_item = SaleItem(
         id=str(uuid.uuid4()),
-        **item.dict()
+        **item.model_dump()
     )
     db.add(db_item)
     
@@ -1791,6 +2300,39 @@ async def create_sale_item(item: SaleItemCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Insufficient stock quantity")
     
     product.stock_quantity -= item.quantity
+    
+    # Log medication history if this is a medicine product
+    if product.generic_name or product.is_prescription_required:
+        try:
+            from patient_history import PatientHistoryService
+            
+            # Get sale to find customer
+            sale = db.query(Sale).filter(Sale.id == item.sale_id).first()
+            if sale:
+                # Find or create customer ID (simplified - in production, ensure customer exists)
+                customer = db.query(Customer).filter(
+                    or_(
+                        Customer.name == sale.customer_name,
+                        Customer.phone == sale.customer_phone
+                    )
+                ).first()
+                
+                if customer:
+                    history_service = PatientHistoryService(db)
+                    history_service.log_medication_sale(
+                        customer_id=customer.id,
+                        product_id=product.id,
+                        sale_id=sale.id,
+                        product_name=product.name,
+                        generic_name=product.generic_name or product.name,
+                        quantity=item.quantity,
+                        unit_price=item.unit_price,
+                        prescription_number=None,  # Can be added to SaleItem model if needed
+                        doctor_name=None,
+                        refill_days=30 if product.is_prescription_required else None
+                    )
+        except Exception as e:
+            print(f"[WARNING] Failed to log medication history: {e}")
     
     db.commit()
     db.refresh(db_item)
@@ -2789,6 +3331,175 @@ async def create_stock_adjustment(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating stock adjustment: {str(e)}")
+
+# ============================================
+# PATIENT MEDICATION HISTORY ENDPOINTS
+# ============================================
+
+@app.get("/api/patients/{customer_id}/medication-history")
+async def get_patient_medication_history(
+    customer_id: str,
+    days: int = 365,
+    db: Session = Depends(get_db)
+):
+    """Get medication history for a patient/customer"""
+    from patient_history import PatientHistoryService
+    
+    service = PatientHistoryService(db)
+    history = service.get_patient_history(customer_id, days)
+    
+    return {
+        "customer_id": customer_id,
+        "days": days,
+        "history": history,
+        "count": len(history)
+    }
+
+
+@app.get("/api/patients/{customer_id}/statistics")
+async def get_patient_statistics(
+    customer_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get statistics for a patient"""
+    from patient_history import PatientHistoryService
+    
+    service = PatientHistoryService(db)
+    stats = service.get_patient_statistics(customer_id)
+    
+    return stats
+
+
+@app.get("/api/patients/refill-reminders")
+async def get_refill_reminders(
+    days_ahead: int = 7,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get patients due for refill reminders"""
+    from patient_history import PatientHistoryService
+    
+    service = PatientHistoryService(db)
+    reminders = service.get_refill_reminders(days_ahead)
+    
+    return {
+        "days_ahead": days_ahead,
+        "reminders": reminders,
+        "count": len(reminders)
+    }
+
+
+@app.post("/api/patients/{customer_id}/check-interactions")
+async def check_drug_interactions(
+    customer_id: str,
+    new_product_id: str,
+    db: Session = Depends(get_db)
+):
+    """Check for potential drug interactions"""
+    from patient_history import PatientHistoryService
+    
+    service = PatientHistoryService(db)
+    result = service.check_drug_interactions(customer_id, new_product_id)
+    
+    return result
+
+
+# ============================================
+# DASHBOARD REAL-TIME STATS ENDPOINTS
+# ============================================
+
+@app.get("/api/dashboard/realtime-stats")
+async def get_realtime_dashboard_stats(db: Session = Depends(get_db)):
+    """Get real-time dashboard statistics"""
+    try:
+        result = db.execute(text("SELECT * FROM v_realtime_dashboard")).fetchone()
+        
+        if result:
+            return {
+                "today_sales": float(result[0] or 0),
+                "today_transactions": int(result[1] or 0),
+                "today_customers": int(result[2] or 0),
+                "week_sales": float(result[3] or 0),
+                "month_sales": float(result[4] or 0),
+                "low_stock_count": int(result[5] or 0),
+                "out_of_stock_count": int(result[6] or 0),
+                "expiring_soon_count": int(result[7] or 0),
+                "pending_requisitions": int(result[8] or 0),
+                "total_inventory_value": float(result[9] or 0)
+            }
+        else:
+            return {
+                "today_sales": 0,
+                "today_transactions": 0,
+                "today_customers": 0,
+                "week_sales": 0,
+                "month_sales": 0,
+                "low_stock_count": 0,
+                "out_of_stock_count": 0,
+                "expiring_soon_count": 0,
+                "pending_requisitions": 0,
+                "total_inventory_value": 0
+            }
+    except Exception as e:
+        # Return default values if view doesn't exist yet
+        return {
+            "today_sales": 0,
+            "today_transactions": 0,
+            "today_customers": 0,
+            "week_sales": 0,
+            "month_sales": 0,
+            "low_stock_count": 0,
+            "out_of_stock_count": 0,
+            "expiring_soon_count": 0,
+            "pending_requisitions": 0,
+            "total_inventory_value": 0,
+            "error": str(e)
+        }
+
+
+@app.get("/api/dashboard/top-products-today")
+async def get_top_products_today(db: Session = Depends(get_db)):
+    """Get top selling products today"""
+    try:
+        results = db.execute(text("SELECT * FROM v_top_products_today")).fetchall()
+        
+        products = []
+        for row in results:
+            products.append({
+                "id": str(row[0]),
+                "sku": row[1],
+                "name": row[2],
+                "generic_name": row[3],
+                "quantity_sold": int(row[4] or 0),
+                "order_count": int(row[5] or 0),
+                "revenue": float(row[6] or 0),
+                "current_stock": int(row[7] or 0)
+            })
+        
+        return {"products": products, "count": len(products)}
+    except Exception as e:
+        return {"products": [], "count": 0, "error": str(e)}
+
+
+@app.get("/api/dashboard/hourly-sales")
+async def get_hourly_sales_today(db: Session = Depends(get_db)):
+    """Get hourly sales trend for today"""
+    try:
+        results = db.execute(text("SELECT * FROM v_hourly_sales_today")).fetchall()
+        
+        hourly_data = []
+        for row in results:
+            hourly_data.append({
+                "hour": int(row[0]),
+                "transaction_count": int(row[1] or 0),
+                "total_sales": float(row[2] or 0),
+                "avg_transaction": float(row[3] or 0)
+            })
+        
+        return {"hourly_data": hourly_data, "count": len(hourly_data)}
+    except Exception as e:
+        return {"hourly_data": [], "count": 0, "error": str(e)}
+
 
 if __name__ == "__main__":
     import uvicorn

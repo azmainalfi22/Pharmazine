@@ -11,11 +11,17 @@ from decimal import Decimal
 import uuid
 
 from hrm_models import (
-    Employee, Attendance, Leave, Payroll,
+    Employee, Attendance, Leave, Payroll, LeaveType,
+    EmployeeDocument, EmployeeLoan, SalaryComponent, PayrollDetail,
     EmployeeCreate, EmployeeUpdate, EmployeeResponse,
     AttendanceCreate, AttendanceResponse,
     LeaveCreate, LeaveUpdate, LeaveResponse,
-    PayrollCreate, PayrollResponse
+    PayrollCreate, PayrollResponse,
+    LeaveTypeCreate, LeaveTypeResponse,
+    EmployeeDocumentCreate, EmployeeDocumentResponse,
+    EmployeeLoanCreate, EmployeeLoanUpdate, EmployeeLoanResponse,
+    SalaryComponentCreate, SalaryComponentResponse,
+    PayrollDetailCreate, PayrollDetailResponse
 )
 
 router = APIRouter(prefix="/api/hrm", tags=["HR Management"])
@@ -84,7 +90,7 @@ def create_employee(
     
     db_employee = Employee(
         id=uuid.uuid4(),
-        **employee.dict()
+        **employee.model_dump()
     )
     db.add(db_employee)
     db.commit()
@@ -104,7 +110,7 @@ def update_employee(
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
     
-    for key, value in employee.dict(exclude_unset=True).items():
+    for key, value in employee.model_dump(exclude_unset=True).items():
         setattr(db_employee, key, value)
     
     db_employee.updated_at = datetime.utcnow()
@@ -176,7 +182,7 @@ def create_attendance(
     
     db_attendance = Attendance(
         id=uuid.uuid4(),
-        **attendance.dict()
+        **attendance.model_dump()
     )
     db.add(db_attendance)
     db.commit()
@@ -273,7 +279,7 @@ def get_leaves(
     if status:
         query = query.filter(Leave.status == status)
     
-    leaves = query.order_by(Leave.applied_date.desc()).offset(skip).limit(limit).all()
+    leaves = query.order_by(Leave.created_at.desc()).offset(skip).limit(limit).all()
     return leaves
 
 
@@ -284,11 +290,15 @@ def create_leave(
     current_user: dict = Depends(get_current_user)
 ):
     """Apply for leave"""
+    # Generate application number
+    count = db.query(func.count(Leave.id)).scalar()
+    application_number = f"LV{datetime.now().strftime('%Y%m')}{str(count + 1).zfill(4)}"
+    
     db_leave = Leave(
         id=uuid.uuid4(),
+        application_number=application_number,
         status='pending',
-        applied_date=date.today(),
-        **leave.dict()
+        **leave.model_dump()
     )
     db.add(db_leave)
     db.commit()
@@ -308,13 +318,12 @@ def update_leave(
     if not db_leave:
         raise HTTPException(status_code=404, detail="Leave application not found")
     
-    for key, value in leave.dict(exclude_unset=True).items():
+    for key, value in leave.model_dump(exclude_unset=True).items():
         setattr(db_leave, key, value)
     
     if leave.status == 'approved':
-        db_leave.approved_date = date.today()
+        db_leave.approved_at = datetime.utcnow()
     
-    db_leave.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(db_leave)
     return db_leave
@@ -333,7 +342,7 @@ def approve_leave(
     
     db_leave.status = 'approved'
     db_leave.approved_by = current_user.get('id')
-    db_leave.approved_date = date.today()
+    db_leave.approved_at = datetime.utcnow()
     db.commit()
     db.refresh(db_leave)
     return db_leave
@@ -413,7 +422,7 @@ def create_payroll(
         gross_salary=gross_salary,
         net_salary=net_salary,
         payment_status='pending',
-        **payroll.dict()
+        **payroll.model_dump()
     )
     db.add(db_payroll)
     db.commit()
@@ -434,7 +443,308 @@ def mark_payroll_paid(
     
     db_payroll.payment_status = 'paid'
     db_payroll.payment_date = date.today()
+    db_payroll.processed_by = current_user.get('id')
+    db_payroll.processed_at = datetime.utcnow()
     db.commit()
     db.refresh(db_payroll)
     return db_payroll
+
+
+# ============================================
+# LEAVE TYPES
+# ============================================
+
+@router.get("/leave-types", response_model=List[LeaveTypeResponse])
+def get_leave_types(
+    skip: int = 0,
+    limit: int = 100,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all leave types"""
+    query = db.query(LeaveType)
+    
+    if is_active is not None:
+        query = query.filter(LeaveType.is_active == is_active)
+    
+    leave_types = query.offset(skip).limit(limit).all()
+    return leave_types
+
+
+@router.post("/leave-types", response_model=LeaveTypeResponse, status_code=status.HTTP_201_CREATED)
+def create_leave_type(
+    leave_type: LeaveTypeCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new leave type"""
+    existing = db.query(LeaveType).filter(
+        or_(LeaveType.name == leave_type.name, LeaveType.code == leave_type.code)
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Leave type with this name or code already exists")
+    
+    db_leave_type = LeaveType(
+        id=uuid.uuid4(),
+        **leave_type.model_dump()
+    )
+    db.add(db_leave_type)
+    db.commit()
+    db.refresh(db_leave_type)
+    return db_leave_type
+
+
+# ============================================
+# EMPLOYEE DOCUMENTS
+# ============================================
+
+@router.get("/employees/{employee_id}/documents", response_model=List[EmployeeDocumentResponse])
+def get_employee_documents(
+    employee_id: str,
+    document_type: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all documents for an employee"""
+    query = db.query(EmployeeDocument).filter(EmployeeDocument.employee_id == employee_id)
+    
+    if document_type:
+        query = query.filter(EmployeeDocument.document_type == document_type)
+    
+    documents = query.order_by(EmployeeDocument.uploaded_at.desc()).all()
+    return documents
+
+
+@router.post("/employees/{employee_id}/documents", response_model=EmployeeDocumentResponse, status_code=status.HTTP_201_CREATED)
+def upload_employee_document(
+    employee_id: str,
+    document: EmployeeDocumentCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload a document for an employee"""
+    db_document = EmployeeDocument(
+        id=uuid.uuid4(),
+        uploaded_by=current_user.get('id'),
+        **document.model_dump()
+    )
+    db.add(db_document)
+    db.commit()
+    db.refresh(db_document)
+    return db_document
+
+
+@router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_employee_document(
+    document_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete an employee document"""
+    db_document = db.query(EmployeeDocument).filter(EmployeeDocument.id == document_id).first()
+    if not db_document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Delete file if exists
+    import os
+    if os.path.exists(db_document.file_path):
+        os.remove(db_document.file_path)
+    
+    db.delete(db_document)
+    db.commit()
+    return None
+
+
+# ============================================
+# EMPLOYEE LOANS
+# ============================================
+
+@router.get("/loans", response_model=List[EmployeeLoanResponse])
+def get_employee_loans(
+    skip: int = 0,
+    limit: int = 100,
+    employee_id: Optional[str] = None,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all employee loans"""
+    query = db.query(EmployeeLoan)
+    
+    if employee_id:
+        query = query.filter(EmployeeLoan.employee_id == employee_id)
+    if status:
+        query = query.filter(EmployeeLoan.status == status)
+    
+    loans = query.order_by(EmployeeLoan.created_at.desc()).offset(skip).limit(limit).all()
+    return loans
+
+
+@router.post("/loans", response_model=EmployeeLoanResponse, status_code=status.HTTP_201_CREATED)
+def create_employee_loan(
+    loan: EmployeeLoanCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new employee loan"""
+    # Generate loan number
+    count = db.query(func.count(EmployeeLoan.id)).scalar()
+    loan_number = f"LOAN{datetime.now().strftime('%Y%m')}{str(count + 1).zfill(4)}"
+    
+    db_loan = EmployeeLoan(
+        id=uuid.uuid4(),
+        loan_number=loan_number,
+        remaining_amount=loan.loan_amount,
+        approved_by=current_user.get('id'),
+        **loan.model_dump()
+    )
+    db.add(db_loan)
+    db.commit()
+    db.refresh(db_loan)
+    return db_loan
+
+
+@router.put("/loans/{loan_id}", response_model=EmployeeLoanResponse)
+def update_employee_loan(
+    loan_id: str,
+    loan: EmployeeLoanUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Update employee loan"""
+    db_loan = db.query(EmployeeLoan).filter(EmployeeLoan.id == loan_id).first()
+    if not db_loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    
+    for key, value in loan.model_dump(exclude_unset=True).items():
+        setattr(db_loan, key, value)
+    
+    db_loan.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_loan)
+    return db_loan
+
+
+@router.post("/loans/{loan_id}/pay-installment")
+def pay_loan_installment(
+    loan_id: str,
+    amount: Decimal,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Pay a loan installment"""
+    db_loan = db.query(EmployeeLoan).filter(EmployeeLoan.id == loan_id).first()
+    if not db_loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    
+    if db_loan.status != 'active':
+        raise HTTPException(status_code=400, detail="Loan is not active")
+    
+    db_loan.paid_installments += 1
+    db_loan.remaining_amount = max(0, float(db_loan.remaining_amount or 0) - float(amount))
+    
+    if db_loan.paid_installments >= db_loan.total_installments or db_loan.remaining_amount <= 0:
+        db_loan.status = 'paid'
+        db_loan.remaining_amount = 0
+    
+    db_loan.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_loan)
+    
+    return {
+        "message": "Installment paid successfully",
+        "paid_installments": db_loan.paid_installments,
+        "remaining_amount": float(db_loan.remaining_amount or 0),
+        "status": db_loan.status
+    }
+
+
+# ============================================
+# SALARY COMPONENTS
+# ============================================
+
+@router.get("/salary-components", response_model=List[SalaryComponentResponse])
+def get_salary_components(
+    component_type: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db)
+):
+    """Get all salary components"""
+    query = db.query(SalaryComponent)
+    
+    if component_type:
+        query = query.filter(SalaryComponent.component_type == component_type)
+    if is_active is not None:
+        query = query.filter(SalaryComponent.is_active == is_active)
+    
+    components = query.all()
+    return components
+
+
+@router.post("/salary-components", response_model=SalaryComponentResponse, status_code=status.HTTP_201_CREATED)
+def create_salary_component(
+    component: SalaryComponentCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new salary component"""
+    existing = db.query(SalaryComponent).filter(
+        SalaryComponent.component_name == component.component_name
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Salary component already exists")
+    
+    db_component = SalaryComponent(
+        id=uuid.uuid4(),
+        **component.model_dump()
+    )
+    db.add(db_component)
+    db.commit()
+    db.refresh(db_component)
+    return db_component
+
+
+# ============================================
+# PAYROLL DETAILS
+# ============================================
+
+@router.get("/payroll/{payroll_id}/details", response_model=List[PayrollDetailResponse])
+def get_payroll_details(
+    payroll_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get payroll details (components breakdown)"""
+    details = db.query(PayrollDetail).filter(PayrollDetail.payroll_id == payroll_id).all()
+    return details
+
+
+@router.post("/payroll/{payroll_id}/details", response_model=PayrollDetailResponse, status_code=status.HTTP_201_CREATED)
+def add_payroll_detail(
+    payroll_id: str,
+    detail: PayrollDetailCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Add a component to payroll"""
+    db_detail = PayrollDetail(
+        id=uuid.uuid4(),
+        **detail.model_dump()
+    )
+    db.add(db_detail)
+    
+    # Recalculate payroll totals
+    payroll = db.query(Payroll).filter(Payroll.id == payroll_id).first()
+    if payroll:
+        details = db.query(PayrollDetail).filter(PayrollDetail.payroll_id == payroll_id).all()
+        
+        earnings = sum(float(d.amount) for d in details if d.component_type == 'earning')
+        deductions = sum(float(d.amount) for d in details if d.component_type == 'deduction')
+        
+        payroll.gross_salary = earnings
+        payroll.total_deductions = deductions
+        payroll.net_salary = earnings - deductions
+    
+    db.commit()
+    db.refresh(db_detail)
+    return db_detail
 
