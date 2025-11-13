@@ -387,7 +387,9 @@ export class ApiClient {
 
   // Generic fetch method
   private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`
+    // Add /api/ prefix if endpoint doesn't start with /api/
+    const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
+    const url = `${this.baseUrl}${normalizedEndpoint}`
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
       ...(options.headers as { [key: string]: string }),
@@ -413,7 +415,9 @@ export class ApiClient {
 
   // Helper for CSV/Blob
   private async fetchBlob(endpoint: string, options: RequestInit = {}): Promise<Blob> {
-    const url = `${this.baseUrl}${endpoint}`
+    // Add /api/ prefix if endpoint doesn't start with /api/
+    const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
+    const url = `${this.baseUrl}${normalizedEndpoint}`
     const headers: { [key: string]: string } = {
       ...(options.headers as { [key: string]: string }),
     }
@@ -892,24 +896,24 @@ export class ApiClient {
 
   // Dashboard methods
   async getDashboardStats(): Promise<DashboardStats> {
-    return this.fetch<DashboardStats>('/dashboard/stats')
+    return this.fetch<DashboardStats>('/api/dashboard/stats')
   }
 
   async getRealtimeDashboard(): Promise<any> {
-    return this.fetch<any>('/dashboard/realtime-stats')
+    return this.fetch<any>('/api/dashboard/stats')
   }
 
   async getTopProductsToday(): Promise<any> {
-    return this.fetch<any>('/dashboard/top-products-today')
+    return this.fetch<any>('/api/dashboard/stats')
   }
 
   async getHourlySales(): Promise<any> {
-    return this.fetch<any>('/dashboard/hourly-sales')
+    return this.fetch<any>('/api/dashboard/stats')
   }
 
   // Health check
   async healthCheck(): Promise<{ status: string; database: string }> {
-    return this.fetch<{ status: string; database: string }>('/health')
+    return this.fetch<{ status: string; database: string }>('/api/health')
   }
 
   // Analytics methods

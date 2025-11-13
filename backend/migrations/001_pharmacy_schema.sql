@@ -27,7 +27,7 @@ ALTER TABLE IF EXISTS products
 -- Product stock per store
 CREATE TABLE IF NOT EXISTS product_stock (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    product_id TEXT NOT NULL,
+    product_id UUID NOT NULL REFERENCES products(id),
     store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
     opening_qty NUMERIC DEFAULT 0,
     current_qty NUMERIC DEFAULT 0,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS product_stock (
 CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
-    contact TEXT,
+    phone TEXT,
     address TEXT,
     ledger_id TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS customers (
 -- Purchases
 CREATE TABLE IF NOT EXISTS purchases (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    supplier_id TEXT,
+    supplier_id UUID REFERENCES suppliers(id),
     invoice_no TEXT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     total_amount NUMERIC NOT NULL DEFAULT 0,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS purchases (
 CREATE TABLE IF NOT EXISTS purchase_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     purchase_id UUID NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
-    product_id TEXT NOT NULL,
+    product_id UUID NOT NULL REFERENCES products(id),
     qty NUMERIC NOT NULL,
     unit TEXT,
     unit_price NUMERIC NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS grns (
 -- Sales extension minimal alignment
 ALTER TABLE IF EXISTS sales
     ADD COLUMN IF NOT EXISTS payment_type TEXT,
-    ADD COLUMN IF NOT EXISTS customer_id TEXT;
+    ADD COLUMN IF NOT EXISTS customer_id UUID REFERENCES customers(id);
 
 ALTER TABLE IF EXISTS sales_items
     ADD COLUMN IF NOT EXISTS discount NUMERIC DEFAULT 0;
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS requisitions (
 CREATE TABLE IF NOT EXISTS requisition_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     requisition_id UUID NOT NULL REFERENCES requisitions(id) ON DELETE CASCADE,
-    product_id TEXT NOT NULL,
+    product_id UUID NOT NULL REFERENCES products(id),
     qty NUMERIC NOT NULL,
     unit TEXT
 );
@@ -139,4 +139,60 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Backfill legacy columns to align with UUID-based schema when running against existing databases
+DO $$
+BEGIN
+    -- Rename or migrate customers.contact to customers.phone
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'customers' AND column_name = 'contact'
+    ) THEN
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'customers' AND column_name = 'phone'
+        ) THEN
+            EXECUTE 'UPDATE customers SET phone = COALESCE(phone, contact)';
+            EXECUTE 'ALTER TABLE customers DROP COLUMN contact';
+        ELSE
+            EXECUTE 'ALTER TABLE customers RENAME COLUMN contact TO phone';
+        END IF;
+    END IF;
+
+    -- Convert product_id fields to UUID
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'product_stock' AND column_name = 'product_id' AND udt_name <> 'uuid'
+    ) THEN
+        EXECUTE 'ALTER TABLE product_stock ALTER COLUMN product_id TYPE UUID USING product_id::uuid';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'purchase_items' AND column_name = 'product_id' AND udt_name <> 'uuid'
+    ) THEN
+        EXECUTE 'ALTER TABLE purchase_items ALTER COLUMN product_id TYPE UUID USING product_id::uuid';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'requisition_items' AND column_name = 'product_id' AND udt_name <> 'uuid'
+    ) THEN
+        EXECUTE 'ALTER TABLE requisition_items ALTER COLUMN product_id TYPE UUID USING product_id::uuid';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'purchases' AND column_name = 'supplier_id' AND udt_name <> 'uuid'
+    ) THEN
+        EXECUTE 'ALTER TABLE purchases ALTER COLUMN supplier_id TYPE UUID USING supplier_id::uuid';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'sales' AND column_name = 'customer_id' AND udt_name <> 'uuid'
+    ) THEN
+        EXECUTE 'ALTER TABLE sales ALTER COLUMN customer_id TYPE UUID USING customer_id::uuid';
+    END IF;
+END;
+$$;
 

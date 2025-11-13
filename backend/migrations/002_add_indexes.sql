@@ -37,7 +37,6 @@ CREATE INDEX IF NOT EXISTS idx_subcategories_category_id ON subcategories(catego
 CREATE INDEX IF NOT EXISTS idx_purchases_supplier_id ON purchases(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_purchases_created_at ON purchases(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_grns_purchase_id ON grns(purchase_id);
-CREATE INDEX IF NOT EXISTS idx_grns_confirmed_at ON grns(confirmed_at);
 
 -- Requisitions indexes
 CREATE INDEX IF NOT EXISTS idx_requisitions_status ON requisitions(status);

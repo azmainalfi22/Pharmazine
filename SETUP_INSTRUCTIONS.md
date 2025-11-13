@@ -1,115 +1,99 @@
-# Sharkar Pharmacy Management System - Setup Instructions
+# Sharkar Pharmacy Management System – Supabase Setup
 
-## 🚀 Quick Start Guide
-
-The Sharkar Pharmacy Management System has been successfully converted from Supabase to PostgreSQL! Here's how to get it running:
-
-### Current Status
-✅ **Frontend**: Ready and configured  
-✅ **Backend API**: Ready and configured  
-❌ **PostgreSQL Database**: Needs to be set up  
-
-### Step 1: Install PostgreSQL (if not already installed)
-
-**Download PostgreSQL from**: https://www.postgresql.org/download/windows/
-
-**During installation:**
-- Remember the password you set for the `postgres` user
-- Make sure to install PostgreSQL command line tools
-
-### Step 2: Set Up the Database
-
-**Option A: Using pgAdmin (GUI)**
-1. Open pgAdmin
-2. Connect to your PostgreSQL server
-3. Right-click "Databases" → "Create" → "Database"
-4. Name: `pharmazine`
-5. Click "Save"
-
-**Option B: Using Command Line**
-1. Open Command Prompt as Administrator
-2. Navigate to PostgreSQL bin directory (usually `C:\Program Files\PostgreSQL\15\bin`)
-3. Run: `psql -U postgres`
-4. Enter your password when prompted
-5. Run: `CREATE DATABASE pharmazine;`
-6. Run: `\q` to exit
-
-### Step 3: Import Database Schema and Data
-
-1. Open Command Prompt as Administrator
-2. Navigate to your project directory: `cd W:\D_folder\Pharmazine`
-3. Run: `psql -U postgres -d pharmazine -f database_setup.sql`
-4. Enter your password when prompted
-
-### Step 4: Update Environment Configuration
-
-The `.env.local` file has been created with default settings. If your PostgreSQL password is different from "password", update the `.env.local` file:
-
-```
-VITE_DATABASE_PASSWORD=your_actual_password
-```
-
-### Step 5: Start the Application
-
-```bash
-# Start both backend API and frontend
-npm run dev:full
-
-# Or start them separately:
-# Terminal 1: npm run dev:server
-# Terminal 2: npm run dev
-```
-
-### Step 6: Access the Application
-
-- **Frontend**: http://localhost:8080 (or the port shown in terminal)
-- **API**: http://localhost:3001/api
-
-### Demo Login Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| **Admin** | admin@sharkarpharmacy.com | admin123 |
-| **Manager** | manager@sharkarpharmacy.com | manager123 |
-| **Employee** | employee@sharkarpharmacy.com | employee123 |
-
-### Troubleshooting
-
-**Database Connection Issues:**
-- Ensure PostgreSQL service is running
-- Check if the database `pharmazine` exists
-- Verify password in `.env.local` file
-- Test connection: `psql -U postgres -d pharmazine`
-
-**Port Issues:**
-- Frontend runs on port 8080 (or next available)
-- API runs on port 3001
-- Check if ports are available
-
-**API Server Issues:**
-- Check if `node server.js` runs without errors
-- Verify environment variables in `.env.local`
-- Test API: `curl http://localhost:3001/api/health`
-
-### What's Included
-
-The database includes comprehensive sample data:
-- **6 users** with different roles
-- **8 categories** and **12 subcategories**
-- **6 suppliers** and **8 customers**
-- **10 products** (smartphones, laptops, LED bulbs, fans, ACs)
-- **5 sales transactions** with EMI support
-- **Complete stock transaction history**
-
-### Next Steps
-
-Once everything is running:
-1. Explore the dashboard and inventory
-2. Try creating new products
-3. Process sample sales transactions
-4. Check user management features
-5. Review reports and analytics
+This guide connects the project to the Supabase project `jsctsjwtqlluthxglood`.
 
 ---
 
-**Need Help?** Check the main README.md for detailed documentation or open an issue in the repository.
+## 1. Prerequisites
+
+- Supabase CLI installed: `npm install -g supabase`
+- Access to the Supabase project (Project ID: `jsctsjwtqlluthxglood`)
+- The following secrets (already provided):
+  - Postgres password: `Xactidea@3939`
+  - Anon key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk`
+  - Service-role key (retrieve from Supabase → Settings → API when needed)
+
+---
+
+## 2. Link the local repository to Supabase
+
+```bash
+supabase login          # paste the Supabase access token
+supabase link --project-ref jsctsjwtqlluthxglood
+```
+
+---
+
+## 3. Configure environment variables
+
+1. Copy `env.example` to create your runtime `.env`:
+   ```bash
+   cp env.example .env
+   ```
+2. For production builds copy `env.production.example` to `.env.production` and adjust `VITE_API_BASE_URL` to your deployed backend domain.
+3. Update any remaining secrets (e.g. `SUPABASE_SERVICE_ROLE_KEY`) directly in the target environment instead of committing them.
+
+The important variables are:
+- `DATABASE_URL=postgresql://postgres:Xactidea%403939@db.jsctsjwtqlluthxglood.supabase.co:5432/postgres`
+- `DIRECT_DATABASE_URL` and `POOLER_DATABASE_URL` for migration tools
+- `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` for the frontend
+
+---
+
+## 4. Run migrations against Supabase
+
+### 4.1 Supabase SQL migrations
+
+```bash
+npx supabase@latest db push --db-url "postgresql://postgres.jsctsjwtqlluthxglood:Xactidea%403939@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+```
+
+This applies the SQL files in `supabase/migrations/` (tables, RLS policies, enums).
+
+### 4.2 Seeding data (optional)
+
+After the migrations finish, you can seed demo records through the backend scripts:
+
+```bash
+set DATABASE_URL=postgresql://postgres.jsctsjwtqlluthxglood:Xactidea%403939@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+cd backend
+python seed_all_data.py
+```
+
+> `run_all_pharmacy_migrations.py` is intended for local Postgres instances. When `DATABASE_URL` points to Supabase the script will now exit early and remind you to use the Supabase CLI command above.
+
+---
+
+## 5. Create initial users and roles
+
+1. In Supabase dashboard → Authentication, enable **Email/Password**.
+2. Add initial users via the Auth UI or SQL editor.
+3. Grant roles using SQL (replace `USER_UUID` with the ID from the `auth.users` table):
+   ```sql
+   insert into public.user_roles (user_id, role) values ('USER_UUID', 'admin');
+   ```
+
+---
+
+## 6. Configure deployment environments
+
+- **Backend container/host**: set `DATABASE_URL`, `SECRET_KEY`, `ENVIRONMENT=production`, and (optionally) `SUPABASE_SERVICE_ROLE_KEY`.
+- **Frontend host**: set `VITE_API_BASE_URL`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- Use the pooled connection strings (`POOLER_DATABASE_URL`) for long-running app servers if you rely on PgBouncer.
+
+---
+
+## 7. Verify the integration
+
+1. Run the backend locally (`uvicorn backend.main:app --reload`) or deploy it, then open `http://localhost:8000/docs`.
+2. Start the frontend (`npm run dev`) and test a Supabase-backed screen (e.g. Category setup).
+3. Confirm CRUD operations succeed and respect RLS policies based on user roles.
+
+---
+
+## 8. Helpful links
+
+- Supabase project dashboard: https://app.supabase.com/project/jsctsjwtqlluthxglood
+- Managed connection dashboard: https://mcp.supabase.com/mcp?project_ref=jsctsjwtqlluthxglood
+
+Keep this document updated if credentials or project references change.

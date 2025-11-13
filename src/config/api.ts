@@ -86,3 +86,51 @@ export const apiCall = async <T>(
   }
 };
 
+/**
+ * Axios-like API client for easy migration and consistent usage
+ */
+const api = {
+  get: async <T = any>(url: string, config?: RequestInit): Promise<{ data: T }> => {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const data = await apiCall<T>(fullUrl, { method: 'GET', ...config });
+    return { data };
+  },
+  
+  post: async <T = any>(url: string, data?: any, config?: RequestInit): Promise<{ data: T }> => {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const responseData = await apiCall<T>(fullUrl, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+      ...config,
+    });
+    return { data: responseData };
+  },
+  
+  put: async <T = any>(url: string, data?: any, config?: RequestInit): Promise<{ data: T }> => {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const responseData = await apiCall<T>(fullUrl, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+      ...config,
+    });
+    return { data: responseData };
+  },
+  
+  delete: async <T = any>(url: string, config?: RequestInit): Promise<{ data: T }> => {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const data = await apiCall<T>(fullUrl, { method: 'DELETE', ...config });
+    return { data };
+  },
+  
+  patch: async <T = any>(url: string, data?: any, config?: RequestInit): Promise<{ data: T }> => {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const responseData = await apiCall<T>(fullUrl, {
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : undefined,
+      ...config,
+    });
+    return { data: responseData };
+  },
+};
+
+export default api;

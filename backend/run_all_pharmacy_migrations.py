@@ -10,6 +10,7 @@ import psycopg2
 from dotenv import load_dotenv
 from pathlib import Path
 import time
+from urllib.parse import urlparse, parse_qs, unquote
 
 # Load environment variables
 load_dotenv()
@@ -18,18 +19,37 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:pharmazine123@lo
 
 def parse_connection_string(url):
     """Parse PostgreSQL connection string"""
-    url = url.replace("postgresql://", "").replace("postgres://", "")
-    auth, rest = url.split("@")
-    user, password = auth.split(":")
-    host_port, database = rest.split("/")
-    host, port = host_port.split(":")
-    
-    return {
-        "user": user,
-        "password": password,
-        "host": host,
-        "port": port,
-        "database": database
+    if not url:
+        raise ValueError("Empty connection string")
+
+    if not url.startswith(("postgresql://", "postgres://")):
+        raise ValueError("Connection string must start with postgresql:// or postgres://")
+
+    parsed = urlparse(url)
+
+    if parsed.scheme not in ("postgresql", "postgres"):
+        raise ValueError(f"Unsupported scheme: {parsed.scheme}")
+
+    database = parsed.path.lstrip("/") if parsed.path else ""
+
+    conn_params = {
+        "user": unquote(parsed.username) if parsed.username else None,
+        "password": unquote(parsed.password) if parsed.password else None,
+        "host": parsed.hostname,
+        "port": parsed.port or 5432,
+        "database": database.split("?")[0] if database else "",
+    }
+
+    # Include selected query parameters
+    query_params = parse_qs(parsed.query)
+    if "sslmode" in query_params:
+        conn_params["sslmode"] = query_params["sslmode"][0]
+
+    return conn_params, {
+        "host": parsed.hostname,
+        "port": parsed.port or 5432,
+        "database": conn_params["database"] or "(default)",
+        "has_query": bool(parsed.query),
     }
 
 def run_migration_file(cursor, migration_file):
@@ -58,13 +78,23 @@ def main():
     
     # Parse connection
     try:
-        conn_params = parse_connection_string(DATABASE_URL)
-        print(f"Connecting to database: {conn_params['database']}")
-        print(f"Host: {conn_params['host']}:{conn_params['port']}")
+        conn_params, display_info = parse_connection_string(DATABASE_URL)
+        print(f"Connecting to database: {display_info['database']}")
+        print(f"Host: {display_info['host']}:{display_info['port']}")
+        if display_info["has_query"]:
+            print("Additional connection options detected in URL (query parameters)")
         print()
     except Exception as e:
         print(f"❌ Error parsing connection string: {e}")
         return False
+
+    # If targeting Supabase, direct users to the CLI-based workflow which handles SSL/pooling
+    if display_info['host'] and 'supabase.co' in display_info['host']:
+        print("⚠️ Detected Supabase connection. This script does not execute Supabase migrations directly.")
+        print("Please run the following command instead:")
+        print(f"  npx supabase@latest db push --db-url \"{DATABASE_URL}\"")
+        print()
+        return True
     
     # Connect to database
     try:
@@ -90,12 +120,7 @@ def main():
     
     # Get all migration files in order
     migrations_dir = Path(__file__).parent / "migrations"
-    migration_files = sorted([
-        f for f in migrations_dir.glob("*.sql")
-        if not f.name.startswith('001_') and not f.name.startswith('002_')  # Skip existing base migrations
-    ])
-    
-    # Add our pharmacy migrations
+
     pharmacy_migrations = [
         "003_pharmacy_medicine_system.sql",
         "004_phase2_customer_manufacturer.sql",
@@ -105,9 +130,11 @@ def main():
         "008_phase678_stock_returns_service.sql",
         "009_phase9_accounts_management.sql",
         "010_phase10_to_13_final_features.sql",
-        "011_cleanup_electronics_fields.sql"
+        "011_cleanup_electronics_fields.sql",
+        "012_patient_history_enhancements.sql",
+        "013_enhance_customer_table.sql",
     ]
-    
+
     migration_files = [migrations_dir / mig for mig in pharmacy_migrations if (migrations_dir / mig).exists()]
     
     print(f"Found {len(migration_files)} pharmacy migration files to run\n")
