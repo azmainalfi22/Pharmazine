@@ -229,6 +229,9 @@ export interface DashboardStats {
 export interface LoginResponse {
   access_token: string
   token_type: string
+  supabase_access_token?: string
+  supabase_refresh_token?: string
+  supabase_expires_in?: number
 }
 
 export interface RegisterRequest {
@@ -579,7 +582,12 @@ export class ApiClient {
   }
 
   // Authentication methods
-  async authenticateUser(email: string, password: string): Promise<Profile | null> {
+  async authenticateUser(email: string, password: string): Promise<{
+    profile: Profile | null
+    supabaseAccessToken?: string
+    supabaseRefreshToken?: string
+    supabaseExpiresIn?: number
+  } | null> {
     try {
       const response = await this.fetch<LoginResponse>('/auth/login', {
         method: 'POST',
@@ -591,7 +599,12 @@ export class ApiClient {
       
       // Get user info
       const user = await this.getCurrentUser()
-      return user
+      return {
+        profile: user,
+        supabaseAccessToken: response.supabase_access_token,
+        supabaseRefreshToken: response.supabase_refresh_token,
+        supabaseExpiresIn: response.supabase_expires_in,
+      }
     } catch (error) {
       console.error('Authentication error:', error)
       return null

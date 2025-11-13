@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Profile, UserRole, apiClient } from '@/integrations/api/client';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   id: string;
@@ -44,9 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      const profile = await apiClient.authenticateUser(email, password);
+      const authResult = await apiClient.authenticateUser(email, password);
       
-      if (profile) {
+      if (authResult?.profile) {
+        const { profile, supabaseAccessToken, supabaseRefreshToken } = authResult;
         const roles = await apiClient.getUserRoles(profile.id);
         const userData: User = {
           id: profile.id,
@@ -58,6 +60,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setUser(userData);
         localStorage.setItem('pharmazine_user', JSON.stringify(userData));
+
+        if (supabaseAccessToken && supabaseRefreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: supabaseAccessToken,
+            refresh_token: supabaseRefreshToken,
+          });
+          if (error) {
+            console.error('Failed to set Supabase session:', error);
+          }
+        }
         return true;
       }
       
@@ -97,6 +109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await apiClient.logout();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Failed to sign out from Supabase:', error);
+    }
     setUser(null);
     localStorage.removeItem('pharmazine_user');
     navigate('/auth');

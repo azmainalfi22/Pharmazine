@@ -30,7 +30,7 @@ supabase link --project-ref jsctsjwtqlluthxglood
    ```bash
    cp env.example .env
    ```
-2. For production builds copy `env.production.example` to `.env.production` and adjust `VITE_API_BASE_URL` to your deployed backend domain.
+2. For production builds copy `env.production.example` to `.env.production` and adjust `VITE_API_BASE_URL` to the root of your deployed backend (no `/api` suffix; the frontend appends it automatically).
 3. Update any remaining secrets (e.g. `SUPABASE_SERVICE_ROLE_KEY`) directly in the target environment instead of committing them.
 
 The important variables are:
@@ -77,8 +77,8 @@ python seed_all_data.py
 
 ## 6. Configure deployment environments
 
-- **Backend container/host**: set `DATABASE_URL`, `SECRET_KEY`, `ENVIRONMENT=production`, and (optionally) `SUPABASE_SERVICE_ROLE_KEY`.
-- **Frontend host**: set `VITE_API_BASE_URL`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- **Backend container/host**: set `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SECRET_KEY`, `ENVIRONMENT=production`, `CORS_ORIGINS` (include your Netlify site).
+- **Frontend host**: set `VITE_API_BASE_URL` (root backend URL, without `/api`), `VITE_SUPABASE_URL`, and `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - Use the pooled connection strings (`POOLER_DATABASE_URL`) for long-running app servers if you rely on PgBouncer.
 
 ---

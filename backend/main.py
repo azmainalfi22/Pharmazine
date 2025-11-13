@@ -10,13 +10,14 @@ from datetime import datetime, timedelta, date
 import os
 import uuid
 import secrets
-from passlib.context import CryptContext
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 from sqlalchemy import text
 from pathlib import Path
 from io import StringIO, TextIOWrapper
 import csv
+import requests
+from requests.exceptions import RequestException
 from fastapi.responses import StreamingResponse, HTMLResponse
 
 # Load environment variables
@@ -40,8 +41,20 @@ SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Supabase configuration
+SUPABASE_URL = (os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL") or "").rstrip("/")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+SUPABASE_AUTH_URL = f"{SUPABASE_URL}/auth/v1" if SUPABASE_URL else None
+SUPABASE_ADMIN_URL = f"{SUPABASE_AUTH_URL}/admin" if SUPABASE_AUTH_URL else None
+
+if not SUPABASE_URL:
+    print("[WARNING] SUPABASE_URL is not configured. Authentication endpoints will fail.")
+if not SUPABASE_ANON_KEY:
+    print("[WARNING] SUPABASE_ANON_KEY is not configured. Authentication endpoints will fail.")
+if not SUPABASE_SERVICE_ROLE_KEY:
+    print("[WARNING] SUPABASE_SERVICE_ROLE_KEY is not configured. User registration will fail.")
 
 # JWT token security
 security = HTTPBearer()
@@ -49,10 +62,31 @@ security = HTTPBearer()
 # Create FastAPI app
 app = FastAPI(title="Pharmazine API", version="1.0.0")
 
+# CORS configuration
+default_cors_origins = [
+    "http://localhost",
+    "http://localhost:80",
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://localhost:8081",
+    "http://localhost:8082",
+    "http://localhost:5173",
+]
+
+raw_cors_origins = os.getenv("CORS_ORIGINS")
+if raw_cors_origins:
+    allow_origins = [
+        origin.strip()
+        for origin in raw_cors_origins.split(",")
+        if origin.strip()
+    ]
+else:
+    allow_origins = default_cors_origins
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://localhost:80", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:5173"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -213,7 +247,6 @@ class Profile(Base):
     id = Column(String, primary_key=True)
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
-    password_hash = Column(String, nullable=False)
     phone = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -666,33 +699,156 @@ def get_db():
         db.close()
 
 # Authentication helper functions
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    try:
-        # Use bcrypt directly to avoid passlib compatibility issues
-        import bcrypt
-        return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
-    except Exception as e:
-        # Fallback: try passlib
-        try:
-            return pwd_context.verify(plain_password, hashed_password)
-        except:
-            # Last fallback verification
-            import hashlib
-            return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+def _supabase_headers(key: str) -> dict:
+    return {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+    }
 
-def get_password_hash(password: str) -> str:
+def upsert_profile_from_supabase(
+    db: Session,
+    user_data: dict,
+    fallback_full_name: Optional[str] = None,
+    fallback_phone: Optional[str] = None,
+) -> Profile:
+    if not user_data:
+        raise ValueError("Supabase user payload is required")
+
+    user_id = user_data.get("id")
+    email = user_data.get("email")
+    if not user_id or not email:
+        raise ValueError("Supabase user payload missing id or email")
+
+    metadata = user_data.get("user_metadata") or {}
+    full_name = metadata.get("full_name") or fallback_full_name or (email.split("@")[0] if email else "User")
+    phone = metadata.get("phone") or fallback_phone
+
+    profile = db.query(Profile).filter(Profile.id == user_id).first()
+
+    if not profile:
+        profile = Profile(
+            id=user_id,
+            full_name=full_name,
+            email=email,
+            phone=phone,
+        )
+        db.add(profile)
+    else:
+        profile.full_name = full_name or profile.full_name
+        profile.email = email or profile.email
+        if phone:
+            profile.phone = phone
+
+    return profile
+
+def ensure_user_has_role(db: Session, user_id: str, role: str = "employee"):
+    existing_role = (
+        db.query(UserRole)
+        .filter(UserRole.user_id == user_id, UserRole.role == role)
+        .first()
+    )
+    if not existing_role:
+        db.add(
+            UserRole(
+                id=str(uuid.uuid4()),
+                user_id=user_id,
+                role=role,
+            )
+        )
+
+def create_supabase_user(email: str, password: str, full_name: Optional[str] = None, phone: Optional[str] = None) -> dict:
+    if not SUPABASE_ADMIN_URL or not SUPABASE_SERVICE_ROLE_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Supabase service role is not configured",
+        )
+
+    payload: dict = {
+        "email": email,
+        "password": password,
+        "email_confirm": True,
+    }
+
+    metadata = {}
+    if full_name:
+        metadata["full_name"] = full_name
+    if phone:
+        metadata["phone"] = phone
+    if metadata:
+        payload["user_metadata"] = metadata
+
     try:
-        # Use bcrypt directly
-        import bcrypt
-        return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-    except Exception:
-        # Fallback to passlib
-        try:
-            return pwd_context.hash(password)
-        except:
-            # Fallback to simple hash if bcrypt fails
-            import hashlib
-            return hashlib.sha256(password.encode()).hexdigest()
+        response = requests.post(
+            f"{SUPABASE_ADMIN_URL}/users",
+            headers=_supabase_headers(SUPABASE_SERVICE_ROLE_KEY),
+            json=payload,
+            timeout=10,
+        )
+    except RequestException:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Unable to reach Supabase Auth service",
+        )
+
+    if response.status_code in (200, 201):
+        data = response.json()
+        return data.get("user") or data
+
+    if response.status_code in (409, 422):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+
+    try:
+        message = response.json().get("message", response.text)
+    except ValueError:
+        message = response.text
+
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Failed to create Supabase user: {message}",
+    )
+
+def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
+    if not SUPABASE_AUTH_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Supabase authentication is not configured",
+        )
+
+    try:
+        response = requests.post(
+            f"{SUPABASE_AUTH_URL}/token?grant_type=password",
+            headers=_supabase_headers(SUPABASE_ANON_KEY),
+            json={"email": email, "password": password},
+            timeout=10,
+        )
+    except RequestException:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Unable to reach Supabase Auth service",
+        )
+
+    if response.status_code != 200:
+        return None
+
+    return response.json()
+
+def authenticate_user(db: Session, email: str, password: str):
+    auth_payload = authenticate_with_supabase(email, password)
+    if not auth_payload:
+        return None, None
+
+    user_data = auth_payload.get("user")
+    if not user_data:
+        return None, None
+
+    profile = upsert_profile_from_supabase(db, user_data)
+    ensure_user_has_role(db, profile.id)
+
+    return profile, auth_payload
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -773,14 +929,6 @@ def generate_chalan_number(receive_type: str, db: Session) -> str:
     
     return chalan_no
 
-def authenticate_user(db: Session, email: str, password: str):
-    user = get_user_by_email(db, email)
-    if not user:
-        return False
-    if not verify_password(password, user.password_hash):
-        return False
-    return user
-
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -815,6 +963,9 @@ class RegisterRequest(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    supabase_access_token: Optional[str] = None
+    supabase_refresh_token: Optional[str] = None
+    supabase_expires_in: Optional[int] = None
 
 class TokenData(BaseModel):
     user_id: Optional[str] = None
@@ -1471,18 +1622,36 @@ async def health_check():
 # Authentication endpoints
 @app.post("/api/auth/login", response_model=Token)
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = authenticate_user(db, request.email, request.password)
-    if not user:
+    profile, supabase_auth = authenticate_user(db, request.email, request.password)
+    if not profile:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    try:
+        db.commit()
+    except Exception as commit_error:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to persist authentication data: {commit_error}",
+        )
+    db.refresh(profile)
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id}, expires_delta=access_token_expires
+        data={"sub": profile.id}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    response_payload = {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+    if supabase_auth:
+        response_payload["supabase_access_token"] = supabase_auth.get("access_token")
+        response_payload["supabase_refresh_token"] = supabase_auth.get("refresh_token")
+        response_payload["supabase_expires_in"] = supabase_auth.get("expires_in")
+    return response_payload
 
 @app.get("/api/users/me")
 async def get_current_user_profile(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
@@ -1519,30 +1688,32 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user
-    hashed_password = get_password_hash(request.password)
-    user = Profile(
-        id=str(uuid.uuid4()),
-        full_name=request.full_name,
+    supabase_user = create_supabase_user(
         email=request.email,
-        password_hash=hashed_password,
-        phone=request.phone
+        password=request.password,
+        full_name=request.full_name,
+        phone=request.phone,
     )
-    
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    
-    # Create default role (employee)
-    role = UserRole(
-        id=str(uuid.uuid4()),
-        user_id=user.id,
-        role="employee"
+
+    profile = upsert_profile_from_supabase(
+        db,
+        supabase_user,
+        fallback_full_name=request.full_name,
+        fallback_phone=request.phone,
     )
-    db.add(role)
-    db.commit()
-    
-    return user
+    ensure_user_has_role(db, profile.id)
+
+    try:
+        db.commit()
+    except Exception as commit_error:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to persist user profile: {commit_error}",
+        )
+
+    db.refresh(profile)
+    return profile
 
 @app.get("/api/auth/me", response_model=ProfileResponse)
 async def get_current_user_info(current_user: Profile = Depends(get_current_user)):
