@@ -30,8 +30,30 @@ sys.path.append(str(Path(__file__).parent))
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:pharmazine123@localhost:5432/pharmazine")
 
-# Redis configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Operational checks
+missing_env = []
+
+def _check_env(var_name: str, secret: bool = False):
+    value = os.getenv(var_name)
+    if not value:
+        missing_env.append(var_name)
+    else:
+        display_value = "***" if secret else value
+        print(f"[ENV] {var_name} set: {display_value}")
+
+# Required environment variables for backend/Supabase integration
+_check_env("DATABASE_URL", secret=True)
+_check_env("SUPABASE_URL")
+_check_env("SUPABASE_ANON_KEY")
+_check_env("SUPABASE_SERVICE_ROLE_KEY", secret=True)
+_check_env("CORS_ORIGINS")
+
+if missing_env:
+    print("[WARNING] Missing critical environment variables:")
+    for var in missing_env:
+        print(f"  - {var}")
+else:
+    print("[INFO] All critical environment variables detected.")
 
 # Environment
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
