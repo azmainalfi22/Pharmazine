@@ -742,6 +742,12 @@ def _supabase_headers(key: str) -> dict:
     }
 
 
+class SupabaseRegistrationError(Exception):
+    def __init__(self, status_code: int, detail: str):
+        self.status_code = status_code
+        self.detail = detail
+
+
 def safe_detail(message: Any) -> str:
     """Ensure API error messages don't include characters Render can't encode."""
     if message is None:
@@ -871,9 +877,9 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         else "Failed to create Supabase user"
     )
 
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=detail_for_client,
+    raise SupabaseRegistrationError(
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail_for_client,
     )
 
 def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
@@ -1753,12 +1759,18 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    supabase_user = create_supabase_user(
-        email=request.email,
-        password=request.password,
-        full_name=request.full_name,
-        phone=request.phone,
-    )
+    try:
+        supabase_user = create_supabase_user(
+            email=request.email,
+            password=request.password,
+            full_name=request.full_name,
+            phone=request.phone,
+        )
+    except SupabaseRegistrationError as exc:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
 
     profile = upsert_profile_from_supabase(
         db,
