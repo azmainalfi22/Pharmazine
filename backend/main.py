@@ -849,13 +849,15 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         )
 
     try:
-        message = response.json().get("message", response.text)
+        raw_message = response.json().get("message", response.text)
     except ValueError:
-        message = response.text
+        raw_message = response.text
+
+    sanitized_message = safe_detail(raw_message)
 
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=f"Failed to create Supabase user: {message}",
+        detail=f"Failed to create Supabase user: {sanitized_message}",
     )
 
 def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
