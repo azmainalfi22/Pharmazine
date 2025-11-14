@@ -45,9 +45,14 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 2. Settings → API → Project API keys
 3. Copy the `service_role` key (🔒 Keep this secret!)
 
-**To get DATABASE_URL password:**
-1. Go to Supabase Dashboard → Settings → Database
-2. Copy the password from the connection string
+**To get DATABASE_URL (CRITICAL - Must be exact):**
+1. Go to https://supabase.com/dashboard/project/jsctsjwtqlluthxglood
+2. Click **Settings** (left sidebar) → **Database**
+3. Scroll to **Connection string** section
+4. Select **Transaction pooler** (NOT Session pooler, NOT Direct connection)
+5. Copy the **URI** format connection string
+6. It should look like: `postgresql://postgres.jsctsjwtqlluthxglood:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres`
+7. **Important:** The username must be `postgres.jsctsjwtqlluthxglood` (includes project ref), not just `postgres`
 
 #### Step 2: Deploy Backend Using Docker
 
