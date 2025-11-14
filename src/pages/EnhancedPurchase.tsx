@@ -134,8 +134,8 @@ export default function EnhancedPurchase() {
 
   const loadSuppliers = async () => {
     try {
-      console.log("Loading suppliers from:", `${API_CONFIG.BASE_URL}/suppliers`);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/suppliers`, {
+      console.log("Loading suppliers from:", `${API_CONFIG.API_ROOT}/suppliers`);
+      const response = await fetch(`${API_CONFIG.API_ROOT}/suppliers`, {
         headers: getAuthHeaders()
       });
       console.log("Suppliers response status:", response.status);
@@ -153,8 +153,8 @@ export default function EnhancedPurchase() {
 
   const loadProducts = async () => {
     try {
-      console.log("Loading products from:", `${API_CONFIG.BASE_URL}/products`);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      console.log("Loading products from:", `${API_CONFIG.API_ROOT}/products`);
+      const response = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders()
       });
       console.log("Products response status:", response.status);
@@ -173,7 +173,7 @@ export default function EnhancedPurchase() {
   const loadPurchases = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/purchases`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/purchases`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
@@ -315,8 +315,8 @@ export default function EnhancedPurchase() {
       };
 
       const url = editingPurchase 
-        ? `${API_CONFIG.BASE_URL}/purchases/${editingPurchase.id}`
-        : `${API_CONFIG.BASE_URL}/purchases`;
+        ? `${API_CONFIG.API_ROOT}/purchases/${editingPurchase.id}`
+        : `${API_CONFIG.API_ROOT}/purchases`;
       const method = editingPurchase ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -370,7 +370,7 @@ export default function EnhancedPurchase() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/purchases/${purchaseId}`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/purchases/${purchaseId}`, {
         method: "DELETE",
         headers: getAuthHeaders()
       });

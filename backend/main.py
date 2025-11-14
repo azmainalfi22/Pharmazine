@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel, EmailStr, validator, Field
-from typing import List, Optional
+from typing import List, Optional, Any
 from datetime import datetime, timedelta, date
 import os
 import uuid
@@ -18,7 +18,7 @@ from io import StringIO, TextIOWrapper
 import csv
 import requests
 from requests.exceptions import RequestException
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
 
 # Load environment variables
 load_dotenv()
@@ -114,6 +114,17 @@ app.add_middleware(
     allow_headers=["*"],
     max_age=600,  # Cache preflight requests for 10 minutes
 )
+
+@app.exception_handler(HTTPException)
+async def sanitize_http_exception(request: Request, exc: HTTPException):
+    detail = exc.detail
+    if isinstance(detail, str):
+        detail = safe_detail(detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": detail},
+        headers=exc.headers,
+    )
 
 # Include pharmacy routes
 try:
@@ -728,6 +739,19 @@ def _supabase_headers(key: str) -> dict:
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
     }
+
+
+def safe_detail(message: Any) -> str:
+    """Ensure API error messages don't include characters Render can't encode."""
+    if message is None:
+        return "Unexpected server error"
+    text = str(message)
+    try:
+        text.encode("latin-1")
+        return text
+    except UnicodeEncodeError:
+        sanitized = text.encode("latin-1", errors="ignore").decode("latin-1").strip()
+        return sanitized or "Unexpected server error"
 
 def upsert_profile_from_supabase(
     db: Session,

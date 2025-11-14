@@ -114,7 +114,7 @@ export default function EnhancedReports() {
   const loadSalesReport = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
@@ -167,7 +167,7 @@ export default function EnhancedReports() {
     setLoading(true);
     try {
       // Load products
-      const productsRes = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      const productsRes = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders()
       });
       
@@ -246,12 +246,12 @@ export default function EnhancedReports() {
     setLoading(true);
     try {
       // Load customers
-      const customersResponse = await fetch(`${API_CONFIG.BASE_URL}/customers`, {
+      const customersResponse = await fetch(`${API_CONFIG.API_ROOT}/customers`, {
         headers: getAuthHeaders()
       });
       
       // Load sales to calculate customer analytics
-      const salesResponse = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const salesResponse = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
 
@@ -301,12 +301,12 @@ export default function EnhancedReports() {
     setLoading(true);
     try {
       // Load purchases/requisitions - adjust endpoint as needed
-      const purchasesResponse = await fetch(`${API_CONFIG.BASE_URL}/requisitions`, {
+      const purchasesResponse = await fetch(`${API_CONFIG.API_ROOT}/requisitions`, {
         headers: getAuthHeaders()
       });
 
       // Load suppliers
-      const suppliersResponse = await fetch(`${API_CONFIG.BASE_URL}/suppliers`, {
+      const suppliersResponse = await fetch(`${API_CONFIG.API_ROOT}/suppliers`, {
         headers: getAuthHeaders()
       });
 
@@ -343,7 +343,7 @@ export default function EnhancedReports() {
     try {
       // Try to load from report endpoint first
       try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/reports/profit-loss?from_date=${dateRange.from}&to_date=${dateRange.to}`, {
+        const response = await fetch(`${API_CONFIG.API_ROOT}/reports/profit-loss?from_date=${dateRange.from}&to_date=${dateRange.to}`, {
           headers: getAuthHeaders()
         });
         if (response.ok) {
@@ -357,7 +357,7 @@ export default function EnhancedReports() {
       }
 
       // Fallback: Calculate from sales data
-      const salesRes = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const salesRes = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
       

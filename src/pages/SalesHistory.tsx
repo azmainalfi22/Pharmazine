@@ -51,7 +51,7 @@ export default function SalesHistory() {
   const loadSales = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
       

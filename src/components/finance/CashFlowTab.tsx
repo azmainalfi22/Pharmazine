@@ -41,7 +41,7 @@ export default function CashFlowTab() {
     setLoading(true);
     try {
       // Load sales (cash inflow)
-      const salesRes = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const salesRes = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
 

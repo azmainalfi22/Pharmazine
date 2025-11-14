@@ -3,7 +3,7 @@
 
 import { API_CONFIG } from '@/config/api';
 
-const API_BASE_URL = API_CONFIG.BASE_URL;
+const API_BASE_URL = API_CONFIG.API_ROOT;
 
 const normalizeBaseUrl = (raw: string): string => {
   const trimmed = raw.replace(/\/+$/, '');

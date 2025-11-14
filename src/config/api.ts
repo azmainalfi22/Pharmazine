@@ -26,13 +26,11 @@ const getBaseUrl = (): string => {
   }
 
   if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return sanitizeBaseUrl(`${protocol}//${hostname}`);
-    }
+    const { protocol, host } = window.location;
+    return sanitizeBaseUrl(`${protocol}//${host}`);
   }
 
+  // Fallback for SSR/build tools
   return "http://localhost:8000";
 };
 

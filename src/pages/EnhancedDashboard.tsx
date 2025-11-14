@@ -124,7 +124,7 @@ export default function EnhancedDashboard() {
       }));
 
       // Load recent sales
-      const salesResponse = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const salesResponse = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
       if (salesResponse.ok) {
@@ -164,7 +164,7 @@ export default function EnhancedDashboard() {
       }
 
       // Load low stock items
-      const productsResponse = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      const productsResponse = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders()
       });
       if (productsResponse.ok) {

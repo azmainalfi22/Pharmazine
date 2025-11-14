@@ -69,7 +69,7 @@ export default function EnhancedCustomers() {
   const loadCustomers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/customers`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/customers`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
@@ -92,8 +92,8 @@ export default function EnhancedCustomers() {
     setLoading(true);
     try {
       const url = editing
-        ? `${API_CONFIG.BASE_URL}/customers/${editing.id}`
-        : `${API_CONFIG.BASE_URL}/customers`;
+        ? `${API_CONFIG.API_ROOT}/customers/${editing.id}`
+        : `${API_CONFIG.API_ROOT}/customers`;
       
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
@@ -123,7 +123,7 @@ export default function EnhancedCustomers() {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/customers/${id}`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/customers/${id}`, {
         method: "DELETE",
         headers: getAuthHeaders()
       });

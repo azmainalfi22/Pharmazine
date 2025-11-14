@@ -37,7 +37,7 @@ export default function LowStockAlerts() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {

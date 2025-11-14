@@ -66,9 +66,9 @@ export default function StockManagement() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      console.log("Loading products from:", API_CONFIG.BASE_URL);
+      console.log("Loading products from:", API_CONFIG.API_ROOT);
       
-      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders()
       });
       

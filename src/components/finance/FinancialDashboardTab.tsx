@@ -44,7 +44,7 @@ export default function FinancialDashboardTab() {
       const monthAgo = format(subDays(new Date(), 30), "yyyy-MM-dd");
 
       // Load sales data
-      const salesRes = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const salesRes = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
 

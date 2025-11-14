@@ -86,7 +86,7 @@ export default function POSSystem() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/products`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
@@ -304,7 +304,7 @@ export default function POSSystem() {
         created_by: null
       };
 
-      const saleResponse = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const saleResponse = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(salePayload)
@@ -318,7 +318,7 @@ export default function POSSystem() {
 
       // Add sale items
       for (const item of cart) {
-        await fetch(`${API_CONFIG.BASE_URL}/sales/items`, {
+        await fetch(`${API_CONFIG.API_ROOT}/sales/items`, {
           method: "POST",
           headers: getAuthHeaders(),
           body: JSON.stringify({

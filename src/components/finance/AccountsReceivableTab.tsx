@@ -35,7 +35,7 @@ export default function AccountsReceivableTab() {
     setLoading(true);
     try {
       // Load sales with pending payments
-      const response = await fetch(`${API_CONFIG.BASE_URL}/sales`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
         headers: getAuthHeaders()
       });
       

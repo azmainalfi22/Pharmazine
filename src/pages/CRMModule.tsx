@@ -87,7 +87,7 @@ export default function CRMModule() {
   };
 
   const loadCampaigns = async () => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/crm/campaigns`, {
+    const response = await fetch(`${API_CONFIG.API_ROOT}/crm/campaigns`, {
       headers: getAuthHeaders()
     });
     if (response.ok) {
@@ -97,7 +97,7 @@ export default function CRMModule() {
   };
 
   const loadLoyaltyMembers = async () => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/crm/loyalty/members`, {
+    const response = await fetch(`${API_CONFIG.API_ROOT}/crm/loyalty/members`, {
       headers: getAuthHeaders()
     });
     if (response.ok) {
@@ -107,7 +107,7 @@ export default function CRMModule() {
   };
 
   const loadRewards = async () => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/crm/rewards`, {
+    const response = await fetch(`${API_CONFIG.API_ROOT}/crm/rewards`, {
       headers: getAuthHeaders()
     });
     if (response.ok) {
@@ -117,7 +117,7 @@ export default function CRMModule() {
   };
 
   const loadStats = async () => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/crm/analytics/summary`, {
+    const response = await fetch(`${API_CONFIG.API_ROOT}/crm/analytics/summary`, {
       headers: getAuthHeaders()
     });
     if (response.ok) {

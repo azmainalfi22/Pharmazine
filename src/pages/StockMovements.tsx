@@ -41,8 +41,8 @@ export default function StockMovements() {
   const loadMovements = async () => {
     try {
       setLoading(true);
-      console.log("Loading stock movements from:", `${API_CONFIG.BASE_URL}/stock-transactions`);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/stock-transactions`, {
+      console.log("Loading stock movements from:", `${API_CONFIG.API_ROOT}/stock-transactions`);
+      const response = await fetch(`${API_CONFIG.API_ROOT}/stock-transactions`, {
         headers: getAuthHeaders(),
       });
       console.log("Stock movements response:", response.status);
@@ -51,7 +51,7 @@ export default function StockMovements() {
         console.log("Stock movements data:", data);
         
         // Fetch products to map names
-        const productsResponse = await fetch(`${API_CONFIG.BASE_URL}/products`, {
+        const productsResponse = await fetch(`${API_CONFIG.API_ROOT}/products`, {
           headers: getAuthHeaders(),
         });
         if (productsResponse.ok) {

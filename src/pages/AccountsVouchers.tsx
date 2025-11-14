@@ -39,8 +39,8 @@ export default function AccountsVouchers() {
     setLoading(true);
     try {
       const [transactionsRes, expensesRes] = await Promise.all([
-        fetch(`${API_CONFIG.BASE_URL}/transactions`, { headers: getAuthHeaders() }),
-        fetch(`${API_CONFIG.BASE_URL}/expenses`, { headers: getAuthHeaders() })
+        fetch(`${API_CONFIG.API_ROOT}/transactions`, { headers: getAuthHeaders() }),
+        fetch(`${API_CONFIG.API_ROOT}/expenses`, { headers: getAuthHeaders() })
       ]);
 
       if (transactionsRes.ok) setTransactions(await transactionsRes.json());
@@ -55,7 +55,7 @@ export default function AccountsVouchers() {
   const handleSaveVoucher = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/transactions`, {
+      const response = await fetch(`${API_CONFIG.API_ROOT}/transactions`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
