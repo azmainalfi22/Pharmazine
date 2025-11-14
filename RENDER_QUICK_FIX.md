@@ -83,6 +83,12 @@ Once deployment succeeds:
 
 ---
 
+## ✅ Latest Fix (Pushed to GitHub)
+
+**Schema Conflict Fixed:** The backend now automatically detects when connected to Supabase and skips SQLAlchemy table creation. This prevents schema mismatches between the backend models and Supabase's UUID-based schema.
+
+**What changed:** Commit `59c3b9e` - Backend will now print `[INFO] Using Supabase - skipping SQLAlchemy table creation` instead of trying to create tables.
+
 ## 🆘 Still Having Issues?
 
 If you still see "Tenant or user not found":
