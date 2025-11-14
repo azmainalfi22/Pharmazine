@@ -76,11 +76,11 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        - VITE_API_BASE_URL=http://backend:8000/api
+        - VITE_API_BASE_URL=http://backend:8000
     container_name: pharmazine-frontend
     restart: unless-stopped
     environment:
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9000/api}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9000}
     ports:
       - "80:80"
       - "443:443"

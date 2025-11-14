@@ -1,5 +1,5 @@
 """
-Sample Data Loader for Sharkar Feed & Medicine
+Sample Data Loader for Feed and Medicine
 Loads realistic sample data for testing and demonstration
 """
 

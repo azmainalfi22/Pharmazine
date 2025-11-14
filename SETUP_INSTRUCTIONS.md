@@ -8,10 +8,7 @@ This guide connects the project to the Supabase project `jsctsjwtqlluthxglood`.
 
 - Supabase CLI installed: `npm install -g supabase`
 - Access to the Supabase project (Project ID: `jsctsjwtqlluthxglood`)
-- The following secrets (already provided):
-  - Postgres password: `Xactidea@3939`
-  - Anon key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk`
-  - Service-role key (retrieve from Supabase → Settings → API when needed)
+- Secure access to the Supabase secrets (database password, anon key, service-role key). Retrieve them from the Supabase dashboard or your secret manager—do **not** store them in version control.
 
 ---
 
@@ -34,8 +31,8 @@ supabase link --project-ref jsctsjwtqlluthxglood
 3. Update any remaining secrets (e.g. `SUPABASE_SERVICE_ROLE_KEY`) directly in the target environment instead of committing them.
 
 The important variables are:
-- `DATABASE_URL=postgresql://postgres:Xactidea%403939@db.jsctsjwtqlluthxglood.supabase.co:5432/postgres`
-- `DIRECT_DATABASE_URL` and `POOLER_DATABASE_URL` for migration tools
+- `DATABASE_URL` pointing at your Supabase Postgres instance (e.g. `postgresql://postgres:<password>@<host>:5432/postgres?sslmode=require`)
+- `DIRECT_DATABASE_URL` and `POOLER_DATABASE_URL` for migration tools / PgBouncer
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` for the frontend
 
 ---
@@ -45,7 +42,7 @@ The important variables are:
 ### 4.1 Supabase SQL migrations
 
 ```bash
-npx supabase@latest db push --db-url "postgresql://postgres.jsctsjwtqlluthxglood:Xactidea%403939@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+npx supabase@latest db push --db-url "$DATABASE_URL"
 ```
 
 This applies the SQL files in `supabase/migrations/` (tables, RLS policies, enums).
@@ -55,7 +52,7 @@ This applies the SQL files in `supabase/migrations/` (tables, RLS policies, enum
 After the migrations finish, you can seed demo records through the backend scripts:
 
 ```bash
-set DATABASE_URL=postgresql://postgres.jsctsjwtqlluthxglood:Xactidea%403939@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+set DATABASE_URL=postgresql://postgres:<password>@<host>:5432/postgres?sslmode=require
 cd backend
 python seed_all_data.py
 ```

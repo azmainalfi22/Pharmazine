@@ -259,7 +259,7 @@ SECRET_KEY=your_secret_key
 ENVIRONMENT=production
 
 # API
-VITE_API_BASE_URL=http://localhost/api
+VITE_API_BASE_URL=http://backend:8000
 ```
 
 ### Nginx Configuration

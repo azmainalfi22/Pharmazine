@@ -1,6 +1,6 @@
 """
 Seed script to populate the database with comprehensive test data
-for Sharkar Feed & Medicine pharmacy system.
+for the Feed and Medicine pharmacy system.
 """
 
 import requests
@@ -297,7 +297,7 @@ class DataSeeder:
     
     def run(self):
         """Run all seeding operations"""
-        print("Starting database seeding for Sharkar Feed & Medicine")
+        print("Starting database seeding for Feed and Medicine")
         print("=" * 60)
         
         try:

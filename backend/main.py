@@ -2757,7 +2757,7 @@ async def get_sale_invoice_html(sale_id: str, db: Session = Depends(get_db)):
         </style>
       </head>
       <body>
-        <h1>Sharkar Feed & Medicine</h1>
+        <h1>Feed and Medicine</h1>
         <div>Invoice: {sale.id}</div>
         <div>Date: {sale.created_at}</div>
         <div>Customer: {sale.customer_name}</div>

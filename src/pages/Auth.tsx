@@ -71,11 +71,11 @@ const Auth = () => {
           <div className="flex justify-center mb-2">
             <img 
               src="/logo-icon.svg" 
-              alt="Sharkar Logo" 
+              alt="Feed and Medicine Logo" 
               className="h-16 w-16 drop-shadow-lg"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-teal-800 dark:text-teal-100 tracking-tight">Sharkar Feed & Medicine</CardTitle>
+          <CardTitle className="text-2xl font-bold text-teal-800 dark:text-teal-100 tracking-tight">Feed and Medicine</CardTitle>
           <CardDescription className="text-teal-600 dark:text-teal-400 font-medium">
             Professional Pharmacy and Animal Feed Management System
           </CardDescription>

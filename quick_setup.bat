@@ -70,7 +70,7 @@ echo VITE_DATABASE_USER=%DB_USER%
 echo VITE_DATABASE_PASSWORD=%DB_PASSWORD%
 echo.
 echo # API Configuration
-echo VITE_API_BASE_URL=http://localhost:3001/api
+echo VITE_API_BASE_URL=http://localhost:3001
 echo.
 echo # Application Configuration
 echo VITE_APP_NAME=Sharkar Pharmacy Management System

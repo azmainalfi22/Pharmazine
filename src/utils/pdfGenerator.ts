@@ -39,10 +39,10 @@ export const generateInvoicePDF = (
   
   // Default company info
   const company = companyInfo || {
-    name: 'Sharkar Feed & Medicine',
+    name: 'Feed and Medicine',
     address: '123 Main Street, City, Country',
     phone: '+1234567890',
-    email: 'info@sharkarfeed.com',
+    email: 'info@feedandmedicine.com',
   };
 
   // Header - Company Info

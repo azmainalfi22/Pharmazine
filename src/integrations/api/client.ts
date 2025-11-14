@@ -1,9 +1,17 @@
-// API client for Sharkar Pharmacy Management System
+// API client for the Pharmazine platform
 // This replaces the PostgreSQL client with HTTP API calls
 
 import { API_CONFIG } from '@/config/api';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
+
+const normalizeBaseUrl = (raw: string): string => {
+  const trimmed = raw.replace(/\/+$/, '');
+  if (trimmed.toLowerCase().endsWith('/api')) {
+    return trimmed.slice(0, -4);
+  }
+  return trimmed;
+};
 
 // Database types (matching the original Supabase types)
 export type Json =
@@ -368,7 +376,7 @@ export class ApiClient {
   private token: string | null = null
 
   constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl
+    this.baseUrl = normalizeBaseUrl(baseUrl)
     // Load token from localStorage on initialization
     this.token = localStorage.getItem('token')
   }
@@ -392,7 +400,7 @@ export class ApiClient {
   private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     // Add /api/ prefix if endpoint doesn't start with /api/
     const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
-    const url = `${this.baseUrl}${normalizedEndpoint}`
+    const url = new URL(normalizedEndpoint, this.baseUrl).toString()
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
       ...(options.headers as { [key: string]: string }),
@@ -420,7 +428,7 @@ export class ApiClient {
   private async fetchBlob(endpoint: string, options: RequestInit = {}): Promise<Blob> {
     // Add /api/ prefix if endpoint doesn't start with /api/
     const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
-    const url = `${this.baseUrl}${normalizedEndpoint}`
+    const url = new URL(normalizedEndpoint, this.baseUrl).toString()
     const headers: { [key: string]: string } = {
       ...(options.headers as { [key: string]: string }),
     }

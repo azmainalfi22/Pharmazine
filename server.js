@@ -14,18 +14,47 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Database configuration
-const dbConfig = {
-  host: process.env.VITE_DATABASE_HOST || 'localhost',
-  port: parseInt(process.env.VITE_DATABASE_PORT || '5432'),
-  database: process.env.VITE_DATABASE_NAME || 'pharmazine',
-  user: process.env.VITE_DATABASE_USER || 'postgres',
-  password: process.env.VITE_DATABASE_PASSWORD || 'password',
-  ssl: process.env.VITE_NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+const resolveEnv = (keys, fallback) => {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (value) return value;
+  }
+  return fallback;
 };
 
+const NODE_ENV = resolveEnv(['NODE_ENV', 'VITE_NODE_ENV'], 'development');
+const rawConnectionString = resolveEnv(
+  ['DATABASE_URL', 'POSTGRES_URL', 'POSTGRES_URI', 'DIRECT_DATABASE_URL', 'SUPABASE_DB_URL'],
+  undefined,
+);
+
+const needsSsl = (value) => {
+  if (!value) return false;
+  return /supabase\.co|render\.com|neon\.tech|aws-/.test(value);
+};
+
+const poolConfig = rawConnectionString
+  ? {
+      connectionString: rawConnectionString,
+      ssl: needsSsl(rawConnectionString) || NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+    }
+  : {
+      host: resolveEnv(['DATABASE_HOST', 'PGHOST', 'VITE_DATABASE_HOST'], 'localhost'),
+      port: parseInt(resolveEnv(['DATABASE_PORT', 'PGPORT', 'VITE_DATABASE_PORT'], '5432'), 10),
+      database: resolveEnv(['DATABASE_NAME', 'PGDATABASE', 'VITE_DATABASE_NAME'], 'pharmazine'),
+      user: resolveEnv(['DATABASE_USER', 'PGUSER', 'VITE_DATABASE_USER'], 'postgres'),
+      password: resolveEnv(['DATABASE_PASSWORD', 'PGPASSWORD', 'VITE_DATABASE_PASSWORD'], 'password'),
+      ssl: NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+    };
+
+if (process.env.VITE_DATABASE_HOST || process.env.VITE_DATABASE_PASSWORD) {
+  console.warn(
+    '⚠️  Detected VITE_DATABASE_* variables in the server runtime. Migrate these to server-only variables (e.g. DATABASE_URL) to avoid leaking credentials in the frontend build.',
+  );
+}
+
 // Create connection pool
-const pool = new Pool(dbConfig);
+const pool = new Pool(poolConfig);
 
 // Test database connection
 pool.on('connect', () => {

@@ -2,16 +2,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key';
+const rawUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const rawKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+
+const missingSupabaseEnv: string[] = [];
+if (!rawUrl) missingSupabaseEnv.push('VITE_SUPABASE_URL');
+if (!rawKey) missingSupabaseEnv.push('VITE_SUPABASE_PUBLISHABLE_KEY');
+
+if (missingSupabaseEnv.length > 0) {
+  const formattedList = missingSupabaseEnv.join(', ');
+  throw new Error(
+    `[Supabase] Missing required environment variable(s): ${formattedList}. ` +
+    'Populate them in your Vite environment (.env, Netlify dashboard, etc.).',
+  );
+}
+
+const SUPABASE_URL = rawUrl!.replace(/\/+$/, '');
+const SUPABASE_PUBLISHABLE_KEY = rawKey!;
+
+const authStorage = typeof window !== 'undefined' ? window.localStorage : undefined;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
+    storage: authStorage,
+    persistSession: Boolean(authStorage),
+    autoRefreshToken: Boolean(authStorage),
+  },
 });
