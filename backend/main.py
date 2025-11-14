@@ -747,12 +747,8 @@ def safe_detail(message: Any) -> str:
     if message is None:
         return "Unexpected server error"
     text = str(message)
-    try:
-        text.encode("latin-1")
-        return text
-    except UnicodeEncodeError:
-        sanitized = text.encode("latin-1", errors="ignore").decode("latin-1").strip()
-        return sanitized or "Unexpected server error"
+    sanitized = text.encode("latin-1", errors="ignore").decode("latin-1").strip()
+    return sanitized or "Unexpected server error"
 
 def upsert_profile_from_supabase(
     db: Session,
