@@ -2,11 +2,15 @@
   command = "npm run build"
   publish = "dist"
 
-# Manage environment variables in the Netlify UI or via CLI secrets.
-# Required build variables:
-#   - VITE_API_BASE_URL (root backend URL, without the trailing /api)
-#   - VITE_SUPABASE_URL (Supabase project URL, e.g. https://<project>.supabase.co)
-#   - VITE_SUPABASE_PUBLISHABLE_KEY (Supabase anon/public key)
+# Environment variables
+# Set these in Netlify Dashboard: Site Settings → Environment Variables
+[build.environment]
+  VITE_API_BASE_URL = "https://pharmazine.onrender.com"
+  VITE_SUPABASE_URL = "https://jsctsjwtqlluthxglood.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3RzandxbGx1dGh4Z2xvb2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMTQ5OTI0MywiZXhwIjoyMDQ3MDc1MjQzfQ.HlRGXvLPLvGKVT6wd2jEqDQ5UXJPBZFHvLJcuJJKLAw"
+
+# Note: The above values are in the file for transparency, but you can also set them
+# in the Netlify UI: Site Settings → Environment Variables
 
 [[redirects]]
   from = "/*"
