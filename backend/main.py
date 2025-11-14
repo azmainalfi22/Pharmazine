@@ -859,6 +859,7 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
     if isinstance(raw_message, (dict, list)):
         raw_message = str(raw_message)
 
+    b64 = None
     try:
         b64 = base64.b64encode(str(raw_message).encode("utf-8")).decode("ascii")
         print(f"[SUPABASE ERROR RAW_B64] {b64}")
@@ -866,11 +867,17 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         pass
 
     sanitized_message = safe_detail(raw_message)
-    print(f"[SUPABASE ERROR] {sanitized_message}")
+    print(f"[SUPABASE ERROR CLEAN] {sanitized_message}")
+
+    detail_for_client = (
+        f"Supabase error (base64): {b64}"
+        if b64
+        else "Failed to create Supabase user"
+    )
 
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=f"Failed to create Supabase user: {sanitized_message}",
+        detail=detail_for_client,
     )
 
 def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
