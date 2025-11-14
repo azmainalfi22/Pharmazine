@@ -28,15 +28,17 @@ No 'Access-Control-Allow-Origin' header is present on the requested resource.
 - Click the **Edit** button next to it
 - Update the value to:
   ```
-  https://pharmazine.netlify.app,http://localhost:5173
+  https://pharmazine.netlify.app,http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:5000,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:8080
   ```
 - Click **Save**
 
 **If the variable DOES NOT EXIST:**
 - Click **Add Environment Variable**
 - **Key**: `CORS_ORIGINS`
-- **Value**: `https://pharmazine.netlify.app,http://localhost:5173`
+- **Value**: `https://pharmazine.netlify.app,http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:5000,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:8080`
 - Click **Save**
+
+**Note**: This includes multiple localhost ports so you can test on any common development port (3000, 5173, 8080, etc.)
 
 ### Step 4: Wait for Redeployment
 - Render will automatically redeploy your service (takes 3-5 minutes)

@@ -42,9 +42,11 @@
 4. Click **Add Environment Variable**
 5. Set:
    - **Key**: `CORS_ORIGINS`
-   - **Value**: `https://pharmazine.netlify.app,http://localhost:5173`
+   - **Value**: `https://pharmazine.netlify.app,http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:5000,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:8080`
 6. Click **Save**
 7. Wait 3-5 minutes for redeploy
+
+**Note**: This value includes multiple localhost ports (3000, 5173, 8080, etc.) so you can test on any common development port.
 
 ---
 
