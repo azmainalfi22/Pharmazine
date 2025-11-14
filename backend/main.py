@@ -19,6 +19,7 @@ import csv
 import requests
 from requests.exceptions import RequestException
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+import base64
 
 # Load environment variables
 load_dotenv()
@@ -849,9 +850,20 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         )
 
     try:
-        raw_message = response.json().get("message", response.text)
+        raw_json = response.json()
+        raw_message = raw_json.get("message", response.text)
     except ValueError:
+        raw_json = None
         raw_message = response.text
+
+    if isinstance(raw_message, (dict, list)):
+        raw_message = str(raw_message)
+
+    try:
+        b64 = base64.b64encode(str(raw_message).encode("utf-8")).decode("ascii")
+        print(f"[SUPABASE ERROR RAW_B64] {b64}")
+    except Exception:
+        pass
 
     sanitized_message = safe_detail(raw_message)
     print(f"[SUPABASE ERROR] {sanitized_message}")
