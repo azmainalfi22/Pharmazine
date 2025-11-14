@@ -854,6 +854,7 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         raw_message = response.text
 
     sanitized_message = safe_detail(raw_message)
+    print(f"[SUPABASE ERROR] {sanitized_message}")
 
     raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
