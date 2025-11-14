@@ -3236,13 +3236,25 @@ async def confirm_grn(payload: GRNCreate, db: Session = Depends(get_db)):
 # Create database tables
 @app.on_event("startup")
 async def startup_event():
-    Base.metadata.create_all(bind=engine)
+    # IMPORTANT: Skip SQLAlchemy table creation when using Supabase
+    # Supabase manages the schema via migrations, so we don't need to create tables here
+    # This prevents schema conflicts between SQLAlchemy models and Supabase schema
+    
+    is_supabase = "supabase.co" in str(engine.url) or "pooler.supabase.com" in str(engine.url)
+    
+    if not is_supabase:
+        # Only create tables for local/non-Supabase databases
+        Base.metadata.create_all(bind=engine)
+        print("[INFO] Created database tables (local mode)")
+    else:
+        print("[INFO] Using Supabase - skipping SQLAlchemy table creation")
+    
     # Run SQL migrations (idempotent) for Postgres
     try:
         if "postgresql" in str(engine.url):
             migrations_dir = Path(__file__).parent / "migrations"
             migration_file = migrations_dir / "001_pharmacy_schema.sql"
-            if migration_file.exists():
+            if migration_file.exists() and not is_supabase:
                 # Skip if stores table already exists
                 with engine.begin() as conn:
                     exists = conn.execute(text("""
