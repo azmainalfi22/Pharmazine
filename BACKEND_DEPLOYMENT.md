@@ -119,16 +119,37 @@ If you don't have a VPS, deploy the backend to:
 
 #### **Render.com** (Recommended - Free tier available)
 
+**Method A: Using render.yaml (Automatic)**
+
+1. Go to https://render.com
+2. Click "New +" → "Blueprint"
+3. Connect your GitHub repo (`Pharmazine`)
+4. Render auto-detects `render.yaml`
+5. Add missing env vars:
+   - `DATABASE_URL` - From Supabase Dashboard → Settings → Database
+   - `SUPABASE_SERVICE_ROLE_KEY` - From Supabase Dashboard → Settings → API
+6. Click "Apply" and wait for deployment
+
+**Method B: Manual Configuration**
+
 1. Go to https://render.com
 2. Create new "Web Service"
 3. Connect your GitHub repo
 4. Configure:
-   - **Build Command:** `pip install -r requirements.txt`
+   - **Runtime:** Python 3
+   - **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
    - **Start Command:** `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
    - **Environment Variables:** Add all the variables from Step 1 above
 5. Deploy
 6. Copy the Render URL (e.g., `https://pharmazine-backend.onrender.com`)
 7. Update Netlify env: `VITE_API_BASE_URL=https://pharmazine-backend.onrender.com`
+
+**Common Render Issues:**
+
+- **Build fails with "gcc not found"**: Render should auto-install system dependencies for `psycopg2-binary`
+- **Module not found errors**: Ensure start command is `uvicorn backend.main:app` (not `main:app`)
+- **Health check fails**: Wait 2-3 minutes for first deploy, free tier can be slow
+- **Database connection timeout**: Use Supabase **pooler** URL (port 6543), not direct connection (port 5432)
 
 #### **Railway.app**
 

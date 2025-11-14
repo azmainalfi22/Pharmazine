@@ -5,22 +5,26 @@ services:
   - type: web
     name: pharmazine-backend
     env: python
+    runtime: python
     region: singapore
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
+    autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
       - key: DATABASE_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false  # Set manually in Render dashboard - Supabase connection string
       - key: SUPABASE_URL
         value: https://jsctsjwtqlluthxglood.supabase.co
       - key: SUPABASE_ANON_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3RzandxbGx1dGh4Z2xvb2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMTQ5OTI0MywiZXhwIjoyMDQ3MDc1MjQzfQ.HlRGXvLPLvGKVT6wd2jEqDQ5UXJPBZFHvLJcuJJKLAw
       - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false  # Set manually - get from Supabase Dashboard
+        sync: false  # Set manually - get from Supabase Dashboard → Settings → API
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
