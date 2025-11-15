@@ -9,6 +9,7 @@ from typing import List, Optional, Any
 from datetime import datetime, timedelta, date
 import os
 import uuid
+from uuid import UUID
 import secrets
 from jose import JWTError, jwt
 from dotenv import load_dotenv
@@ -1284,7 +1285,7 @@ class GRNCreate(BaseModel):
 
 # Pydantic models for API
 class ProfileResponse(BaseModel):
-    id: str
+    id: UUID
     full_name: str
     email: str
     phone: Optional[str] = None
