@@ -793,6 +793,8 @@ def upsert_profile_from_supabase(
     if not user_id or not email:
         raise ValueError("Supabase user payload missing id or email")
 
+    user_id = str(user_id)
+
     metadata = user_data.get("user_metadata") or {}
     full_name = metadata.get("full_name") or fallback_full_name or (email.split("@")[0] if email else "User")
     phone = metadata.get("phone") or fallback_phone
