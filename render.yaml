@@ -22,7 +22,7 @@ services:
       - key: SUPABASE_URL
         value: https://jsctsjwtqlluthxglood.supabase.co
       - key: SUPABASE_ANON_KEY
-        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3RzandxbGx1dGh4Z2xvb2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMTQ5OTI0MywiZXhwIjoyMDQ3MDc1MjQzfQ.HlRGXvLPLvGKVT6wd2jEqDQ5UXJPBZFHvLJcuJJKLAw
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false  # Set manually - get from Supabase Dashboard → Settings → API
       - key: SECRET_KEY

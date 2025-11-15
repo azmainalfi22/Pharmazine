@@ -7,7 +7,7 @@
 [build.environment]
   VITE_API_BASE_URL = "https://pharmazine.onrender.com"
   VITE_SUPABASE_URL = "https://jsctsjwtqlluthxglood.supabase.co"
-  VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3RzandxbGx1dGh4Z2xvb2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMTQ5OTI0MywiZXhwIjoyMDQ3MDc1MjQzfQ.HlRGXvLPLvGKVT6wd2jEqDQ5UXJPBZFHvLJcuJJKLAw"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk"
 
 # Note: The above values are in the file for transparency, but you can also set them
 # in the Netlify UI: Site Settings → Environment Variables
