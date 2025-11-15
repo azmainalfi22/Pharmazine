@@ -42,6 +42,51 @@ def _check_env(var_name: str, secret: bool = False):
         display_value = "***" if secret else value
         print(f"[ENV] {var_name} set: {display_value}")
 
+# Environment
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
+# Authentication configuration
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Supabase configuration
+DEFAULT_SUPABASE_URL = "https://jsctsjwtqlluthxglood.supabase.co"
+DEFAULT_SUPABASE_ANON_KEY = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9s"
+    "ZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk"
+)
+DEFAULT_SUPABASE_SERVICE_ROLE_KEY = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9s"
+    "ZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjQ5Mjg5MCwiZXhwIjoyMDc4MDY4ODkwfQ.FUZuhsaosq7mDnoUsEUtwXUCizSzXjbiHFMHw4JXTfw"
+)
+
+SUPABASE_URL = (
+    os.getenv("SUPABASE_URL")
+    or os.getenv("VITE_SUPABASE_URL")
+    or DEFAULT_SUPABASE_URL
+).rstrip("/")
+SUPABASE_ANON_KEY = (
+    os.getenv("SUPABASE_ANON_KEY")
+    or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+    or DEFAULT_SUPABASE_ANON_KEY
+)
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or DEFAULT_SUPABASE_SERVICE_ROLE_KEY
+
+os.environ.setdefault("SUPABASE_URL", SUPABASE_URL)
+os.environ.setdefault("SUPABASE_ANON_KEY", SUPABASE_ANON_KEY)
+os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", SUPABASE_SERVICE_ROLE_KEY)
+
+SUPABASE_AUTH_URL = f"{SUPABASE_URL}/auth/v1" if SUPABASE_URL else None
+SUPABASE_ADMIN_URL = f"{SUPABASE_AUTH_URL}/admin" if SUPABASE_AUTH_URL else None
+
+if not SUPABASE_URL:
+    print("[WARNING] SUPABASE_URL is not configured. Authentication endpoints will fail.")
+if not SUPABASE_ANON_KEY:
+    print("[WARNING] SUPABASE_ANON_KEY is not configured. Authentication endpoints will fail.")
+if not SUPABASE_SERVICE_ROLE_KEY:
+    print("[WARNING] SUPABASE_SERVICE_ROLE_KEY is not configured. User registration will fail.")
+
 # Required environment variables for backend/Supabase integration
 _check_env("DATABASE_URL", secret=True)
 _check_env("SUPABASE_URL")
@@ -55,29 +100,6 @@ if missing_env:
         print(f"  - {var}")
 else:
     print("[INFO] All critical environment variables detected.")
-
-# Environment
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-
-# Authentication configuration
-SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# Supabase configuration
-SUPABASE_URL = (os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL") or "").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-SUPABASE_AUTH_URL = f"{SUPABASE_URL}/auth/v1" if SUPABASE_URL else None
-SUPABASE_ADMIN_URL = f"{SUPABASE_AUTH_URL}/admin" if SUPABASE_AUTH_URL else None
-
-if not SUPABASE_URL:
-    print("[WARNING] SUPABASE_URL is not configured. Authentication endpoints will fail.")
-if not SUPABASE_ANON_KEY:
-    print("[WARNING] SUPABASE_ANON_KEY is not configured. Authentication endpoints will fail.")
-if not SUPABASE_SERVICE_ROLE_KEY:
-    print("[WARNING] SUPABASE_SERVICE_ROLE_KEY is not configured. User registration will fail.")
 
 # JWT token security
 security = HTTPBearer()

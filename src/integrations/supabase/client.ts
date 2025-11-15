@@ -2,8 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const rawUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
-const rawKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+const DEFAULT_SUPABASE_URL = 'https://jsctsjwtqlluthxglood.supabase.co';
+const DEFAULT_SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzY3Rzand0cWxsdXRoeGdsb29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTI4OTAsImV4cCI6MjA3ODA2ODg5MH0.wCyVHtaIuBlVkir006NAfdcSqRUdOuZw71CU3_kjQNk';
+
+const rawUrl =
+  import.meta.env.VITE_SUPABASE_URL?.trim() || DEFAULT_SUPABASE_URL;
+const rawKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() || DEFAULT_SUPABASE_KEY;
 
 const missingSupabaseEnv: string[] = [];
 if (!rawUrl) missingSupabaseEnv.push('VITE_SUPABASE_URL');
