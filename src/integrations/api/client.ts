@@ -400,7 +400,14 @@ export class ApiClient {
   private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     // Add /api/ prefix if endpoint doesn't start with /api/
     const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
-    const url = new URL(normalizedEndpoint, this.baseUrl).toString()
+    
+    // In development, use relative URLs so Vite proxy can intercept them
+    // In production, use absolute URLs
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const url = isDevelopment 
+      ? normalizedEndpoint  // Relative URL for Vite proxy
+      : new URL(normalizedEndpoint, this.baseUrl).toString()  // Absolute URL for production
+    
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
       ...(options.headers as { [key: string]: string }),
@@ -428,7 +435,13 @@ export class ApiClient {
   private async fetchBlob(endpoint: string, options: RequestInit = {}): Promise<Blob> {
     // Add /api/ prefix if endpoint doesn't start with /api/
     const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
-    const url = new URL(normalizedEndpoint, this.baseUrl).toString()
+    
+    // In development, use relative URLs so Vite proxy can intercept them
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const url = isDevelopment 
+      ? normalizedEndpoint  // Relative URL for Vite proxy
+      : new URL(normalizedEndpoint, this.baseUrl).toString()  // Absolute URL for production
+    
     const headers: { [key: string]: string } = {
       ...(options.headers as { [key: string]: string }),
     }
@@ -516,7 +529,10 @@ export class ApiClient {
     return this.fetchBlob(`/reports/sales/export`)
   }
   async getInvoiceHTML(saleId: string): Promise<string> {
-    const url = `${this.baseUrl}/sales/${saleId}/invoice`
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const url = isDevelopment 
+      ? `/api/sales/${saleId}/invoice`  // Relative URL for Vite proxy
+      : `${this.baseUrl}/sales/${saleId}/invoice`  // Absolute URL for production
     const res = await fetch(url, { headers: this.token ? { Authorization: `Bearer ${this.token}` } : {} })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     return res.text()
@@ -529,7 +545,11 @@ export class ApiClient {
   async importCSV(endpoint: '/import/products' | '/import/suppliers' | '/import/customers' | '/import/opening-stock', file: File): Promise<any> {
     const form = new FormData()
     form.append('file', file)
-    const url = `${this.baseUrl}${endpoint}`
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api${endpoint}`
+    const url = isDevelopment 
+      ? normalizedEndpoint  // Relative URL for Vite proxy
+      : `${this.baseUrl}${endpoint}`  // Absolute URL for production
     const headers: Record<string, string> = {}
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`
     const response = await fetch(url, { method: 'POST', headers, body: form as any })
