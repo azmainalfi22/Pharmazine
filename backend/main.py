@@ -950,7 +950,13 @@ def authenticate_user(db: Session, email: str, password: str):
     return profile, auth_payload
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
+    # Ensure all JWT claims are JSON serializable (e.g., UUID -> str)
+    to_encode = {}
+    for k, v in (data or {}).items():
+        if k == "sub":
+            to_encode[k] = str(v)
+        else:
+            to_encode[k] = v
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
