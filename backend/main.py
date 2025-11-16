@@ -20,6 +20,7 @@ import csv
 import requests
 from requests.exceptions import RequestException
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
 import base64
 
 # Load environment variables
@@ -30,7 +31,9 @@ import sys
 sys.path.append(str(Path(__file__).parent))
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:pharmazine123@localhost:5432/pharmazine")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Configure your Postgres connection string.")
 
 # Operational checks
 missing_env = []
@@ -1747,7 +1750,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
         response_payload["supabase_access_token"] = supabase_auth.get("access_token")
         response_payload["supabase_refresh_token"] = supabase_auth.get("refresh_token")
         response_payload["supabase_expires_in"] = supabase_auth.get("expires_in")
-    return response_payload
+    return jsonable_encoder(response_payload)
 
 @app.get("/api/users/me")
 async def get_current_user_profile(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
