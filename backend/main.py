@@ -301,6 +301,15 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Minimal runtime migration to ensure profiles.role exists
+try:
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role VARCHAR"))
+        conn.execute(text("UPDATE profiles SET role = 'employee' WHERE role IS NULL"))
+        conn.commit()
+except Exception as _migrate_err:
+    print(f"[WARN] Could not ensure profiles.role column: {_migrate_err}")
+
 # Database Models
 class Profile(Base):
     __tablename__ = "profiles"
@@ -309,6 +318,7 @@ class Profile(Base):
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     phone = Column(String)
+    role = Column(String, default="employee")  # admin | manager | employee
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     roles = relationship("UserRole", back_populates="user")
@@ -801,6 +811,10 @@ def upsert_profile_from_supabase(
     metadata = user_data.get("user_metadata") or {}
     full_name = metadata.get("full_name") or fallback_full_name or (email.split("@")[0] if email else "User")
     phone = metadata.get("phone") or fallback_phone
+    # Single-source role from Supabase user metadata; default employee
+    role = (metadata.get("role") or "employee").strip().lower()
+    if role not in ("admin", "manager", "employee"):
+        role = "employee"
 
     profile = db.query(Profile).filter(Profile.id == user_id).first()
 
@@ -810,6 +824,7 @@ def upsert_profile_from_supabase(
             full_name=full_name,
             email=email,
             phone=phone,
+            role=role,
         )
         db.add(profile)
     else:
@@ -817,26 +832,15 @@ def upsert_profile_from_supabase(
         profile.email = email or profile.email
         if phone:
             profile.phone = phone
+        if role and role in ("admin", "manager", "employee"):
+            profile.role = role
 
     return profile
 
 def ensure_user_has_role(db: Session, user_id: str, role: str = "employee"):
-    existing_role = (
-        db.query(UserRole)
-        .filter(UserRole.user_id == user_id, UserRole.role == role)
-        .first()
-    )
-    if not existing_role:
-        db.add(
-            UserRole(
-                id=str(uuid.uuid4()),
-                user_id=user_id,
-                role=role,
-            )
-        )
-
-def admin_exists(db: Session) -> bool:
-    return db.query(UserRole).filter(UserRole.role == "admin").first() is not None
+    # Deprecated: roles now sourced from Profile.role (single source of truth).
+    # Keep as no-op for backward compatibility in case of stray calls.
+    return
 
 def create_supabase_user(email: str, password: str, full_name: Optional[str] = None, phone: Optional[str] = None) -> dict:
     if not SUPABASE_ADMIN_URL or not SUPABASE_SERVICE_ROLE_KEY:
@@ -972,8 +976,15 @@ def get_user_by_email(db: Session, email: str):
     return db.query(Profile).filter(Profile.email == email).first()
 
 def get_roles_for_user(db: Session, user_id: str) -> List[str]:
+    # Primary source: profile.role
+    user = db.query(Profile).filter(Profile.id == user_id).first()
+    if user and getattr(user, "role", None):
+        return [user.role]
+    # Fallback to legacy user_roles if present
     roles = db.query(UserRole).filter(UserRole.user_id == user_id).all()
-    return [r.role for r in roles]
+    if roles:
+        return [r.role for r in roles]
+    return ["employee"]
 
 def require_roles(allowed_roles: List[str]):
     def _checker(current_user: Profile = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -1815,11 +1826,7 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
         fallback_full_name=request.full_name,
         fallback_phone=request.phone,
     )
-    # Always grant base role
-    ensure_user_has_role(db, profile.id)
-    # Bootstrap: if no admin exists yet, promote this first user to admin
-    if not admin_exists(db):
-        ensure_user_has_role(db, profile.id, "admin")
+    # Roles are sourced from Supabase metadata; default handled in upsert
 
     try:
         db.commit()
@@ -1847,36 +1854,12 @@ class RoleUpdateRequest(BaseModel):
     role: str
 
 @app.post("/api/users/{user_id}/roles", dependencies=[Depends(require_admin())])
-async def grant_role(user_id: str, req: RoleUpdateRequest, db: Session = Depends(get_db)):
-    allowed = {"employee", "manager", "admin"}
-    role = req.role.strip().lower()
-    if role not in allowed:
-        raise HTTPException(status_code=400, detail="Invalid role")
-    user = db.query(Profile).filter(Profile.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    ensure_user_has_role(db, user_id, role)
-    db.commit()
-    return {"message": "Role granted", "user_id": user_id, "role": role}
+async def grant_role_deprecated(user_id: str, req: RoleUpdateRequest):
+    raise HTTPException(status_code=410, detail="Deprecated. Set role in Supabase user_metadata.role")
 
 @app.delete("/api/users/{user_id}/roles/{role}", dependencies=[Depends(require_admin())])
-async def revoke_role(user_id: str, role: str, db: Session = Depends(get_db)):
-    role = role.strip().lower()
-    rec = (
-        db.query(UserRole)
-        .filter(UserRole.user_id == user_id, UserRole.role == role)
-        .first()
-    )
-    if not rec:
-        raise HTTPException(status_code=404, detail="Role not found for user")
-    # Prevent locking system out: require at least one admin remains
-    if role == "admin":
-        admins = db.query(UserRole).filter(UserRole.role == "admin").all()
-        if len(admins) <= 1 and admins[0].user_id == user_id:
-            raise HTTPException(status_code=400, detail="Cannot revoke the last admin")
-    db.delete(rec)
-    db.commit()
-    return {"message": "Role revoked", "user_id": user_id, "role": role}
+async def revoke_role_deprecated(user_id: str, role: str):
+    raise HTTPException(status_code=410, detail="Deprecated. Set role in Supabase user_metadata.role")
 
 # CRUD endpoints for all entities
 @app.get("/api/categories", response_model=List[CategoryResponse])
