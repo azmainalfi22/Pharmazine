@@ -835,6 +835,9 @@ def ensure_user_has_role(db: Session, user_id: str, role: str = "employee"):
             )
         )
 
+def admin_exists(db: Session) -> bool:
+    return db.query(UserRole).filter(UserRole.role == "admin").first() is not None
+
 def create_supabase_user(email: str, password: str, full_name: Optional[str] = None, phone: Optional[str] = None) -> dict:
     if not SUPABASE_ADMIN_URL or not SUPABASE_SERVICE_ROLE_KEY:
         raise HTTPException(
@@ -1812,7 +1815,11 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
         fallback_full_name=request.full_name,
         fallback_phone=request.phone,
     )
+    # Always grant base role
     ensure_user_has_role(db, profile.id)
+    # Bootstrap: if no admin exists yet, promote this first user to admin
+    if not admin_exists(db):
+        ensure_user_has_role(db, profile.id, "admin")
 
     try:
         db.commit()
@@ -1834,6 +1841,42 @@ async def get_current_user_info(current_user: Profile = Depends(get_current_user
 async def get_user_roles(user_id: str, db: Session = Depends(get_db)):
     roles = db.query(UserRole).filter(UserRole.user_id == user_id).all()
     return [{"role": role.role} for role in roles]
+
+# Admin-only role management endpoints
+class RoleUpdateRequest(BaseModel):
+    role: str
+
+@app.post("/api/users/{user_id}/roles", dependencies=[Depends(require_admin())])
+async def grant_role(user_id: str, req: RoleUpdateRequest, db: Session = Depends(get_db)):
+    allowed = {"employee", "manager", "admin"}
+    role = req.role.strip().lower()
+    if role not in allowed:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    user = db.query(Profile).filter(Profile.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    ensure_user_has_role(db, user_id, role)
+    db.commit()
+    return {"message": "Role granted", "user_id": user_id, "role": role}
+
+@app.delete("/api/users/{user_id}/roles/{role}", dependencies=[Depends(require_admin())])
+async def revoke_role(user_id: str, role: str, db: Session = Depends(get_db)):
+    role = role.strip().lower()
+    rec = (
+        db.query(UserRole)
+        .filter(UserRole.user_id == user_id, UserRole.role == role)
+        .first()
+    )
+    if not rec:
+        raise HTTPException(status_code=404, detail="Role not found for user")
+    # Prevent locking system out: require at least one admin remains
+    if role == "admin":
+        admins = db.query(UserRole).filter(UserRole.role == "admin").all()
+        if len(admins) <= 1 and admins[0].user_id == user_id:
+            raise HTTPException(status_code=400, detail="Cannot revoke the last admin")
+    db.delete(rec)
+    db.commit()
+    return {"message": "Role revoked", "user_id": user_id, "role": role}
 
 # CRUD endpoints for all entities
 @app.get("/api/categories", response_model=List[CategoryResponse])
