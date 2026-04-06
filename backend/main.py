@@ -1,3 +1,12 @@
+import sys
+from pathlib import Path
+
+# Ensure `rbac` and other local modules resolve when cwd is not `backend/`
+# (e.g. `uvicorn backend.main:app` from repo root). Prefer Render rootDir=backend + `uvicorn main:app`.
+_backend_dir = Path(__file__).resolve().parent
+if str(_backend_dir) not in sys.path:
+    sys.path.insert(0, str(_backend_dir))
+
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -18,7 +27,6 @@ import secrets
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 from sqlalchemy import text
-from pathlib import Path
 from io import StringIO, TextIOWrapper
 import csv
 import requests
@@ -30,10 +38,6 @@ import base64
 # Load environment variables (always from this file's directory so cwd does not matter).
 # override=True: a stale DATABASE_URL in the process/shell must not win over backend/.env.
 load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
-
-# Import pharmacy routes
-import sys
-sys.path.append(str(Path(__file__).parent))
 
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL")

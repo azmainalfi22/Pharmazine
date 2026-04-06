@@ -1,5 +1,8 @@
-# Render Blueprint — set env vars in the Render dashboard (do not commit secrets).
+# Render Blueprint — sync from repo or mirror these settings in the dashboard.
+# Root directory MUST be `backend` so `uvicorn main:app` and `requirements.txt` resolve.
+# Set secrets (DATABASE_URL, Supabase keys, CORS_ORIGINS, etc.) in the dashboard only.
 # https://render.com/docs/blueprint-spec
+version: "1"
 services:
   - type: web
     name: pharmazine-api
