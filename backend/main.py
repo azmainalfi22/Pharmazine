@@ -18,7 +18,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.pool import NullPool
 from pydantic import BaseModel, EmailStr, validator, Field, field_validator
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Tuple
 from datetime import datetime, timedelta, date
 import os
 import uuid
@@ -40,7 +40,7 @@ import base64
 load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip()
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set. Configure your Postgres connection string.")
 
@@ -252,13 +252,14 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Supabase configuration — set only via environment (never commit real keys)
+# .strip(): trailing newlines from Render/Netlify paste breaks Auth API (401 / invalid API key).
 SUPABASE_URL = (
-    os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL") or ""
-).rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv(
-    "VITE_SUPABASE_PUBLISHABLE_KEY"
+    (os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL") or "").strip().rstrip("/")
 )
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+_raw_anon = os.getenv("SUPABASE_ANON_KEY") or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+SUPABASE_ANON_KEY = _raw_anon.strip() if isinstance(_raw_anon, str) else None
+_raw_svc = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_SERVICE_ROLE_KEY = _raw_svc.strip() if isinstance(_raw_svc, str) else None
 
 os.environ.setdefault("SUPABASE_URL", SUPABASE_URL)
 os.environ.setdefault("SUPABASE_ANON_KEY", SUPABASE_ANON_KEY)
@@ -1003,13 +1004,16 @@ def safe_detail(message: Any) -> str:
     return sanitized or "Unexpected server error"
 
 
-def _parse_supabase_auth_error(response: requests.Response) -> str:
+def _parse_supabase_auth_error(
+    response: requests.Response,
+    default_detail: str = "Registration rejected by Supabase",
+) -> str:
     """Turn Supabase GoTrue error JSON into a short user-safe message."""
     try:
         body = response.json()
     except ValueError:
         raw = (response.text or "").strip()
-        return safe_detail(raw[:500] if raw else "Registration rejected by Supabase")
+        return safe_detail(raw[:500] if raw else default_detail)
 
     if isinstance(body, dict):
         for key in ("msg", "message", "error_description", "error"):
@@ -1024,7 +1028,7 @@ def _parse_supabase_auth_error(response: requests.Response) -> str:
                     else:
                         parts.append(str(item))
                 return safe_detail("; ".join(parts)[:500])
-    return safe_detail("Registration rejected by Supabase")
+    return safe_detail(default_detail)
 
 def upsert_profile_from_supabase(
     db: Session,
@@ -1195,7 +1199,11 @@ def create_supabase_user(email: str, password: str, full_name: Optional[str] = N
         detail_for_client,
     )
 
-def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
+def authenticate_with_supabase(email: str, password: str) -> Tuple[Optional[dict], Optional[str]]:
+    """
+    Password grant against Supabase GoTrue.
+    Returns (session_dict, None) on success, or (None, user_safe_error) on failure.
+    """
     if not SUPABASE_AUTH_URL or not SUPABASE_ANON_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1207,7 +1215,7 @@ def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
             f"{SUPABASE_AUTH_URL}/token?grant_type=password",
             headers=_supabase_headers(SUPABASE_ANON_KEY),
             json={"email": email, "password": password},
-            timeout=10,
+            timeout=12,
         )
     except RequestException:
         raise HTTPException(
@@ -1215,13 +1223,47 @@ def authenticate_with_supabase(email: str, password: str) -> Optional[dict]:
             detail="Unable to reach Supabase Auth service",
         )
 
-    if response.status_code != 200:
-        return None
+    if response.status_code == 429:
+        return None, "Too many sign-in attempts. Please wait a minute and try again."
 
-    return response.json()
+    if response.status_code != 200:
+        err = _parse_supabase_auth_error(
+            response,
+            default_detail="Incorrect email or password",
+        )
+        return None, err
+
+    try:
+        data = response.json()
+    except ValueError:
+        return None, "Invalid response from authentication service"
+
+    if not isinstance(data, dict):
+        return None, "Invalid response from authentication service"
+
+    # Some GoTrue deployments return tokens without embedding `user`; recover via /user.
+    if not data.get("user") and data.get("access_token"):
+        try:
+            ur = requests.get(
+                f"{SUPABASE_AUTH_URL}/user",
+                headers={
+                    "apikey": SUPABASE_ANON_KEY,
+                    "Authorization": f"Bearer {data['access_token']}",
+                    "Content-Type": "application/json",
+                },
+                timeout=12,
+            )
+            if ur.status_code == 200:
+                uj = ur.json()
+                if isinstance(uj, dict):
+                    data["user"] = uj
+        except RequestException:
+            pass
+
+    return data, None
 
 def authenticate_user(db: Session, email: str, password: str):
-    auth_payload = authenticate_with_supabase(email, password)
+    auth_payload, _err = authenticate_with_supabase(email, password)
     if not auth_payload:
         return None, None
 
@@ -2120,11 +2162,11 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     use_rest = not _probe_db()
 
     # Always authenticate via Supabase HTTP first
-    supabase_auth = authenticate_with_supabase(request.email, request.password)
+    supabase_auth, supa_login_error = authenticate_with_supabase(request.email, request.password)
     if not supabase_auth:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail=supa_login_error or "Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -2132,7 +2174,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incomplete session from authentication provider. Try again or reset your password in Supabase.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
