@@ -1,0 +1,13 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="24" cy="24" r="22" fill="#0F766E"/>
+  
+  <!-- Medical Cross -->
+  <rect x="21" y="14" width="6" height="20" fill="white" rx="1"/>
+  <rect x="14" y="21" width="20" height="6" fill="white" rx="1"/>
+  
+  <!-- Leaf accent -->
+  <path d="M 30 16 Q 34 15 36 18 Q 37 20 36 22 Q 34 23 30 22 L 30 16" 
+        fill="#10B981" stroke="white" stroke-width="1"/>
+</svg>
+

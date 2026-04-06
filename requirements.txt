@@ -1,0 +1,3 @@
+# Convenience symlink-style duplicate — backend is canonical for Render.
+# Use: pip install -r backend/requirements.txt
+-r backend/requirements.txt

@@ -1,0 +1,8 @@
+# Additional requirements for scheduler and notifications
+
+# Task scheduling
+schedule==1.2.0
+
+# SMS notifications (optional)
+twilio==8.10.0
+
