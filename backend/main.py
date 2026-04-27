@@ -178,9 +178,25 @@ def _rest_update_profile(user_id: str, fields: dict) -> Optional[dict]:
 
 
 def _rest_get_roles(user_id: str) -> List[str]:
-    """Get roles for user via PostgREST (profiles.role + user_roles)."""
+    """Get roles for user via PostgREST (user_roles table primary, profiles.role fallback)."""
     if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY or not user_id:
         return ["employee"]
+    # Primary: user_roles table (created by Supabase trigger on every signup)
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/user_roles",
+            headers=_supabase_rest_headers(),
+            params={"user_id": f"eq.{user_id}", "select": "role"},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            rows = resp.json() or []
+            roles = [row.get("role", "").strip().lower() for row in rows if row.get("role")]
+            if roles:
+                return roles
+    except Exception:
+        pass
+    # Fallback: profiles.role VARCHAR column (may hold pharmacy-specific roles)
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/profiles",
@@ -192,7 +208,7 @@ def _rest_get_roles(user_id: str) -> List[str]:
             rows = resp.json() or []
             if rows:
                 r = (rows[0].get("role") or "").strip().lower()
-                if r in ("admin", "manager", "employee"):
+                if r:
                     return [r]
     except Exception:
         pass
