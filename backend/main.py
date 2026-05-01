@@ -178,9 +178,25 @@ def _rest_update_profile(user_id: str, fields: dict) -> Optional[dict]:
 
 
 def _rest_get_roles(user_id: str) -> List[str]:
-    """Get roles for user via PostgREST (profiles.role + user_roles)."""
+    """Get roles for user via PostgREST (user_roles table primary, profiles.role fallback)."""
     if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY or not user_id:
         return ["employee"]
+    # Primary: user_roles table (created by Supabase trigger on every signup)
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/user_roles",
+            headers=_supabase_rest_headers(),
+            params={"user_id": f"eq.{user_id}", "select": "role"},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            rows = resp.json() or []
+            roles = [row.get("role", "").strip().lower() for row in rows if row.get("role")]
+            if roles:
+                return roles
+    except Exception:
+        pass
+    # Fallback: profiles.role VARCHAR column (may hold pharmacy-specific roles)
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/profiles",
@@ -192,7 +208,7 @@ def _rest_get_roles(user_id: str) -> List[str]:
             rows = resp.json() or []
             if rows:
                 r = (rows[0].get("role") or "").strip().lower()
-                if r in ("admin", "manager", "employee"):
+                if r:
                     return [r]
     except Exception:
         pass
@@ -519,6 +535,26 @@ try:
         conn.commit()
 except Exception as _migrate_err:
     print(f"[WARN] Could not ensure profiles.role column: {_migrate_err}")
+
+# Ensure vouchers table exists (idempotent)
+try:
+    with engine.connect() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS vouchers (
+                id VARCHAR PRIMARY KEY,
+                voucher_no VARCHAR UNIQUE NOT NULL,
+                voucher_type VARCHAR NOT NULL,
+                date TIMESTAMP DEFAULT NOW(),
+                amount FLOAT NOT NULL,
+                description TEXT,
+                status VARCHAR DEFAULT 'pending',
+                created_by VARCHAR REFERENCES profiles(id),
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """))
+        conn.commit()
+except Exception as _v_err:
+    print(f"[WARN] Could not ensure vouchers table: {_v_err}")
 
 # Database Models
 class Profile(Base):
@@ -959,6 +995,19 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     description = Column(Text, nullable=True)
     receipt_url = Column(String, nullable=True)
+
+class Voucher(Base):
+    __tablename__ = "vouchers"
+
+    id = Column(String, primary_key=True)
+    voucher_no = Column(String, unique=True, nullable=False)
+    voucher_type = Column(String, nullable=False)  # payment, receipt, journal
+    date = Column(DateTime, default=datetime.utcnow)
+    amount = Column(Float, nullable=False)
+    description = Column(Text, nullable=True)
+    status = Column(String, default="pending")  # pending, approved, rejected
+    created_by = Column(String, ForeignKey("profiles.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
@@ -2386,6 +2435,96 @@ async def grant_role_deprecated(user_id: str, req: RoleUpdateRequest):
 @app.delete("/api/users/{user_id}/roles/{role}", dependencies=[Depends(require_admin())])
 async def revoke_role_deprecated(user_id: str, role: str):
     raise HTTPException(status_code=410, detail="Deprecated. Set role in Supabase user_metadata.role")
+
+@app.get("/api/users", dependencies=[Depends(require_admin())])
+async def list_all_users(db: Session = Depends(get_db)):
+    """Admin-only: List all system users with their roles."""
+    if _probe_db():
+        profiles = db.query(Profile).order_by(Profile.created_at.desc()).all()
+        result = []
+        for p in profiles:
+            roles = [ur.role for ur in p.roles]
+            result.append({
+                "id": str(p.id),
+                "full_name": p.full_name,
+                "email": p.email,
+                "phone": p.phone,
+                "role": p.role or (roles[0] if roles else "employee"),
+                "roles": roles,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            })
+        return result
+    else:
+        try:
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/profiles",
+                headers=_rest_headers(),
+                params={"select": "id,full_name,email,phone,role,created_at", "order": "created_at.desc"},
+            )
+            if resp.status_code == 200:
+                profiles_data = resp.json() or []
+                for p in profiles_data:
+                    roles_resp = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/user_roles",
+                        headers=_rest_headers(),
+                        params={"user_id": f"eq.{p['id']}", "select": "role"},
+                    )
+                    if roles_resp.status_code == 200:
+                        role_list = [r["role"] for r in roles_resp.json()]
+                        p["roles"] = role_list
+                        if not p.get("role") and role_list:
+                            p["role"] = role_list[0]
+                    else:
+                        p["roles"] = [p.get("role", "employee")]
+                return profiles_data
+            raise HTTPException(status_code=resp.status_code, detail="Failed to fetch users")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/users/{user_id}/role", dependencies=[Depends(require_admin())])
+async def update_user_role(user_id: str, req: RoleUpdateRequest, db: Session = Depends(get_db)):
+    """Admin-only: Update a user's primary role."""
+    valid_roles = ["admin", "manager", "employee", "pharmacist", "cashier",
+                   "stock_clerk", "accountant", "super_admin", "pharmacy_manager"]
+    if req.role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Choose from: {', '.join(valid_roles)}")
+    if _probe_db():
+        profile = db.query(Profile).filter(Profile.id == user_id).first()
+        if not profile:
+            raise HTTPException(status_code=404, detail="User not found")
+        profile.role = req.role
+        existing = db.query(UserRole).filter(UserRole.user_id == user_id).first()
+        if existing:
+            existing.role = req.role
+        else:
+            db.add(UserRole(id=str(uuid.uuid4()), user_id=user_id, role=req.role))
+        db.commit()
+        return {"success": True, "user_id": user_id, "role": req.role}
+    else:
+        try:
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/profiles",
+                headers={**_rest_headers(), "Content-Type": "application/json"},
+                params={"id": f"eq.{user_id}"},
+                json={"role": req.role},
+            )
+            patch_resp = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/user_roles",
+                headers={**_rest_headers(), "Content-Type": "application/json"},
+                params={"user_id": f"eq.{user_id}"},
+                json={"role": req.role},
+            )
+            if not patch_resp.ok:
+                requests.post(
+                    f"{SUPABASE_URL}/rest/v1/user_roles",
+                    headers={**_rest_headers(), "Content-Type": "application/json"},
+                    json={"id": str(uuid.uuid4()), "user_id": user_id, "role": req.role},
+                )
+            return {"success": True, "user_id": user_id, "role": req.role}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
 # CRUD endpoints for all entities
 @app.get("/api/categories", response_model=List[CategoryResponse])

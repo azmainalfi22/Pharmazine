@@ -35,18 +35,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for existing session in localStorage
-    const savedUser = localStorage.getItem("pharmazine_user");
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-      } catch (error) {
-        logger.error("Error parsing saved user data:", error);
-        localStorage.removeItem("pharmazine_user");
+    const restoreSession = async () => {
+      const savedUser = localStorage.getItem("pharmazine_user");
+      const token = localStorage.getItem("token");
+      if (!savedUser || !token) {
+        setLoading(false);
+        return;
       }
-    }
-    setLoading(false);
+      try {
+        const cached = JSON.parse(savedUser) as User;
+        setUser(cached); // optimistic render while validating
+        const freshProfile = await apiClient.getCurrentUser();
+        if (!freshProfile) {
+          // Token expired or invalid
+          setUser(null);
+          localStorage.removeItem("pharmazine_user");
+          localStorage.removeItem("token");
+        } else {
+          const permsPayload = await apiClient.getUserPermissions().catch(() => null);
+          const roles = permsPayload?.roles?.map((r: string) => ({ role: r })) || cached.roles;
+          const updated: User = { ...cached, ...freshProfile, roles };
+          setUser(updated);
+          localStorage.setItem("pharmazine_user", JSON.stringify(updated));
+        }
+      } catch {
+        localStorage.removeItem("pharmazine_user");
+        localStorage.removeItem("token");
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    restoreSession();
   }, []);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
@@ -85,8 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Role-based post-login navigation
         const roleNames = (roles || []).map((r) => r.role);
-        const isAdmin = roleNames.includes("admin");
-        const isManager = roleNames.includes("manager");
+        const isAdmin = roleNames.some((r) => ["admin", "super_admin"].includes(r));
+        const isManager = roleNames.some((r) => ["manager", "pharmacy_manager"].includes(r));
         if (isAdmin) {
           navigate("/settings/system", { replace: true });
         } else if (isManager) {
@@ -145,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     setUser(null);
     localStorage.removeItem("pharmazine_user");
+    localStorage.removeItem("token");
     navigate("/auth");
   };
 

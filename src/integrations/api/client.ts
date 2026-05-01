@@ -23,7 +23,16 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type AppRole = "admin" | "manager" | "employee";
+export type AppRole =
+  | "admin"
+  | "manager"
+  | "employee"
+  | "super_admin"
+  | "pharmacy_manager"
+  | "pharmacist"
+  | "cashier"
+  | "stock_clerk"
+  | "accountant";
 export type PaymentMethod =
   | "cash"
   | "bkash"

@@ -56,8 +56,8 @@ const queryClient = new QueryClient();
 function HomeRoute() {
   const { user } = useAuth();
   const roles = (user?.roles || []).map((r: any) => r.role);
-  const isAdmin = roles.includes("admin");
-  const isManager = roles.includes("manager");
+  const isAdmin = roles.some((r: string) => ["admin", "super_admin"].includes(r));
+  const isManager = roles.some((r: string) => ["manager", "pharmacy_manager"].includes(r));
   if (isAdmin) return <Navigate to="/settings/system" replace />;
   if (isManager) return <Navigate to="/reports" replace />;
   return <EnhancedDashboard />;

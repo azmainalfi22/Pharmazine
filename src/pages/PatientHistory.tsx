@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
-import { 
-  Users, Pill, Calendar, FileText, TrendingUp, 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Users, Pill, Calendar, FileText, TrendingUp,
   AlertCircle, Search, Clock, User
 } from 'lucide-react';
-import api from '../config/api';
-import { toast } from 'react-hot-toast';
+import api from '@/config/api';
+import { toast } from 'sonner';
 
 import { logger } from "@/utils/logger";
 interface MedicationHistory {
