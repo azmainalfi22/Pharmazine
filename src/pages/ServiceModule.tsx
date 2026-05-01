@@ -95,11 +95,6 @@ export default function ServiceModule() {
     loadData();
   }, []);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const loadData = async () => {
     setLoading(true);
     try {

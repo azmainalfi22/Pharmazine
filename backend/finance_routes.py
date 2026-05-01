@@ -292,6 +292,107 @@ def get_financial_dashboard(db: Session = Depends(get_db)):
 
 
 # ============================================
+# VOUCHER ENDPOINTS
+# ============================================
+
+from pydantic import BaseModel as PydanticModel
+
+class VoucherCreate(PydanticModel):
+    voucher_type: str  # payment, receipt, journal
+    amount: float
+    description: str
+    date: Optional[str] = None
+
+@router.get("/vouchers")
+def list_vouchers(
+    voucher_type: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """List all vouchers, optionally filtered by type."""
+    try:
+        from main import Voucher
+        q = db.query(Voucher)
+        if voucher_type:
+            q = q.filter(Voucher.voucher_type == voucher_type)
+        vouchers = q.order_by(Voucher.created_at.desc()).all()
+        return [
+            {
+                "id": v.id,
+                "voucher_no": v.voucher_no,
+                "voucher_type": v.voucher_type,
+                "date": v.date.isoformat() if v.date else None,
+                "amount": float(v.amount),
+                "description": v.description,
+                "status": v.status,
+                "created_at": v.created_at.isoformat() if v.created_at else None,
+            }
+            for v in vouchers
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/vouchers")
+def create_voucher(
+    payload: VoucherCreate,
+    db: Session = Depends(get_db)
+):
+    """Create a new voucher."""
+    try:
+        from main import Voucher
+        # Auto-generate voucher number
+        count = db.query(Voucher).count()
+        prefix = {"payment": "PV", "receipt": "RV", "journal": "JV"}.get(payload.voucher_type, "V")
+        voucher_no = f"{prefix}-{str(count + 1).zfill(4)}"
+        # Ensure uniqueness
+        while db.query(Voucher).filter(Voucher.voucher_no == voucher_no).first():
+            count += 1
+            voucher_no = f"{prefix}-{str(count + 1).zfill(4)}"
+
+        v = Voucher(
+            id=str(uuid.uuid4()),
+            voucher_no=voucher_no,
+            voucher_type=payload.voucher_type,
+            date=datetime.fromisoformat(payload.date) if payload.date else datetime.utcnow(),
+            amount=payload.amount,
+            description=payload.description,
+            status="pending",
+        )
+        db.add(v)
+        db.commit()
+        db.refresh(v)
+        return {
+            "id": v.id,
+            "voucher_no": v.voucher_no,
+            "voucher_type": v.voucher_type,
+            "date": v.date.isoformat(),
+            "amount": float(v.amount),
+            "description": v.description,
+            "status": v.status,
+            "created_at": v.created_at.isoformat(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/vouchers/{voucher_id}/approve")
+def approve_voucher(voucher_id: str, db: Session = Depends(get_db)):
+    """Approve a voucher."""
+    try:
+        from main import Voucher
+        v = db.query(Voucher).filter(Voucher.id == voucher_id).first()
+        if not v:
+            raise HTTPException(status_code=404, detail="Voucher not found")
+        v.status = "approved"
+        db.commit()
+        return {"success": True, "voucher_id": voucher_id, "status": "approved"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================
 # HELPER FUNCTIONS
 # ============================================
 

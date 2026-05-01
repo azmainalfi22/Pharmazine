@@ -43,7 +43,7 @@ export default function RefillReminders() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_CONFIG.API_ROOT}/pharmacy/enhanced/refill-reminders/due`,
+        `${API_CONFIG.API_ROOT}/refill-reminders?days_ahead=30`,
         {
           headers: getAuthHeaders(),
         }
@@ -82,9 +82,9 @@ export default function RefillReminders() {
     if (daysUntil < 0) {
       return <Badge variant="destructive">OVERDUE</Badge>;
     } else if (daysUntil === 0) {
-      return <Badge variant="warning">TODAY</Badge>;
+      return <Badge className="bg-orange-100 text-orange-800 border-orange-200">TODAY</Badge>;
     } else if (daysUntil <= 3) {
-      return <Badge variant="warning">{daysUntil} days</Badge>;
+      return <Badge className="bg-orange-100 text-orange-800 border-orange-200">{daysUntil} days</Badge>;
     } else {
       return <Badge variant="default">{daysUntil} days</Badge>;
     }

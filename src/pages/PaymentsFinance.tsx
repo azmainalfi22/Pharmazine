@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import apiClient from '@/integrations/api/client';
+import { API_CONFIG, apiCall } from '@/config/api';
 
 import { logger } from "@/utils/logger";
 // Types
@@ -209,16 +210,8 @@ const PaymentsFinance = () => {
 
   const loadDashboard = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/finance/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setDashboard(data);
-      }
+      const data = await apiCall<FinancialDashboard>(`${API_CONFIG.FINANCE_BASE}/dashboard`);
+      setDashboard(data);
     } catch (error) {
       logger.error('Error loading dashboard:', error);
     }
@@ -247,19 +240,8 @@ const PaymentsFinance = () => {
 
   const loadVouchers = async () => {
     try {
-      // Load vouchers - for now using mock data
-      setVouchers([
-        {
-          id: '1',
-          voucher_no: 'V-001',
-          voucher_type: 'payment',
-          date: new Date().toISOString(),
-          amount: 1000,
-          description: 'Supplier payment',
-          status: 'approved',
-          created_at: new Date().toISOString()
-        }
-      ]);
+      const data = await apiCall<Voucher[]>(`${API_CONFIG.FINANCE_BASE}/vouchers`);
+      setVouchers(data || []);
     } catch (error) {
       logger.error('Error loading vouchers:', error);
     }
@@ -267,16 +249,8 @@ const PaymentsFinance = () => {
 
   const loadReceivables = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/finance/receivables', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setReceivables(data.receivables || []);
-      }
+      const data = await apiCall<{ receivables: Receivable[] }>(`${API_CONFIG.FINANCE_BASE}/receivables`);
+      setReceivables(data.receivables || []);
     } catch (error) {
       logger.error('Error loading receivables:', error);
     }
@@ -284,16 +258,8 @@ const PaymentsFinance = () => {
 
   const loadPayables = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/finance/payables', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setPayables(data.payables || []);
-      }
+      const data = await apiCall<{ payables: Payable[] }>(`${API_CONFIG.FINANCE_BASE}/payables`);
+      setPayables(data.payables || []);
     } catch (error) {
       logger.error('Error loading payables:', error);
     }
@@ -301,30 +267,12 @@ const PaymentsFinance = () => {
 
   const loadCashFlow = async () => {
     try {
-      const [summaryRes, dailyRes] = await Promise.all([
-        fetch('http://localhost:8000/api/finance/cashflow/summary', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        }),
-        fetch('http://localhost:8000/api/finance/cashflow/daily', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        })
+      const [summary, daily] = await Promise.all([
+        apiCall<typeof cashFlowSummary>(`${API_CONFIG.FINANCE_BASE}/cashflow/summary`),
+        apiCall<{ daily_flow: CashFlowItem[] }>(`${API_CONFIG.FINANCE_BASE}/cashflow/daily`),
       ]);
-
-      if (summaryRes.ok) {
-        const summary = await summaryRes.json();
-        setCashFlowSummary(summary);
-      }
-
-      if (dailyRes.ok) {
-        const daily = await dailyRes.json();
-        setCashFlow(daily.daily_flow || []);
-      }
+      setCashFlowSummary(summary);
+      setCashFlow(daily.daily_flow || []);
     } catch (error) {
       logger.error('Error loading cash flow:', error);
     }
@@ -350,12 +298,22 @@ const PaymentsFinance = () => {
     }
 
     try {
+      await apiCall(`${API_CONFIG.API_ROOT}/transactions`, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'cash_in',
+          amount: paymentForm.amount,
+          reference_id: paymentForm.invoice_no || undefined,
+          description: `Payment from ${paymentForm.customer_name}${paymentForm.notes ? ' - ' + paymentForm.notes : ''}`,
+          date: paymentForm.payment_date,
+        }),
+      });
       toast.success('Payment collected successfully');
       setPaymentDialog(false);
       resetPaymentForm();
       loadPayments();
-    } catch (error) {
-      toast.error('Failed to save payment');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to save payment');
     }
   };
 
@@ -366,12 +324,20 @@ const PaymentsFinance = () => {
     }
 
     try {
+      await apiCall<Voucher>(`${API_CONFIG.FINANCE_BASE}/vouchers`, {
+        method: 'POST',
+        body: JSON.stringify({
+          voucher_type: voucherForm.voucher_type,
+          amount: voucherForm.amount,
+          description: voucherForm.description,
+        }),
+      });
       toast.success('Voucher created successfully');
       setVoucherDialog(false);
       resetVoucherForm();
       loadVouchers();
-    } catch (error) {
-      toast.error('Failed to create voucher');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to create voucher');
     }
   };
 

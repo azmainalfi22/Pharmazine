@@ -3,6 +3,7 @@
  * NEW FEATURE: Manage multiple pharmacy branches with full API integration
  */
 import { useState, useEffect } from "react";
+import { logger } from "@/utils/logger";
 import {
   Plus,
   Building2,
@@ -109,7 +110,7 @@ export default function MultiBranchManagement() {
       const response = await apiClient.get("/api/branches/");
       setBranches(response.data);
     } catch (error: any) {
-      console.error("Error fetching branches:", error);
+      logger.error("Error fetching branches:", error);
       toast.error(error.response?.data?.detail || "Failed to fetch branches");
     } finally {
       setLoading(false);
@@ -122,7 +123,7 @@ export default function MultiBranchManagement() {
       const response = await apiClient.get("/api/branches/stats");
       setStats(response.data);
     } catch (error: any) {
-      console.error("Error fetching stats:", error);
+      logger.error("Error fetching stats:", error);
     }
   };
 
@@ -167,7 +168,7 @@ export default function MultiBranchManagement() {
       resetForm();
       fetchStats(); // Refresh stats
     } catch (error: any) {
-      console.error("Error adding branch:", error);
+      logger.error("Error adding branch:", error);
       toast.error(error.response?.data?.detail || "Failed to add branch");
     } finally {
       setLoading(false);
@@ -192,7 +193,7 @@ export default function MultiBranchManagement() {
       resetForm();
       fetchStats();
     } catch (error: any) {
-      console.error("Error updating branch:", error);
+      logger.error("Error updating branch:", error);
       toast.error(error.response?.data?.detail || "Failed to update branch");
     } finally {
       setLoading(false);
@@ -232,7 +233,7 @@ export default function MultiBranchManagement() {
       fetchStats();
       toast.success("Branch deactivated successfully");
     } catch (error: any) {
-      console.error("Error deleting branch:", error);
+      logger.error("Error deleting branch:", error);
       toast.error(
         error.response?.data?.detail || "Failed to deactivate branch"
       );

@@ -128,11 +128,6 @@ export default function EnhancedPurchase() {
     if (activeTab === "list") loadPurchases();
   }, [activeTab]);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const loadSuppliers = async () => {
     try {
       logger.debug("Loading suppliers from:", `${API_CONFIG.API_ROOT}/suppliers`);

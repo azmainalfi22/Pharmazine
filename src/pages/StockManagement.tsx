@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
+import { apiClient } from "@/integrations/api/client";
 import { Link } from "react-router-dom";
 
 import { logger } from "@/utils/logger";
