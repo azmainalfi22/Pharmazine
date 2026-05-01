@@ -298,5 +298,165 @@ async def get_pending_claims(db: Session = Depends(get_db)):
     
     return claims
 
+# Medicine Allergies
+class MedicineAllergyCreate(BaseModel):
+    customer_id: str
+    medicine_name: str
+    generic_name: Optional[str] = None
+    allergy_type: str = "mild"  # mild | moderate | severe | life-threatening
+    symptoms: str
+    date_identified: Optional[date] = None
+    notes: Optional[str] = None
+
+class MedicineAllergyUpdate(BaseModel):
+    medicine_name: Optional[str] = None
+    generic_name: Optional[str] = None
+    allergy_type: Optional[str] = None
+    symptoms: Optional[str] = None
+    date_identified: Optional[date] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
+
+@router.get("/allergies")
+async def list_allergies(db: Session = Depends(get_db)):
+    """Get all active medicine allergy records"""
+    result = db.execute(text("""
+        SELECT a.id, a.customer_id, c.name as customer_name,
+               a.medicine_name, a.generic_name, a.allergy_type,
+               a.symptoms, a.date_identified, a.notes, a.is_active
+        FROM medicine_allergies a
+        LEFT JOIN customers c ON a.customer_id = c.id
+        WHERE a.is_active = TRUE
+        ORDER BY a.allergy_type DESC, a.medicine_name
+    """)).fetchall()
+
+    return [
+        {
+            'id': row[0],
+            'customer_id': row[1],
+            'customer_name': row[2],
+            'medicine_name': row[3],
+            'generic_name': row[4],
+            'allergy_type': row[5],
+            'symptoms': row[6],
+            'date_identified': str(row[7]) if row[7] else None,
+            'notes': row[8],
+            'is_active': row[9],
+        }
+        for row in result
+    ]
+
+@router.post("/allergies")
+async def create_allergy(allergy: MedicineAllergyCreate, db: Session = Depends(get_db)):
+    """Create a medicine allergy record"""
+    allergy_id = str(uuid.uuid4())
+    db.execute(text("""
+        INSERT INTO medicine_allergies (
+            id, customer_id, medicine_name, generic_name, allergy_type,
+            symptoms, date_identified, notes, is_active
+        ) VALUES (
+            :id, :customer_id, :medicine_name, :generic_name, :allergy_type,
+            :symptoms, :date_identified, :notes, TRUE
+        )
+    """), {
+        'id': allergy_id,
+        'customer_id': allergy.customer_id,
+        'medicine_name': allergy.medicine_name,
+        'generic_name': allergy.generic_name,
+        'allergy_type': allergy.allergy_type,
+        'symptoms': allergy.symptoms,
+        'date_identified': allergy.date_identified,
+        'notes': allergy.notes,
+    })
+    db.commit()
+    return {"id": allergy_id, "message": "Allergy record created successfully"}
+
+@router.patch("/allergies/{allergy_id}")
+async def update_allergy(allergy_id: str, update: MedicineAllergyUpdate, db: Session = Depends(get_db)):
+    """Update a medicine allergy record"""
+    fields = {k: v for k, v in update.dict().items() if v is not None}
+    if not fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    set_clause = ", ".join(f"{k} = :{k}" for k in fields)
+    fields['allergy_id'] = allergy_id
+    db.execute(text(f"UPDATE medicine_allergies SET {set_clause} WHERE id = :allergy_id"), fields)
+    db.commit()
+    return {"message": "Allergy record updated successfully"}
+
+@router.delete("/allergies/{allergy_id}")
+async def delete_allergy(allergy_id: str, db: Session = Depends(get_db)):
+    """Soft-delete an allergy record"""
+    db.execute(
+        text("UPDATE medicine_allergies SET is_active = FALSE WHERE id = :id"),
+        {'id': allergy_id}
+    )
+    db.commit()
+    return {"message": "Allergy record removed"}
+
+# All Prescriptions (GET)
+@router.get("/prescriptions")
+async def list_all_prescriptions(db: Session = Depends(get_db)):
+    """Get all prescription records"""
+    result = db.execute(text("""
+        SELECT p.id, p.prescription_number, p.customer_id, c.name as customer_name,
+               p.doctor_name, p.doctor_license, p.diagnosis,
+               p.prescription_date, p.valid_until,
+               p.refills_allowed, p.refills_used, p.is_active, p.notes
+        FROM prescription_records p
+        LEFT JOIN customers c ON p.customer_id = c.id
+        ORDER BY p.prescription_date DESC
+    """)).fetchall()
+
+    return [
+        {
+            'id': row[0],
+            'prescription_number': row[1],
+            'customer_id': row[2],
+            'customer_name': row[3],
+            'doctor_name': row[4],
+            'doctor_license': row[5],
+            'diagnosis': row[6],
+            'prescription_date': str(row[7]),
+            'valid_until': str(row[8]) if row[8] else None,
+            'refills_allowed': row[9],
+            'refills_used': row[10],
+            'is_active': row[11],
+            'notes': row[12],
+        }
+        for row in result
+    ]
+
+# All Insurance Claims (GET)
+@router.get("/insurance-claims")
+async def get_all_claims(db: Session = Depends(get_db)):
+    """Get all insurance claims"""
+    result = db.execute(text("""
+        SELECT id, claim_number, customer_id, insurance_provider,
+               policy_number, claim_amount, approved_amount,
+               claim_status, submitted_date, approval_date, payment_date,
+               rejection_reason, notes
+        FROM insurance_claims
+        ORDER BY submitted_date DESC
+    """)).fetchall()
+
+    return [
+        {
+            'id': row[0],
+            'claim_number': row[1],
+            'customer_id': row[2],
+            'insurance_provider': row[3],
+            'policy_number': row[4],
+            'claim_amount': float(row[5]) if row[5] else 0.0,
+            'approved_amount': float(row[6]) if row[6] else None,
+            'claim_status': row[7],
+            'submitted_date': str(row[8]),
+            'approval_date': str(row[9]) if row[9] else None,
+            'payment_date': str(row[10]) if row[10] else None,
+            'rejection_reason': row[11],
+            'notes': row[12],
+        }
+        for row in result
+    ]
+
 # Import get_db from main
 # This will be imported when included in main.py
