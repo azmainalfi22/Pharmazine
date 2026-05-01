@@ -1,6 +1,6 @@
-# Render Blueprint — sync from repo or mirror these settings in the dashboard.
-# Root directory MUST be `backend` so `uvicorn main:app` and `requirements.txt` resolve.
-# Set secrets (DATABASE_URL, Supabase keys, CORS_ORIGINS, etc.) in the dashboard only.
+# Render Blueprint — push this file and import the repo in the Render dashboard.
+# Root directory is `backend` so uvicorn/main.py and requirements.txt resolve correctly.
+# Set all secret values in the Render dashboard (Environment tab) — never commit them.
 # https://render.com/docs/blueprint-spec
 version: "1"
 services:
@@ -11,6 +11,25 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
+    # Keep the instance alive between requests (free tier spins down after inactivity)
+    autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
+      - key: ENVIRONMENT
+        value: "production"
+      # ── Set these in the Render dashboard, never commit values ──
+      - key: DATABASE_URL
+        sync: false   # Use the Supabase Transaction pooler URI (port 6543, IPv4-friendly)
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true   # Render generates a random value on first deploy
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false   # Set to: https://YOUR_APP.netlify.app (plus localhost URLs for dev)

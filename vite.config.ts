@@ -19,7 +19,8 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: proxyTarget,
           changeOrigin: true,
-          secure: true,
+          // false because the local backend is plain HTTP (no TLS certificate to verify)
+          secure: false,
         },
       },
     },

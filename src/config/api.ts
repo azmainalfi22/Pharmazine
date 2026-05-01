@@ -25,12 +25,23 @@ const getBaseUrl = (): string => {
     return sanitizeBaseUrl(fromEnv);
   }
 
+  // In production the env var must be set — surface a clear error rather than
+  // silently sending API requests to the Netlify domain (which has no backend).
+  if (import.meta.env.PROD) {
+    console.error(
+      "[Pharmazine] VITE_API_BASE_URL is not set. " +
+      "Add it in Netlify → Site configuration → Environment variables " +
+      "pointing to your Render backend URL (e.g. https://pharmazine-api.onrender.com)."
+    );
+  }
+
+  // Dev fallback: Vite proxy forwards /api → 127.0.0.1:8000 transparently,
+  // so same-origin requests work in development even without the env var.
   if (typeof window !== "undefined") {
     const { protocol, host } = window.location;
     return sanitizeBaseUrl(`${protocol}//${host}`);
   }
 
-  // Fallback for SSR/build tools
   return "http://localhost:8000";
 };
 
