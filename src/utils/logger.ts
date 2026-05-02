@@ -1,5 +1,3 @@
-import { logger } from "@/utils/logger";
-
 /**
  * Centralized Logging Utility for Pharmazine
  *
@@ -52,9 +50,9 @@ class Logger {
 
     const formatted = this.formatMessage("debug", message, data);
     if (data) {
-      logger.debug(formatted, data);
+      console.debug(formatted, data);
     } else {
-      logger.debug(formatted);
+      console.debug(formatted);
     }
   }
 
@@ -66,9 +64,9 @@ class Logger {
 
     const formatted = this.formatMessage("info", message, data);
     if (data) {
-      logger.info(formatted, data);
+      console.info(formatted, data);
     } else {
-      logger.info(formatted);
+      console.info(formatted);
     }
   }
 
@@ -80,9 +78,9 @@ class Logger {
 
     const formatted = this.formatMessage("warn", message, data);
     if (data) {
-      logger.warn(formatted, data);
+      console.warn(formatted, data);
     } else {
-      logger.warn(formatted);
+      console.warn(formatted);
     }
   }
 
@@ -95,15 +93,15 @@ class Logger {
     const formatted = this.formatMessage("error", message, error);
 
     if (error instanceof Error) {
-      logger.error(formatted, {
+      console.error(formatted, {
         message: error.message,
         stack: error.stack,
         ...error,
       });
     } else if (error) {
-      logger.error(formatted, error);
+      console.error(formatted, error);
     } else {
-      logger.error(formatted);
+      console.error(formatted);
     }
   }
 
