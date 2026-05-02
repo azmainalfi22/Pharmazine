@@ -54,6 +54,7 @@ import BiDashboard from "./pages/BiDashboard";
 import ProcurementModule from "./pages/ProcurementModule";
 import PatientCRMModule from "./pages/PatientCRMModule";
 import InterBranchTransfer from "./pages/InterBranchTransfer";
+import SecuritySettingsPage from "./pages/SecuritySettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -289,6 +290,16 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <BackupManagementPage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings/security"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <SecuritySettingsPage />
                     </Layout>
                   </ProtectedRoute>
                 }

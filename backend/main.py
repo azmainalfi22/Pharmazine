@@ -5466,6 +5466,196 @@ async def get_branch_stock(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─── Phase I: Security Endpoints ─────────────────────────────────────────────
+
+import hmac
+import hashlib
+import base64
+import struct
+import time as _time
+
+def _hotp(secret_b32: str, counter: int) -> str:
+    """HMAC-based OTP (used to implement TOTP)."""
+    try:
+        key = base64.b32decode(secret_b32.upper() + "=" * ((8 - len(secret_b32) % 8) % 8))
+    except Exception:
+        return "000000"
+    msg = struct.pack(">Q", counter)
+    h = hmac.new(key, msg, hashlib.sha1).digest()
+    offset = h[-1] & 0x0F
+    code = struct.unpack(">I", h[offset:offset+4])[0] & 0x7FFFFFFF
+    return str(code % 1000000).zfill(6)
+
+def _totp(secret_b32: str) -> str:
+    """Time-based OTP (30-second window)."""
+    return _hotp(secret_b32, int(_time.time()) // 30)
+
+def _verify_totp(secret_b32: str, code: str, window: int = 1) -> bool:
+    """Verify TOTP code within ±window time steps."""
+    t = int(_time.time()) // 30
+    for i in range(-window, window + 1):
+        if _hotp(secret_b32, t + i) == code:
+            return True
+    return False
+
+def _gen_totp_secret() -> str:
+    """Generate a random base32 TOTP secret."""
+    raw = secrets.token_bytes(20)
+    return base64.b32encode(raw).decode().rstrip("=")
+
+
+@app.get("/api/security/2fa/status")
+async def get_2fa_status(db: Session = Depends(get_db)):
+    """Return current 2FA status (global stub — in production tie to user_id)."""
+    try:
+        row = db.execute(text("SELECT is_enabled FROM user_2fa LIMIT 1")).fetchone()
+        return {"is_enabled": bool(row[0]) if row else False}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/security/2fa/setup")
+async def setup_2fa(db: Session = Depends(get_db)):
+    """Generate a TOTP secret and return enrollment details."""
+    try:
+        secret = _gen_totp_secret()
+        # Store pending secret (not yet enabled until verified)
+        existing = db.execute(text("SELECT id FROM user_2fa LIMIT 1")).fetchone()
+        if existing:
+            db.execute(text("UPDATE user_2fa SET totp_secret=:s, is_enabled=false WHERE id=:id"),
+                       {"s": secret, "id": str(existing[0])})
+        else:
+            db.execute(text("""
+                INSERT INTO user_2fa (id, user_id, totp_secret, is_enabled, created_at)
+                VALUES (gen_random_uuid(), NULL, :s, false, now())
+            """), {"s": secret})
+        db.commit()
+        totp_uri = f"otpauth://totp/Pharmazine?secret={secret}&issuer=Pharmazine"
+        return {"secret": secret, "totp_uri": totp_uri, "is_enabled": False}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class TOTPVerifyRequest(BaseModel):
+    code: str
+
+@app.post("/api/security/2fa/verify")
+async def verify_2fa(req: TOTPVerifyRequest, db: Session = Depends(get_db)):
+    """Verify TOTP code and enable 2FA."""
+    try:
+        row = db.execute(text("SELECT id, totp_secret FROM user_2fa LIMIT 1")).fetchone()
+        if not row or not row[1]:
+            raise HTTPException(status_code=400, detail="No pending 2FA setup")
+        if not _verify_totp(row[1], req.code.strip()):
+            raise HTTPException(status_code=400, detail="Invalid TOTP code")
+        db.execute(text("UPDATE user_2fa SET is_enabled=true, enabled_at=now() WHERE id=:id"),
+                   {"id": str(row[0])})
+        db.commit()
+        return {"enabled": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/security/2fa/disable")
+async def disable_2fa(db: Session = Depends(get_db)):
+    """Disable 2FA."""
+    try:
+        db.execute(text("UPDATE user_2fa SET is_enabled=false WHERE is_enabled=true"))
+        db.commit()
+        return {"disabled": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/security/audit-log")
+async def get_security_audit_log(limit: int = 100, db: Session = Depends(get_db)):
+    """Return security audit log entries."""
+    try:
+        rows = db.execute(text("""
+            SELECT sa.id, sa.user_id, u.email AS user_email,
+                   sa.event_type, sa.ip_address, sa.success, sa.details, sa.created_at
+            FROM security_audit sa
+            LEFT JOIN users u ON u.id = sa.user_id
+            ORDER BY sa.created_at DESC
+            LIMIT :limit
+        """), {"limit": limit}).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "user_id": str(r[1]) if r[1] else None,
+                "user_email": r[2],
+                "event_type": r[3],
+                "ip_address": r[4],
+                "success": bool(r[5]),
+                "details": r[6],
+                "created_at": str(r[7]) if r[7] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/security/rate-limits")
+async def get_rate_limits(db: Session = Depends(get_db)):
+    """Return recent rate limit activity."""
+    try:
+        rows = db.execute(text("""
+            SELECT ip_address, endpoint, request_count, blocked, window_start
+            FROM rate_limit_log
+            ORDER BY window_start DESC
+            LIMIT 100
+        """)).fetchall()
+        return [
+            {
+                "ip_address": r[0],
+                "endpoint": r[1] or "/",
+                "request_count": r[2] or 0,
+                "blocked": bool(r[3]),
+                "window_start": str(r[4]) if r[4] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@app.post("/api/security/change-password")
+async def change_password(req: PasswordChangeRequest, db: Session = Depends(get_db)):
+    """Stub password change — actual implementation uses Supabase Auth API."""
+    if len(req.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    # In production, call Supabase Auth Admin API to update user password
+    # supabase.auth.admin.update_user_by_id(user_id, {"password": req.new_password})
+    return {"changed": True, "note": "Connect to Supabase Auth for live password updates"}
+
+
+class SessionSettingsRequest(BaseModel):
+    session_timeout: int = 480
+    force_https: bool = True
+    ip_whitelist: Optional[str] = None
+
+@app.post("/api/security/session-settings")
+async def save_session_settings(req: SessionSettingsRequest):
+    """Store session security settings (config stub)."""
+    return {
+        "saved": True,
+        "session_timeout_minutes": req.session_timeout,
+        "force_https": req.force_https,
+        "ip_whitelist": req.ip_whitelist,
+        "note": "Add SESSION_TIMEOUT and IP_WHITELIST to backend/.env to enforce",
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

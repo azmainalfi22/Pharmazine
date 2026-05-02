@@ -308,6 +308,11 @@ const Layout = ({ children }: LayoutProps) => {
                 icon: Settings,
               },
               {
+                path: "/settings/security",
+                label: "Security & 2FA",
+                icon: Shield,
+              },
+              {
                 path: "/settings/notifications",
                 label: "Notifications",
                 icon: Bell,
