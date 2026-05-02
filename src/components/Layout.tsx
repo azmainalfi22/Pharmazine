@@ -185,6 +185,7 @@ const Layout = ({ children }: LayoutProps) => {
       ],
     },
     { path: "/customers", label: "Customers", icon: Users },
+    { path: "/patients/crm", label: "Patient CRM", icon: Heart },
     { path: "/patient-history", label: "Patient History", icon: FileText },
     {
       path: "/pharmacy-care",

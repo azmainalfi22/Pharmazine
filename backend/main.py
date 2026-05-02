@@ -4904,6 +4904,210 @@ async def get_three_way_match(purchase_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─── Phase F: Patient CRM Endpoints ───────────────────────────────────────────
+
+@app.get("/api/patients/crm")
+async def get_patients_crm(db: Session = Depends(get_db)):
+    """Return patients/customers with CRM fields (allergies, insurance, consent)."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, name, phone, email,
+                   allergies, insurance_provider, insurance_id,
+                   hipaa_consent_date, loyalty_points
+            FROM customers
+            ORDER BY name
+        """)).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "phone": r[2],
+                "email": r[3],
+                "allergies": list(r[4]) if r[4] else [],
+                "insurance_provider": r[5],
+                "insurance_id": r[6],
+                "hipaa_consent_date": str(r[7]) if r[7] else None,
+                "loyalty_points": r[8] or 0,
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class AllergyUpdateRequest(BaseModel):
+    allergies: List[str]
+
+@app.patch("/api/patients/{patient_id}/allergies")
+async def update_patient_allergies(patient_id: str, req: AllergyUpdateRequest, db: Session = Depends(get_db)):
+    """Update patient allergy list."""
+    try:
+        db.execute(text(
+            "UPDATE customers SET allergies = :allergies::text[] WHERE id = :pid"
+        ), {"allergies": req.allergies, "pid": patient_id})
+        db.commit()
+        return {"updated": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class HipaaLogRequest(BaseModel):
+    action: str
+    resource_type: str
+    patient_id: Optional[str] = None
+    resource_id: Optional[str] = None
+    notes: Optional[str] = None
+
+@app.post("/api/hipaa-audit-log")
+async def create_hipaa_log(req: HipaaLogRequest, request: Request, db: Session = Depends(get_db)):
+    """Create HIPAA audit log entry."""
+    try:
+        ip = request.client.host if request.client else None
+        db.execute(text("""
+            INSERT INTO hipaa_audit_log
+            (id, patient_id, action, resource_type, resource_id, ip_address, notes, created_at)
+            VALUES (gen_random_uuid(), :pid, :action, :rtype, :rid, :ip, :notes, now())
+        """), {
+            "pid": req.patient_id,
+            "action": req.action,
+            "rtype": req.resource_type,
+            "rid": req.resource_id,
+            "ip": ip,
+            "notes": req.notes,
+        })
+        db.commit()
+        return {"logged": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/hipaa-audit-log")
+async def get_hipaa_logs(limit: int = 200, db: Session = Depends(get_db)):
+    """Return recent HIPAA audit log entries."""
+    try:
+        rows = db.execute(text("""
+            SELECT h.id, h.patient_id, c.name AS patient_name,
+                   h.action, h.resource_type, h.notes, h.created_at
+            FROM hipaa_audit_log h
+            LEFT JOIN customers c ON c.id = h.patient_id
+            ORDER BY h.created_at DESC
+            LIMIT :limit
+        """), {"limit": limit}).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "patient_id": str(r[1]) if r[1] else None,
+                "patient_name": r[2],
+                "action": r[3],
+                "resource_type": r[4],
+                "notes": r[5],
+                "created_at": str(r[6]) if r[6] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ConsentFormRequest(BaseModel):
+    patient_id: str
+    form_type: str
+    signed_by: Optional[str] = None
+    valid_until: Optional[str] = None
+
+@app.post("/api/consent-forms")
+async def create_consent_form(req: ConsentFormRequest, db: Session = Depends(get_db)):
+    """Create a new patient consent form record."""
+    try:
+        form_id = str(uuid.uuid4())
+        valid_until = req.valid_until if req.valid_until else None
+        status = "signed" if req.signed_by else "pending"
+        db.execute(text("""
+            INSERT INTO patient_consent_forms
+            (id, patient_id, form_type, signed_by, status, valid_until, signed_at, created_at)
+            VALUES (:id, :pid, :ftype, :signer, :status, :valid_until,
+                    CASE WHEN :signer IS NOT NULL THEN now() ELSE NULL END, now())
+        """), {
+            "id": form_id, "pid": req.patient_id, "ftype": req.form_type,
+            "signer": req.signed_by, "status": status, "valid_until": valid_until,
+        })
+        db.commit()
+        return {"id": form_id, "status": status}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/consent-forms")
+async def get_consent_forms(patient_id: Optional[str] = None, db: Session = Depends(get_db)):
+    """Return consent forms, optionally filtered by patient."""
+    try:
+        where = "WHERE 1=1"
+        params: dict = {}
+        if patient_id:
+            where += " AND cf.patient_id = :pid"
+            params["pid"] = patient_id
+        rows = db.execute(text(f"""
+            SELECT cf.id, cf.patient_id, c.name AS patient_name,
+                   cf.form_type, cf.status, cf.signed_at, cf.signed_by,
+                   cf.valid_until, cf.created_at
+            FROM patient_consent_forms cf
+            LEFT JOIN customers c ON c.id = cf.patient_id
+            {where}
+            ORDER BY cf.created_at DESC
+        """), params).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "patient_id": str(r[1]),
+                "patient_name": r[2],
+                "form_type": r[3],
+                "status": r[4],
+                "signed_at": str(r[5]) if r[5] else None,
+                "signed_by": r[6],
+                "valid_until": str(r[7]) if r[7] else None,
+                "created_at": str(r[8]) if r[8] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/patients/adherence")
+async def get_medication_adherence(db: Session = Depends(get_db)):
+    """Return medication adherence records with patient and product names."""
+    try:
+        rows = db.execute(text("""
+            SELECT ma.id, ma.customer_id, c.name AS patient_name,
+                   pr.name AS product_name,
+                   ma.last_filled_at, ma.next_due_date,
+                   ma.total_fills, ma.missed_fills, ma.compliance_pct
+            FROM medication_adherence ma
+            LEFT JOIN customers c ON c.id = ma.customer_id
+            LEFT JOIN products pr ON pr.id = ma.product_id
+            ORDER BY ma.compliance_pct ASC
+        """)).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "customer_id": str(r[1]) if r[1] else None,
+                "patient_name": r[2],
+                "product_name": r[3],
+                "last_filled_at": str(r[4]) if r[4] else None,
+                "next_due_date": str(r[5]) if r[5] else None,
+                "total_fills": r[6] or 0,
+                "missed_fills": r[7] or 0,
+                "compliance_pct": float(r[8]) if r[8] else 100.0,
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

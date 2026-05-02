@@ -52,6 +52,7 @@ import SupplierReturnPage from "./pages/SupplierReturnPage";
 import MultiBranchManagement from "./pages/MultiBranchManagement";
 import BiDashboard from "./pages/BiDashboard";
 import ProcurementModule from "./pages/ProcurementModule";
+import PatientCRMModule from "./pages/PatientCRMModule";
 
 const queryClient = new QueryClient();
 
@@ -499,6 +500,16 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <ProcurementModule />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patients/crm"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <PatientCRMModule />
                     </Layout>
                   </ProtectedRoute>
                 }
