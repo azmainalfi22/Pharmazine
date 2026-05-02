@@ -4564,6 +4564,170 @@ async def get_hourly_sales_today(db: Session = Depends(get_db)):
         return {"hourly_data": [], "count": 0, "error": str(e)}
 
 
+# ─── Phase C: POS Enhancements ───────────────────────────────────────────────
+
+@app.get("/api/sales/{sale_id}", dependencies=[Depends(require_permission(Permission.VIEW_SALES))])
+async def get_sale_by_id(sale_id: str, db: Session = Depends(get_db)):
+    """Get a single sale by ID (full or partial UUID prefix)."""
+    sale = db.query(Sale).filter(
+        (Sale.id == sale_id) | Sale.id.like(f"{sale_id}%")
+    ).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail="Sale not found")
+    return {
+        "id": sale.id,
+        "customer_name": sale.customer_name,
+        "customer_phone": sale.customer_phone,
+        "customer_email": sale.customer_email,
+        "total_amount": float(sale.total_amount or 0),
+        "discount": float(sale.discount or 0),
+        "tax": float(sale.tax or 0),
+        "net_amount": float(sale.net_amount or 0),
+        "payment_method": sale.payment_method,
+        "payment_status": sale.payment_status,
+        "notes": sale.notes,
+        "created_at": sale.created_at.isoformat() if sale.created_at else None,
+    }
+
+
+@app.get("/api/customers/by-phone/{phone}", dependencies=[Depends(require_permission(Permission.VIEW_CUSTOMERS))])
+async def get_customer_by_phone(phone: str, db: Session = Depends(get_db)):
+    """Lookup customer by phone for loyalty points (C4)."""
+    customer = db.query(Customer).filter(Customer.phone == phone).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return {
+        "id": customer.id,
+        "name": customer.name,
+        "phone": customer.phone,
+        "loyalty_points": customer.loyalty_points or 0,
+        "loyalty_tier": customer.loyalty_tier,
+    }
+
+
+class LoyaltyUpdateRequest(BaseModel):
+    earn: int = 0
+    redeem: int = 0
+    sale_id: Optional[str] = None
+
+
+@app.patch("/api/customers/{customer_id}/loyalty", dependencies=[Depends(require_permission(Permission.VIEW_CUSTOMERS))])
+async def update_loyalty_points(customer_id: str, req: LoyaltyUpdateRequest, db: Session = Depends(get_db)):
+    """Earn or redeem loyalty points for a customer (C4)."""
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    current = customer.loyalty_points or 0
+    if req.redeem > current:
+        raise HTTPException(status_code=400, detail=f"Insufficient points: {current} available")
+
+    new_balance = current + req.earn - req.redeem
+
+    # Log earn transaction
+    if req.earn > 0:
+        db.execute(text("""
+            INSERT INTO loyalty_transactions (id, customer_id, sale_id, transaction_type, points, balance_after, notes)
+            VALUES (gen_random_uuid(), :cid, :sid, 'earn', :pts, :bal, 'POS earn')
+        """), {"cid": customer_id, "sid": req.sale_id, "pts": req.earn, "bal": new_balance})
+
+    # Log redeem transaction
+    if req.redeem > 0:
+        db.execute(text("""
+            INSERT INTO loyalty_transactions (id, customer_id, sale_id, transaction_type, points, balance_after, notes)
+            VALUES (gen_random_uuid(), :cid, :sid, 'redeem', :pts, :bal, 'POS redeem')
+        """), {"cid": customer_id, "sid": req.sale_id, "pts": -req.redeem, "bal": new_balance - req.earn})
+
+    customer.loyalty_points = max(0, new_balance)
+
+    # Update loyalty tier
+    if customer.loyalty_points >= 1000:
+        customer.loyalty_tier = "Gold"
+    elif customer.loyalty_points >= 500:
+        customer.loyalty_tier = "Silver"
+    else:
+        customer.loyalty_tier = "Bronze"
+
+    db.commit()
+    return {"loyalty_points": customer.loyalty_points, "loyalty_tier": customer.loyalty_tier}
+
+
+class SalePaymentRequest(BaseModel):
+    sale_id: str
+    payment_method: str
+    amount: float
+    reference_number: Optional[str] = None
+
+
+@app.post("/api/sale-payments", dependencies=[Depends(require_permission(Permission.CREATE_SALE))])
+async def create_sale_payment(req: SalePaymentRequest, db: Session = Depends(get_db)):
+    """Record a split payment for a sale (C3)."""
+    try:
+        db.execute(text("""
+            INSERT INTO sale_payments (id, sale_id, payment_method, amount, reference_number)
+            VALUES (gen_random_uuid(), :sid, :method, :amount, :ref)
+        """), {"sid": req.sale_id, "method": req.payment_method, "amount": req.amount, "ref": req.reference_number})
+        db.commit()
+        return {"status": "ok"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class SaleReturnRequest(BaseModel):
+    original_sale_id: str
+    return_reason: str
+    total_refund: float
+    refund_method: str = "cash"
+    status: str = "completed"
+
+
+@app.post("/api/sale-returns", dependencies=[Depends(require_permission(Permission.CREATE_SALE))])
+async def create_sale_return(req: SaleReturnRequest, db: Session = Depends(get_db)):
+    """Process a sales return with stock reversal (C5)."""
+    sale = db.query(Sale).filter(Sale.id == req.original_sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail="Original sale not found")
+
+    return_id = str(uuid.uuid4())
+    try:
+        db.execute(text("""
+            INSERT INTO sale_returns (id, original_sale_id, return_reason, total_refund, refund_method, status)
+            VALUES (:rid, :sid, :reason, :refund, :method, :status)
+        """), {
+            "rid": return_id,
+            "sid": req.original_sale_id,
+            "reason": req.return_reason,
+            "refund": req.total_refund,
+            "method": req.refund_method,
+            "status": req.status,
+        })
+
+        # Reverse stock for each sold item
+        items = db.execute(text(
+            "SELECT product_id, quantity, batch_no FROM sale_items WHERE sale_id = :sid"
+        ), {"sid": req.original_sale_id}).fetchall()
+
+        for item in items:
+            if item[0]:  # product_id exists
+                db.execute(text("""
+                    UPDATE products SET stock_quantity = stock_quantity + :qty
+                    WHERE id = :pid
+                """), {"qty": item[1], "pid": item[0]})
+
+                db.execute(text("""
+                    INSERT INTO stock_transactions
+                    (id, product_id, transaction_type, quantity, reference_number, notes, created_at)
+                    VALUES (gen_random_uuid(), :pid, 'sales_return', :qty, :ref, 'Sale return', now())
+                """), {"pid": item[0], "qty": item[1], "ref": f"RETURN-{return_id[:8]}"})
+
+        db.commit()
+        return {"id": return_id, "status": "completed", "total_refund": req.total_refund}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

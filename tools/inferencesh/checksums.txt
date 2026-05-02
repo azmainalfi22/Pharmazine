@@ -1,0 +1,4 @@
+a057adc8d9e8d8ef95f5f30bff302d775298744d13a1d4ceea90876086a8ff3d  inferencesh-cli-v1.7.19-darwin-amd64.tar.gz
+cb233bf214e6fed9836d5cfef9b998d728ba81d8c0753d4868055aa268dd218f  inferencesh-cli-v1.7.19-linux-amd64.tar.gz
+a01f288c32e3cf361b77e55e18bf68942beae6848edc80de90af42efd8b5301b  inferencesh-cli-v1.7.19-linux-arm64.tar.gz
+32263303628b3829c6549dfd67d376a30fed4c9da13cf34739f3401a03d6be0d  inferencesh-cli-v1.7.19-darwin-arm64.tar.gz
