@@ -5108,6 +5108,219 @@ async def get_medication_adherence(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─── Phase G: Notifications & SMS Endpoints ───────────────────────────────────
+
+@app.get("/api/notifications")
+async def get_notifications(limit: int = 50, user_id: Optional[str] = None, db: Session = Depends(get_db)):
+    """Return recent in-app notifications."""
+    try:
+        where = "WHERE 1=1"
+        params: dict = {"limit": limit}
+        if user_id:
+            where += " AND (user_id = :uid OR user_id IS NULL)"
+            params["uid"] = user_id
+        rows = db.execute(text(f"""
+            SELECT id, user_id, title, body, type, category, is_read, action_url, created_at
+            FROM app_notifications
+            {where}
+            ORDER BY created_at DESC
+            LIMIT :limit
+        """), params).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "user_id": str(r[1]) if r[1] else None,
+                "title": r[2],
+                "body": r[3],
+                "type": r[4] or "info",
+                "category": r[5] or "general",
+                "is_read": bool(r[6]),
+                "action_url": r[7],
+                "created_at": str(r[8]) if r[8] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class NotificationCreateRequest(BaseModel):
+    title: str
+    body: Optional[str] = None
+    type: str = "info"
+    category: str = "general"
+    action_url: Optional[str] = None
+    user_id: Optional[str] = None
+
+@app.post("/api/notifications")
+async def create_notification(req: NotificationCreateRequest, db: Session = Depends(get_db)):
+    """Create a new in-app notification."""
+    try:
+        nid = str(uuid.uuid4())
+        db.execute(text("""
+            INSERT INTO app_notifications (id, user_id, title, body, type, category, action_url, is_read, created_at)
+            VALUES (:id, :uid, :title, :body, :type, :cat, :url, false, now())
+        """), {
+            "id": nid, "uid": req.user_id, "title": req.title, "body": req.body,
+            "type": req.type, "cat": req.category, "url": req.action_url,
+        })
+        db.commit()
+        return {"id": nid, "created": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.patch("/api/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, db: Session = Depends(get_db)):
+    """Mark a notification as read."""
+    try:
+        db.execute(text(
+            "UPDATE app_notifications SET is_read = true, read_at = now() WHERE id = :nid"
+        ), {"nid": notification_id})
+        db.commit()
+        return {"updated": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.patch("/api/notifications/read-all")
+async def mark_all_notifications_read(db: Session = Depends(get_db)):
+    """Mark all notifications as read."""
+    try:
+        db.execute(text("UPDATE app_notifications SET is_read = true, read_at = now() WHERE is_read = false"))
+        db.commit()
+        return {"updated": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class SMSSendRequest(BaseModel):
+    phone_number: str
+    message: str
+    type: str = "general"
+
+@app.post("/api/sms/send")
+async def send_sms(req: SMSSendRequest, db: Session = Depends(get_db)):
+    """Send SMS (simulated stub — real Twilio requires env vars TWILIO_*)."""
+    twilio_sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
+    twilio_token = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
+    twilio_from = os.getenv("TWILIO_FROM_NUMBER", "").strip()
+
+    sms_id = str(uuid.uuid4())
+    status = "simulated"
+    error_msg = None
+
+    if twilio_sid and twilio_token and twilio_from:
+        # Real Twilio send
+        try:
+            resp = requests.post(
+                f"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages.json",
+                data={"To": req.phone_number, "From": twilio_from, "Body": req.message},
+                auth=(twilio_sid, twilio_token),
+                timeout=10,
+            )
+            if resp.status_code in (200, 201):
+                status = "sent"
+            else:
+                status = "failed"
+                error_msg = resp.text[:200]
+        except Exception as ex:
+            status = "failed"
+            error_msg = str(ex)[:200]
+
+    try:
+        db.execute(text("""
+            INSERT INTO sms_log (id, phone_number, message, type, status, provider, sent_at, error_message, created_at)
+            VALUES (:id, :phone, :msg, :type, :status, :provider,
+                    CASE WHEN :status IN ('sent','simulated') THEN now() ELSE NULL END,
+                    :err, now())
+        """), {
+            "id": sms_id, "phone": req.phone_number, "msg": req.message,
+            "type": req.type, "status": status,
+            "provider": "twilio" if (twilio_sid and status == "sent") else "stub",
+            "err": error_msg,
+        })
+        db.commit()
+    except Exception as e:
+        db.rollback()
+
+    return {"id": sms_id, "status": status}
+
+
+@app.get("/api/sms-log")
+async def get_sms_log(limit: int = 50, db: Session = Depends(get_db)):
+    """Return SMS log entries."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, phone_number, message, type, status, provider, sent_at, error_message, created_at
+            FROM sms_log
+            ORDER BY created_at DESC
+            LIMIT :limit
+        """), {"limit": limit}).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "phone_number": r[1],
+                "message": r[2],
+                "type": r[3] or "general",
+                "status": r[4] or "pending",
+                "provider": r[5] or "stub",
+                "sent_at": str(r[6]) if r[6] else None,
+                "error_message": r[7],
+                "created_at": str(r[8]) if r[8] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class NotifPrefsRequest(BaseModel):
+    expiry_alerts: bool = True
+    low_stock_alerts: bool = True
+    order_alerts: bool = True
+    sms_enabled: bool = False
+    sms_phone: Optional[str] = None
+    email_enabled: bool = True
+    digest_hour: int = 8
+
+@app.post("/api/notification-preferences")
+async def save_notification_preferences(req: NotifPrefsRequest, db: Session = Depends(get_db)):
+    """Upsert notification preferences for the current user (global stub)."""
+    try:
+        existing = db.execute(text("SELECT id FROM notification_preferences LIMIT 1")).fetchone()
+        if existing:
+            db.execute(text("""
+                UPDATE notification_preferences
+                SET expiry_alerts=:ea, low_stock_alerts=:lsa, order_alerts=:oa,
+                    sms_enabled=:se, sms_phone=:sp, email_enabled=:ee,
+                    digest_hour=:dh, updated_at=now()
+                WHERE id=:id
+            """), {
+                "ea": req.expiry_alerts, "lsa": req.low_stock_alerts, "oa": req.order_alerts,
+                "se": req.sms_enabled, "sp": req.sms_phone, "ee": req.email_enabled,
+                "dh": req.digest_hour, "id": str(existing[0]),
+            })
+        else:
+            db.execute(text("""
+                INSERT INTO notification_preferences
+                (id, user_id, expiry_alerts, low_stock_alerts, order_alerts,
+                 sms_enabled, sms_phone, email_enabled, digest_hour, updated_at)
+                VALUES (gen_random_uuid(), NULL, :ea, :lsa, :oa, :se, :sp, :ee, :dh, now())
+            """), {
+                "ea": req.expiry_alerts, "lsa": req.low_stock_alerts, "oa": req.order_alerts,
+                "se": req.sms_enabled, "sp": req.sms_phone, "ee": req.email_enabled, "dh": req.digest_hour,
+            })
+        db.commit()
+        return {"saved": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

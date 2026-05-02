@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import NotificationBell from "./NotificationBell";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -598,6 +599,9 @@ const Layout = ({ children }: LayoutProps) => {
 
           {/* Glassmorphic User Profile & Logout */}
           <div className="p-4 border-t border-white/20 dark:border-gray-700/30 backdrop-blur-xl">
+            <div className="mb-2 flex justify-end px-1">
+              <NotificationBell />
+            </div>
             <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
