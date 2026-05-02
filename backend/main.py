@@ -5321,6 +5321,151 @@ async def save_notification_preferences(req: NotifPrefsRequest, db: Session = De
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─── Phase H: Multi-Branch Endpoints ─────────────────────────────────────────
+
+class BranchTransferRequest(BaseModel):
+    from_branch_id: int
+    to_branch_id: int
+    product_id: str
+    requested_qty: float
+    notes: Optional[str] = None
+
+@app.post("/api/branch-transfers")
+async def create_branch_transfer(req: BranchTransferRequest, db: Session = Depends(get_db)):
+    """Create an inter-branch stock transfer request."""
+    if req.from_branch_id == req.to_branch_id:
+        raise HTTPException(status_code=400, detail="From and To branches must differ")
+    try:
+        tid = str(uuid.uuid4())
+        db.execute(text("""
+            INSERT INTO branch_transfers
+            (id, from_branch_id, to_branch_id, product_id, requested_qty, status, requested_at)
+            VALUES (:id, :fb, :tb, :pid, :qty, 'pending', now())
+        """), {"id": tid, "fb": req.from_branch_id, "tb": req.to_branch_id,
+               "pid": req.product_id, "qty": req.requested_qty})
+        db.commit()
+        return {"id": tid, "status": "pending"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/branch-transfers")
+async def get_branch_transfers(db: Session = Depends(get_db)):
+    """List all branch transfers with branch and product names."""
+    try:
+        rows = db.execute(text("""
+            SELECT bt.id,
+                   fb.name AS from_branch_name,
+                   tb.name AS to_branch_name,
+                   pr.name AS product_name,
+                   bt.requested_qty, bt.approved_qty, bt.status,
+                   bt.requested_by, bt.approved_by, bt.notes, bt.requested_at
+            FROM branch_transfers bt
+            LEFT JOIN branches fb ON fb.id = bt.from_branch_id
+            LEFT JOIN branches tb ON tb.id = bt.to_branch_id
+            LEFT JOIN products pr ON pr.id = bt.product_id
+            ORDER BY bt.requested_at DESC
+        """)).fetchall()
+        return [
+            {
+                "id": str(r[0]),
+                "from_branch_name": r[1] or "Unknown",
+                "to_branch_name": r[2] or "Unknown",
+                "product_name": r[3] or "Unknown",
+                "requested_qty": float(r[4]) if r[4] else 0,
+                "approved_qty": float(r[5]) if r[5] else None,
+                "status": r[6] or "pending",
+                "requested_by": r[7],
+                "approved_by": r[8],
+                "notes": r[9],
+                "requested_at": str(r[10]) if r[10] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class TransferStatusRequest(BaseModel):
+    status: str
+    approved_qty: Optional[float] = None
+
+@app.patch("/api/branch-transfers/{transfer_id}/status")
+async def update_transfer_status(transfer_id: str, req: TransferStatusRequest, db: Session = Depends(get_db)):
+    """Advance a branch transfer status."""
+    valid = {"approved", "dispatched", "received", "rejected"}
+    if req.status not in valid:
+        raise HTTPException(status_code=400, detail=f"Invalid status: {req.status}")
+    try:
+        update = "status = :status"
+        params: dict = {"status": req.status, "tid": transfer_id}
+        if req.approved_qty:
+            update += ", approved_qty = :aqty"
+            params["aqty"] = req.approved_qty
+        if req.status in ("received", "rejected"):
+            update += ", resolved_at = now()"
+        db.execute(text(f"UPDATE branch_transfers SET {update} WHERE id = :tid"), params)
+        db.commit()
+        return {"updated": True, "status": req.status}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/reports/consolidated-pl")
+async def get_consolidated_pl(db: Session = Depends(get_db)):
+    """Return consolidated P&L grouped by branch (or single branch if no branch_id on sales)."""
+    try:
+        rows = db.execute(text("""
+            SELECT
+                COALESCE(b.name, 'Headquarters') AS branch_name,
+                COALESCE(SUM(s.total_amount), 0) AS total_revenue,
+                COALESCE(SUM(si.quantity * si.unit_price * 0.6), 0) AS total_cogs
+            FROM sales s
+            LEFT JOIN branches b ON b.id = s.branch_id
+            LEFT JOIN sale_items si ON si.sale_id = s.id
+            WHERE s.status != 'cancelled'
+            GROUP BY COALESCE(b.name, 'Headquarters')
+            ORDER BY total_revenue DESC
+        """)).fetchall()
+        result = []
+        for r in rows:
+            revenue = float(r[1]) if r[1] else 0
+            cogs = float(r[2]) if r[2] else 0
+            profit = revenue - cogs
+            margin = (profit / revenue * 100) if revenue > 0 else 0
+            result.append({
+                "branch_name": r[0],
+                "total_revenue": revenue,
+                "total_cogs": cogs,
+                "gross_profit": profit,
+                "gross_margin": round(margin, 2),
+            })
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/branch-stock")
+async def get_branch_stock(db: Session = Depends(get_db)):
+    """Return branch stock snapshot."""
+    try:
+        rows = db.execute(text("""
+            SELECT pr.name AS product_name, b.name AS branch_name, bs.quantity
+            FROM branch_stock bs
+            JOIN branches b ON b.id = bs.branch_id
+            JOIN products pr ON pr.id = bs.product_id
+            ORDER BY b.name, pr.name
+        """)).fetchall()
+        return [
+            {"product_name": r[0], "branch_name": r[1], "quantity": float(r[2]) if r[2] else 0}
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

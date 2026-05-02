@@ -53,6 +53,7 @@ import MultiBranchManagement from "./pages/MultiBranchManagement";
 import BiDashboard from "./pages/BiDashboard";
 import ProcurementModule from "./pages/ProcurementModule";
 import PatientCRMModule from "./pages/PatientCRMModule";
+import InterBranchTransfer from "./pages/InterBranchTransfer";
 
 const queryClient = new QueryClient();
 
@@ -871,6 +872,16 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <SystemConfiguration />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/branch/transfers"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InterBranchTransfer />
                     </Layout>
                   </ProtectedRoute>
                 }

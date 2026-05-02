@@ -279,7 +279,10 @@ const Layout = ({ children }: LayoutProps) => {
       ? [{ path: "/users", label: "User Management", icon: Users }]
       : []),
     ...(isAdmin
-      ? [{ path: "/multi-branch", label: "Multi-Branch", icon: Building2 }]
+      ? [
+          { path: "/multi-branch", label: "Multi-Branch", icon: Building2 },
+          { path: "/branch/transfers", label: "Inter-Branch Transfers", icon: ArrowRightLeft },
+        ]
       : []),
     ...(isAdmin
       ? [
