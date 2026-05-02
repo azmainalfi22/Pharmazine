@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Receipt, DollarSign, Calendar, RefreshCw, Download, Eye } from "lucide-react";
+import { Search, Receipt, DollarSign, Calendar, RefreshCw, Download, Printer } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { toast } from "sonner";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
@@ -108,6 +108,12 @@ export default function SalesHistory() {
     });
   };
 
+  const printInvoice = (saleId: string) => {
+    const url = `${API_CONFIG.API_ROOT}/sales/${saleId}/invoice`;
+    const win = window.open(url, "_blank", "width=900,height=700");
+    if (!win) toast.error("Pop-up blocked — please allow pop-ups for this site");
+  };
+
   const exportToCSV = () => {
     if (filteredSales.length === 0) {
       toast.error("No data to export");
@@ -196,7 +202,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">REVENUE</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">${stats.totalRevenue.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">৳{stats.totalRevenue.toFixed(0)}</div>
               <div className="text-xs text-white/70">Total Amount</div>
             </div>
 
@@ -205,7 +211,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CASH</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">${stats.cashSales.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">৳{stats.cashSales.toFixed(0)}</div>
               <div className="text-xs text-white/70">Cash Sales</div>
             </div>
 
@@ -214,7 +220,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CARD</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">${stats.cardSales.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">৳{stats.cardSales.toFixed(0)}</div>
               <div className="text-xs text-white/70">Card Sales</div>
             </div>
           </div>
@@ -310,15 +316,15 @@ export default function SalesHistory() {
                       </TableCell>
                       <TableCell>{sale.customer_name}</TableCell>
                       <TableCell>{sale.customer_phone || "-"}</TableCell>
-                      <TableCell className="text-right">${sale.total_amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{sale.total_amount.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
-                        {sale.discount > 0 ? `$${sale.discount.toFixed(2)}` : "-"}
+                        {sale.discount > 0 ? `৳${sale.discount.toFixed(2)}` : "-"}
                       </TableCell>
                       <TableCell className="text-right">
-                        {sale.tax > 0 ? `$${sale.tax.toFixed(2)}` : "-"}
+                        {sale.tax > 0 ? `৳${sale.tax.toFixed(2)}` : "-"}
                       </TableCell>
                       <TableCell className="text-right font-bold text-primary">
-                        ${sale.net_amount.toFixed(2)}
+                        ৳{sale.net_amount.toFixed(2)}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
@@ -334,8 +340,13 @@ export default function SalesHistory() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => printInvoice(sale.id)}
+                          title="Print Invoice"
+                        >
+                          <Printer className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>

@@ -498,8 +498,8 @@ export default function POSSystem() {
               <tr>
                 <td>${item.product_name}</td>
                 <td class="right">${item.quantity}</td>
-                <td class="right">$${item.unit_price.toFixed(2)}</td>
-                <td class="right">$${item.total_price.toFixed(2)}</td>
+                <td class="right">৳${item.unit_price.toFixed(2)}</td>
+                <td class="right">৳${item.total_price.toFixed(2)}</td>
               </tr>
               <tr>
                 <td colspan="4" style="font-size: 10px; color: #666;">Batch: ${
@@ -512,31 +512,31 @@ export default function POSSystem() {
           </tbody>
         </table>
         <div class="divider"></div>
-        <div>Subtotal: <span class="right">$${totals.itemsTotal.toFixed(
+        <div>Subtotal: <span class="right">৳${totals.itemsTotal.toFixed(
           2
         )}</span></div>
         ${
           totals.discount > 0
-            ? `<div>Discount: <span class="right">-$${totals.discount.toFixed(
+            ? `<div>Discount: <span class="right">-৳${totals.discount.toFixed(
                 2
               )}</span></div>`
             : ""
         }
         ${
           totals.tax > 0
-            ? `<div>Tax: <span class="right">$${totals.tax.toFixed(
+            ? `<div>Tax: <span class="right">৳${totals.tax.toFixed(
                 2
               )}</span></div>`
             : ""
         }
         <div class="divider"></div>
-        <div class="total">TOTAL: <span class="right">$${totals.grandTotal.toFixed(
+        <div class="total">TOTAL: <span class="right">৳${totals.grandTotal.toFixed(
           2
         )}</span></div>
-        <div>Paid: <span class="right">$${paymentInfo.paid_amount.toFixed(
+        <div>Paid: <span class="right">৳${paymentInfo.paid_amount.toFixed(
           2
         )}</span></div>
-        <div>Change: <span class="right">$${(
+        <div>Change: <span class="right">৳${(
           paymentInfo.paid_amount - totals.grandTotal
         ).toFixed(2)}</span></div>
         <div class="divider"></div>

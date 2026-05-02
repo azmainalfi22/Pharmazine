@@ -3531,41 +3531,108 @@ async def get_sale_invoice_html(sale_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Sale not found")
     items = db.query(SaleItem, Product).join(Product, SaleItem.product_id == Product.id).filter(SaleItem.sale_id == sale_id).all()
     rows = "".join([
-        f"<tr><td>{prod.sku}</td><td>{prod.name}</td><td style='text-align:right'>{it.quantity}</td><td style='text-align:right'>{it.unit_price:.2f}</td><td style='text-align:right'>{it.total_price:.2f}</td></tr>"
-        for it, prod in items
+        f"""<tr>
+          <td>{i+1}</td>
+          <td>{prod.sku}</td>
+          <td>{prod.name}{('<br><small style="color:#666">' + prod.generic_name + '</small>') if prod.generic_name else ''}</td>
+          <td style='text-align:center'>{it.quantity}</td>
+          <td style='text-align:right'>&#2547;{it.unit_price:.2f}</td>
+          <td style='text-align:right'>{it.discount_percentage:.1f}%</td>
+          <td style='text-align:right'>&#2547;{it.total_price:.2f}</td>
+        </tr>"""
+        for i, (it, prod) in enumerate(items)
     ])
-    html = f"""
-    <html>
-      <head>
-        <meta charset='utf-8' />
-        <title>Invoice {sale.id}</title>
-        <style>
-          body {{ font-family: Arial, sans-serif; padding: 24px; }}
-          h1 {{ margin: 0 0 8px 0; }}
-          table {{ width: 100%; border-collapse: collapse; margin-top: 16px; }}
-          th, td {{ border: 1px solid #ddd; padding: 8px; }}
-          th {{ background: #f7f7f7; text-align: left; }}
-        </style>
-      </head>
-      <body>
-        <h1>Feed and Medicine</h1>
-        <div>Invoice: {sale.id}</div>
-        <div>Date: {sale.created_at}</div>
-        <div>Customer: {sale.customer_name}</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Code</th><th>Item</th><th style='text-align:right'>Qty</th><th style='text-align:right'>Unit Price</th><th style='text-align:right'>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
-        <h3 style='text-align:right'>Net Amount: {sale.net_amount:.2f}</h3>
-      </body>
-    </html>
-    """
+    # Format date nicely
+    try:
+        sale_date = sale.created_at.strftime("%d %B %Y %I:%M %p") if sale.created_at else str(sale.created_at)
+    except Exception:
+        sale_date = str(sale.created_at)
+
+    discount_row = f"<tr><td colspan='6' style='text-align:right;padding:6px 8px;'>Discount:</td><td style='text-align:right;padding:6px 8px;'>&#2547;{sale.discount:.2f}</td></tr>" if sale.discount else ""
+    tax_row = f"<tr><td colspan='6' style='text-align:right;padding:6px 8px;'>Tax / VAT:</td><td style='text-align:right;padding:6px 8px;'>&#2547;{sale.tax:.2f}</td></tr>" if sale.tax else ""
+
+    html = f"""<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>Invoice #{sale.id[:8].upper()} - PHARMAZINE</title>
+    <style>
+      * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+      body {{ font-family: Arial, sans-serif; padding: 32px; font-size: 13px; color: #222; }}
+      .header {{ text-align: center; border-bottom: 2px solid #1d4ed8; padding-bottom: 16px; margin-bottom: 20px; }}
+      .header h1 {{ font-size: 28px; color: #1d4ed8; letter-spacing: 2px; }}
+      .header p {{ color: #555; font-size: 12px; margin-top: 4px; }}
+      .invoice-meta {{ display: flex; justify-content: space-between; margin-bottom: 20px; }}
+      .meta-box {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; min-width: 200px; }}
+      .meta-box h3 {{ font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }}
+      .meta-box p {{ font-size: 13px; font-weight: 600; }}
+      .meta-box .sub {{ font-size: 12px; color: #555; font-weight: normal; }}
+      table {{ width: 100%; border-collapse: collapse; margin-bottom: 16px; }}
+      thead tr {{ background: #1d4ed8; color: white; }}
+      thead th {{ padding: 10px 8px; text-align: left; font-size: 12px; }}
+      tbody tr:nth-child(even) {{ background: #f8fafc; }}
+      tbody td {{ padding: 9px 8px; border-bottom: 1px solid #e2e8f0; }}
+      .totals {{ float: right; width: 280px; }}
+      .totals table {{ border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }}
+      .totals td {{ padding: 8px 12px; }}
+      .totals tr:last-child {{ background: #1d4ed8; color: white; font-weight: bold; font-size: 15px; }}
+      .footer {{ clear: both; margin-top: 40px; text-align: center; color: #94a3b8; font-size: 11px; border-top: 1px solid #e2e8f0; padding-top: 12px; }}
+      @media print {{ body {{ padding: 16px; }} }}
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>PHARMAZINE</h1>
+      <p>Your Health, Our Priority &nbsp;|&nbsp; Licensed Pharmacy Management System</p>
+    </div>
+
+    <div class="invoice-meta">
+      <div class="meta-box">
+        <h3>Bill To</h3>
+        <p>{sale.customer_name or 'Walk-in Customer'}</p>
+        {f'<p class="sub">{sale.customer_phone}</p>' if sale.customer_phone else ''}
+      </div>
+      <div class="meta-box" style="text-align:right">
+        <h3>Invoice Details</h3>
+        <p>#{sale.id[:8].upper()}</p>
+        <p class="sub">{sale_date}</p>
+        <p class="sub">Payment: {(sale.payment_method or 'cash').title()}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>SKU</th>
+          <th>Medicine / Product</th>
+          <th style='text-align:center'>Qty</th>
+          <th style='text-align:right'>Unit Price</th>
+          <th style='text-align:right'>Disc%</th>
+          <th style='text-align:right'>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows if rows else '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999">No items found</td></tr>'}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table>
+        <tr><td>Subtotal:</td><td style='text-align:right'>&#2547;{sale.total_amount:.2f}</td></tr>
+        {discount_row}
+        {tax_row}
+        <tr><td>NET TOTAL:</td><td style='text-align:right'>&#2547;{sale.net_amount:.2f}</td></tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      Thank you for choosing Pharmazine &bull; Powered by Pharmazine PMS
+    </div>
+
+    <script>window.onload = function() {{ window.print(); }};</script>
+  </body>
+</html>"""
     return HTMLResponse(content=html)
 
 """ CSV Import/Template Endpoints """

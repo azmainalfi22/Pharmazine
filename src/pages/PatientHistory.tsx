@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect, useMemo } from "react";
+import {
+  Card, CardContent, CardHeader, CardTitle, CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Users, Pill, Calendar, FileText, TrendingUp,
-  AlertCircle, Search, Clock, User
-} from 'lucide-react';
-import api from '@/config/api';
-import { toast } from 'sonner';
-
+  AlertCircle, Search, Clock, User, Activity,
+} from "lucide-react";
+import api from "@/config/api";
+import { toast } from "sonner";
 import { logger } from "@/utils/logger";
+
 interface MedicationHistory {
   id: string;
   product_name: string;
@@ -47,13 +49,17 @@ interface RefillReminder {
   doctor_name: string;
 }
 
+function fmt(amount: number) {
+  return `৳${amount.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export default function PatientHistory() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [history, setHistory] = useState<MedicationHistory[]>([]);
   const [stats, setStats] = useState<PatientStats | null>(null);
   const [refillReminders, setRefillReminders] = useState<RefillReminder[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -70,22 +76,22 @@ export default function PatientHistory() {
 
   const loadCustomers = async () => {
     try {
-      const response = await api.get('/api/customers');
+      const response = await api.get("/api/customers");
       setCustomers(response.data || []);
     } catch (error: any) {
-      toast.error('Failed to load customers');
-      logger.error(error);
+      logger.error("Failed to load customers", error);
+      toast.error("Failed to load customers");
     }
   };
 
   const loadPatientHistory = async (customerId: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await api.get(`/api/patients/${customerId}/medication-history`);
       setHistory(response.data.history || []);
     } catch (error: any) {
-      toast.error('Failed to load patient history');
-      logger.error(error);
+      logger.error("Failed to load patient history", error);
+      toast.error("Failed to load patient history");
     } finally {
       setLoading(false);
     }
@@ -96,57 +102,96 @@ export default function PatientHistory() {
       const response = await api.get(`/api/patients/${customerId}/statistics`);
       setStats(response.data);
     } catch (error: any) {
-      toast.error('Failed to load patient statistics');
-      logger.error(error);
+      logger.error("Failed to load patient statistics", error);
     }
   };
 
   const loadRefillReminders = async () => {
     try {
-      const response = await api.get('/api/patients/refill-reminders');
+      // Route: GET /api/refill-reminders (not /api/patients/refill-reminders)
+      const response = await api.get("/api/refill-reminders");
       setRefillReminders(response.data.reminders || []);
     } catch (error: any) {
-      logger.error('Failed to load refill reminders:', error);
+      logger.error("Failed to load refill reminders", error);
     }
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone?.includes(searchTerm) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const selectedCustomerName = useMemo(() => {
+    const c = customers.find((c) => c.id === selectedCustomer);
+    return c ? c.name : "";
+  }, [customers, selectedCustomer]);
+
+  const filteredCustomers = useMemo(
+    () =>
+      customers.filter(
+        (c) =>
+          c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          c.phone?.includes(searchTerm) ||
+          c.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [customers, searchTerm]
   );
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Patient Medication History</h1>
-          <p className="text-gray-500 mt-1">Track customer medication purchases and refills</p>
+      {/* Gradient Header */}
+      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 rounded-xl p-6 text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white/20 rounded-lg">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Patient Medication History</h1>
+            <p className="text-teal-100 text-sm mt-0.5">
+              Track customer medication purchases and refill schedules
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="bg-white/10 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold">{customers.length}</p>
+            <p className="text-xs text-teal-200">Total Patients</p>
+          </div>
+          <div className="bg-white/10 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold">{refillReminders.length}</p>
+            <p className="text-xs text-teal-200">Refills Due</p>
+          </div>
+          <div className="bg-white/10 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold">{stats?.total_purchases ?? "—"}</p>
+            <p className="text-xs text-teal-200">Selected Patient Visits</p>
+          </div>
         </div>
       </div>
 
       {/* Refill Reminders */}
       {refillReminders.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="pharmacy-card border-orange-200 bg-orange-50">
           <CardHeader>
-            <CardTitle className="flex items-center text-orange-700">
-              <AlertCircle className="mr-2 h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-orange-700">
+              <AlertCircle className="w-5 h-5" />
               Refill Reminders ({refillReminders.length})
             </CardTitle>
-            <CardDescription>Patients due for medication refills</CardDescription>
+            <CardDescription className="text-orange-600">
+              Patients due for medication refills
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {refillReminders.slice(0, 5).map((reminder) => (
-                <div key={reminder.customer_id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                <div
+                  key={`${reminder.customer_id}-${reminder.product_name}`}
+                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-orange-100"
+                >
                   <div>
-                    <p className="font-medium">{reminder.customer_name}</p>
+                    <p className="font-medium text-gray-900">{reminder.customer_name}</p>
                     <p className="text-sm text-gray-600">{reminder.product_name}</p>
-                    <p className="text-xs text-gray-500">Due in {reminder.days_until_refill} days</p>
+                    <p className="text-xs text-orange-600 font-medium">
+                      Due in {reminder.days_until_refill} day{reminder.days_until_refill !== 1 ? "s" : ""}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm">{reminder.customer_phone}</p>
-                    <Button size="sm" variant="outline" className="mt-1">
+                    <p className="text-sm text-gray-600">{reminder.customer_phone}</p>
+                    <Button size="sm" variant="outline" className="mt-1 text-orange-600 border-orange-300 hover:bg-orange-50">
                       Send Reminder
                     </Button>
                   </div>
@@ -158,53 +203,64 @@ export default function PatientHistory() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Customer Selection */}
-        <Card className="lg:col-span-1">
+        {/* Patient List */}
+        <Card className="pharmacy-card lg:col-span-1">
           <CardHeader>
-            <CardTitle>Select Patient</CardTitle>
-            <CardDescription>Search and select a patient</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-teal-600" />
+              Select Patient
+            </CardTitle>
+            <CardDescription>Search and select a patient to view history</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search by name, phone, or email..."
+                placeholder="Search by name, phone, or email…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 pharmacy-input"
               />
             </div>
 
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {filteredCustomers.map((customer) => (
-                <div
-                  key={customer.id}
-                  onClick={() => setSelectedCustomer(customer.id)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedCustomer === customer.id
-                      ? 'bg-blue-50 border-blue-500'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <p className="font-medium">{customer.name}</p>
-                  <p className="text-sm text-gray-600">{customer.phone}</p>
-                </div>
-              ))}
-            </div>
+            {filteredCustomers.length === 0 ? (
+              <p className="text-sm text-gray-400 italic text-center py-4">
+                {customers.length === 0 ? "Loading patients…" : "No patients match your search"}
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredCustomers.map((customer) => (
+                  <div
+                    key={customer.id}
+                    onClick={() => setSelectedCustomer(customer.id)}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedCustomer === customer.id
+                        ? "bg-teal-50 border-teal-400"
+                        : "hover:bg-gray-50 border-gray-200"
+                    }`}
+                  >
+                    <p className="font-medium text-sm text-gray-900">{customer.name}</p>
+                    {customer.phone && (
+                      <p className="text-xs text-gray-500">{customer.phone}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Patient Details */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {selectedCustomer ? (
             <>
-              {/* Patient Statistics */}
+              {/* Stats Row */}
               {stats && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center space-x-2">
-                        <Pill className="h-8 w-8 text-blue-500" />
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="pharmacy-card">
+                    <CardContent className="pt-5">
+                      <div className="flex items-center gap-3">
+                        <Pill className="h-8 w-8 text-blue-500 flex-shrink-0" />
                         <div>
                           <p className="text-2xl font-bold">{stats.total_purchases}</p>
                           <p className="text-xs text-gray-500">Total Purchases</p>
@@ -212,26 +268,24 @@ export default function PatientHistory() {
                       </div>
                     </CardContent>
                   </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center space-x-2">
-                        <TrendingUp className="h-8 w-8 text-green-500" />
+                  <Card className="pharmacy-card">
+                    <CardContent className="pt-5">
+                      <div className="flex items-center gap-3">
+                        <TrendingUp className="h-8 w-8 text-green-500 flex-shrink-0" />
                         <div>
-                          <p className="text-2xl font-bold">${stats.total_spent.toFixed(2)}</p>
+                          <p className="text-xl font-bold">{fmt(stats.total_spent)}</p>
                           <p className="text-xs text-gray-500">Total Spent</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-8 w-8 text-purple-500" />
+                  <Card className="pharmacy-card">
+                    <CardContent className="pt-5">
+                      <div className="flex items-center gap-3">
+                        <Activity className="h-8 w-8 text-purple-500 flex-shrink-0" />
                         <div>
                           <p className="text-2xl font-bold">{stats.unique_medications}</p>
-                          <p className="text-xs text-gray-500">Unique Medications</p>
+                          <p className="text-xs text-gray-500">Unique Meds</p>
                         </div>
                       </div>
                     </CardContent>
@@ -239,81 +293,94 @@ export default function PatientHistory() {
                 </div>
               )}
 
+              {/* Most purchased badge */}
+              {stats?.most_purchased && (
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-xs text-gray-500">Most purchased:</span>
+                  <Badge variant="secondary" className="text-xs">{stats.most_purchased}</Badge>
+                </div>
+              )}
+
               {/* Medication History */}
-              <Card>
+              <Card className="pharmacy-card">
                 <CardHeader>
-                  <CardTitle>Medication History</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-teal-600" />
+                    Medication History — {selectedCustomerName}
+                  </CardTitle>
                   <CardDescription>Past medication purchases and prescriptions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <div className="text-center py-8">Loading...</div>
-                  ) : history.length > 0 ? (
+                    <div className="text-center py-10 text-gray-400">Loading history…</div>
+                  ) : history.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400">
+                      <Pill className="h-12 w-12 mx-auto mb-3 text-gray-200" />
+                      <p className="font-medium">No medication history found</p>
+                      <p className="text-sm mt-1">History is recorded when medicines are sold via POS</p>
+                    </div>
+                  ) : (
                     <div className="space-y-3">
                       {history.map((item) => (
-                        <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div key={item.id} className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-semibold">{item.product_name}</h3>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="font-semibold text-gray-900">{item.product_name}</h3>
                                 {item.generic_name && (
                                   <Badge variant="outline" className="text-xs">
                                     {item.generic_name}
                                   </Badge>
                                 )}
                               </div>
-                              
-                              <div className="mt-2 space-y-1 text-sm text-gray-600">
+
+                              <div className="mt-2 space-y-1 text-sm text-gray-500">
                                 <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>Dispensed: {new Date(item.dispensed_at).toLocaleDateString()}</span>
+                                  <Calendar className="h-3.5 w-3.5" />
+                                  <span>Dispensed: {new Date(item.dispensed_at).toLocaleDateString("en-BD")}</span>
                                 </div>
-                                
                                 {item.doctor_name && (
                                   <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4" />
+                                    <User className="h-3.5 w-3.5" />
                                     <span>Dr. {item.doctor_name}</span>
                                   </div>
                                 )}
-                                
                                 {item.prescription_number && (
                                   <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
+                                    <FileText className="h-3.5 w-3.5" />
                                     <span>Rx: {item.prescription_number}</span>
                                   </div>
                                 )}
-                                
                                 {item.next_refill_date && (
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4" />
-                                    <span>Next Refill: {new Date(item.next_refill_date).toLocaleDateString()}</span>
+                                  <div className="flex items-center gap-2 text-orange-600">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span>
+                                      Next Refill: {new Date(item.next_refill_date).toLocaleDateString("en-BD")}
+                                    </span>
                                   </div>
                                 )}
                               </div>
                             </div>
-                            
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                              <p className="font-semibold">${item.total_price.toFixed(2)}</p>
+
+                            <div className="text-right ml-4">
+                              <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                              <p className="font-semibold text-gray-900">{fmt(item.total_price)}</p>
                             </div>
                           </div>
                         </div>
                       ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No medication history found for this patient
                     </div>
                   )}
                 </CardContent>
               </Card>
             </>
           ) : (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center text-gray-500">
-                  <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                  <p>Select a patient to view their medication history</p>
+            <Card className="pharmacy-card">
+              <CardContent className="py-16">
+                <div className="text-center text-gray-400">
+                  <Users className="h-16 w-16 mx-auto mb-4 text-gray-200" />
+                  <p className="font-medium text-gray-500">No patient selected</p>
+                  <p className="text-sm mt-1">Search and select a patient on the left to view their history</p>
                 </div>
               </CardContent>
             </Card>
@@ -323,4 +390,3 @@ export default function PatientHistory() {
     </div>
   );
 }
-

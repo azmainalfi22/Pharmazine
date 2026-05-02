@@ -1,0 +1,11 @@
+node_modules
+.git
+backend
+backend/__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+*.log
+.claude
+tools
