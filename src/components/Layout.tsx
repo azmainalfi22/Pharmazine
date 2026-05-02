@@ -114,6 +114,7 @@ const Layout = ({ children }: LayoutProps) => {
       submenu: [
         { path: "/setup/suppliers", label: "Manage Suppliers", icon: Truck },
         { path: "/purchase", label: "Purchase Orders", icon: ShoppingCart },
+        { path: "/procurement/module", label: "Procurement Module", icon: Briefcase },
         {
           path: "/inventory/stock-out/supplier-return",
           label: "Return to Supplier",

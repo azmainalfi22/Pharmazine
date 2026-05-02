@@ -4728,6 +4728,182 @@ async def create_sale_return(req: SaleReturnRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─── Phase E: Procurement Module Endpoints ────────────────────────────────────
+
+class POStatusRequest(BaseModel):
+    status: str
+    notes: Optional[str] = None
+
+@app.patch("/api/purchases/{purchase_id}/status")
+async def advance_po_status(purchase_id: str, req: POStatusRequest, db: Session = Depends(get_db)):
+    """Advance PO lifecycle status."""
+    valid_statuses = {"draft", "approved", "ordered", "received", "paid", "cancelled"}
+    if req.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status: {req.status}")
+    try:
+        result = db.execute(text(
+            "SELECT id FROM purchases WHERE id = :pid OR id::text LIKE :prefix"
+        ), {"pid": purchase_id, "prefix": f"{purchase_id}%"}).fetchone()
+        if not result:
+            raise HTTPException(status_code=404, detail="Purchase not found")
+        real_id = result[0]
+
+        update_fields = "po_status = :status"
+        params: dict = {"status": req.status, "pid": real_id}
+        if req.status == "received":
+            update_fields += ", received_at = now()"
+        if req.status == "approved":
+            update_fields += ", approved_at = now()"
+        if req.notes:
+            update_fields += ", po_notes = :notes"
+            params["notes"] = req.notes
+
+        db.execute(text(f"UPDATE purchases SET {update_fields} WHERE id = :pid"), params)
+        db.commit()
+        return {"id": str(real_id), "status": req.status, "updated": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/procurement/aging")
+async def get_supplier_aging(db: Session = Depends(get_db)):
+    """Return supplier credit aging data."""
+    try:
+        rows = db.execute(text("""
+            SELECT
+                s.id AS supplier_id,
+                s.name AS supplier_name,
+                COUNT(p.id) AS total_orders,
+                COALESCE(SUM(CASE WHEN p.payment_status != 'paid' THEN p.total_amount ELSE 0 END), 0) AS outstanding,
+                COALESCE(SUM(CASE WHEN p.payment_status != 'paid' AND p.due_date < CURRENT_DATE THEN p.total_amount ELSE 0 END), 0) AS overdue,
+                COALESCE(SUM(CASE WHEN p.payment_status != 'paid' AND p.due_date >= CURRENT_DATE AND p.due_date <= CURRENT_DATE + 30 THEN p.total_amount ELSE 0 END), 0) AS due_30d,
+                COALESCE(SUM(CASE WHEN p.payment_status != 'paid' AND p.due_date > CURRENT_DATE + 30 AND p.due_date <= CURRENT_DATE + 60 THEN p.total_amount ELSE 0 END), 0) AS due_31_60d,
+                COALESCE(SUM(CASE WHEN p.payment_status != 'paid' AND p.due_date > CURRENT_DATE + 60 AND p.due_date <= CURRENT_DATE + 90 THEN p.total_amount ELSE 0 END), 0) AS due_61_90d
+            FROM suppliers s
+            LEFT JOIN purchases p ON p.supplier_id = s.id
+            GROUP BY s.id, s.name
+            ORDER BY outstanding DESC
+        """)).fetchall()
+        return [
+            {
+                "supplier_id": str(r[0]),
+                "supplier_name": r[1],
+                "total_orders": r[2],
+                "outstanding": float(r[3]),
+                "overdue": float(r[4]),
+                "due_30d": float(r[5]),
+                "due_31_60d": float(r[6]),
+                "due_61_90d": float(r[7]),
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/procurement/price-history")
+async def get_price_history(product_id: Optional[str] = None, limit: int = 100, db: Session = Depends(get_db)):
+    """Return product purchase price history for comparison."""
+    try:
+        where = "WHERE 1=1"
+        params: dict = {"limit": limit}
+        if product_id:
+            where += " AND pi.product_id = :product_id"
+            params["product_id"] = product_id
+        rows = db.execute(text(f"""
+            SELECT
+                pr.name AS product_name,
+                s.name AS supplier_name,
+                pi.unit_price,
+                p.date AS purchase_date
+            FROM purchase_items pi
+            JOIN products pr ON pr.id = pi.product_id
+            JOIN purchases p ON p.id = pi.purchase_id
+            LEFT JOIN suppliers s ON s.id = p.supplier_id
+            {where}
+            ORDER BY p.date DESC
+            LIMIT :limit
+        """), params).fetchall()
+        return [
+            {
+                "product_name": r[0],
+                "supplier_name": r[1] or "Unknown",
+                "unit_price": float(r[2]) if r[2] else 0,
+                "purchase_date": str(r[3]) if r[3] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/procurement/three-way-match/{purchase_id}")
+async def get_three_way_match(purchase_id: str, db: Session = Depends(get_db)):
+    """Return 3-way match data: PO vs GRN vs invoice for a purchase."""
+    try:
+        # Get purchase header
+        po = db.execute(text("""
+            SELECT p.id, p.invoice_no, p.total_amount, p.date, p.po_status,
+                   s.name AS supplier_name
+            FROM purchases p
+            LEFT JOIN suppliers s ON s.id = p.supplier_id
+            WHERE p.id = :pid OR p.id::text LIKE :prefix
+            LIMIT 1
+        """), {"pid": purchase_id, "prefix": f"{purchase_id}%"}).fetchone()
+        if not po:
+            raise HTTPException(status_code=404, detail="Purchase not found")
+
+        # Get purchase items
+        items = db.execute(text("""
+            SELECT pi.id, pr.name AS product_name,
+                   pi.quantity AS ordered_qty,
+                   pi.received_quantity AS received_qty,
+                   pi.unit_price AS ordered_price,
+                   pi.unit_price AS invoiced_price,
+                   pi.total_price
+            FROM purchase_items pi
+            JOIN products pr ON pr.id = pi.product_id
+            WHERE pi.purchase_id = :pid
+        """), {"pid": str(po[0])}).fetchall()
+
+        items_list = []
+        for it in items:
+            ordered_qty = float(it[2]) if it[2] else 0
+            received_qty = float(it[3]) if it[3] else ordered_qty
+            ordered_price = float(it[4]) if it[4] else 0
+            invoiced_price = float(it[5]) if it[5] else ordered_price
+            items_list.append({
+                "id": str(it[0]),
+                "product_name": it[1],
+                "ordered_qty": ordered_qty,
+                "received_qty": received_qty,
+                "qty_match": abs(ordered_qty - received_qty) < 0.01,
+                "ordered_price": ordered_price,
+                "invoiced_price": invoiced_price,
+                "price_match": abs(ordered_price - invoiced_price) < 0.01,
+                "total": float(it[6]) if it[6] else 0,
+            })
+
+        overall_match = all(i["qty_match"] and i["price_match"] for i in items_list)
+        return {
+            "purchase_id": str(po[0]),
+            "invoice_no": po[1],
+            "supplier_name": po[5] or "Unknown",
+            "po_date": str(po[3]) if po[3] else "",
+            "po_status": po[4] or "draft",
+            "total_amount": float(po[2]) if po[2] else 0,
+            "overall_match": overall_match,
+            "items": items_list,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
