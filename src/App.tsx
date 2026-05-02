@@ -50,6 +50,7 @@ import OpeningStockPage from "./pages/OpeningStockPage";
 import StockAdjustmentPage from "./pages/StockAdjustmentPage";
 import SupplierReturnPage from "./pages/SupplierReturnPage";
 import MultiBranchManagement from "./pages/MultiBranchManagement";
+import BiDashboard from "./pages/BiDashboard";
 
 const queryClient = new QueryClient();
 
@@ -477,6 +478,16 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <EnhancedReports />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports/bi-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <BiDashboard />
                     </Layout>
                   </ProtectedRoute>
                 }

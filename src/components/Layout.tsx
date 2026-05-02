@@ -219,6 +219,7 @@ const Layout = ({ children }: LayoutProps) => {
       label: "Reports & Analytics",
       icon: BarChart3,
       submenu: [
+        { path: "/reports/bi-dashboard", label: "BI Analytics", icon: BarChart3 },
         { path: "/reports/medicine", label: "Medicine Report", icon: Pill },
         { path: "/reports/sales", label: "Sales Report", icon: ShoppingCart },
         { path: "/reports/stock", label: "Stock Report", icon: Package },
