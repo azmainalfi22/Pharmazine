@@ -320,6 +320,9 @@ default_cors_origins = [
     "http://localhost:8081",
     "http://localhost:8082",
     "http://localhost:5173",
+    # Production frontend — always allowed even if CORS_ORIGINS env var is not set
+    "https://pharmazine.netlify.app",
+    "http://pharmazine.netlify.app",
 ]
 
 raw_cors_origins = os.getenv("CORS_ORIGINS")
