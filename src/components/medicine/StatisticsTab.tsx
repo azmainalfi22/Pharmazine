@@ -8,42 +8,67 @@ import { toast } from "sonner";
 
 import { logger } from "@/utils/logger";
 interface MedicineStatistics {
+  // Backend field names (pharmacy_routes.py / MedicineStatistics pydantic model)
+  total_medicines?: number;
+  total_batches?: number;
+  total_inventory_value?: number;
+  expiring_soon_count?: number;
+  low_stock_count?: number;
+  expired_count?: number;
+  expiring_value_at_risk?: number;
+  // Legacy aliases kept for zero-state defaults
+  total_products?: number;
+  total_stock_value?: number;
+  expiring_soon?: number;
+  low_stock_items?: number;
+  out_of_stock?: number;
+  total_manufacturers?: number;
+  average_stock_level?: number;
+}
+
+interface ManufacturerStatistics {
+  total_manufacturers?: number;
+  active_manufacturers?: number;
+  total_outstanding?: number;
+  // legacy
+  total_products_supplied?: number;
+  total_credit_limit?: number;
+  total_outstanding_balance?: number;
+}
+
+// Normalize backend response to consistent shape
+const normalizeMedStats = (d: MedicineStatistics) => ({
+  total_products: d.total_medicines ?? d.total_products ?? 0,
+  total_batches: d.total_batches ?? 0,
+  total_stock_value: d.total_inventory_value ?? d.total_stock_value ?? 0,
+  expiring_soon: d.expiring_soon_count ?? d.expiring_soon ?? 0,
+  low_stock_items: d.low_stock_count ?? d.low_stock_items ?? 0,
+  out_of_stock: d.expired_count ?? d.out_of_stock ?? 0,
+  expiring_value: d.expiring_value_at_risk ?? 0,
+});
+
+// Normalized shape used in the UI
+interface NormStats {
   total_products: number;
   total_batches: number;
   total_stock_value: number;
   expiring_soon: number;
   low_stock_items: number;
   out_of_stock: number;
-  total_manufacturers: number;
-  average_stock_level: number;
+  expiring_value: number;
 }
 
-interface ManufacturerStatistics {
-  total_manufacturers: number;
-  active_manufacturers: number;
-  total_products_supplied: number;
-  total_credit_limit: number;
-  total_outstanding_balance: number;
-}
+const ZERO_STATS: NormStats = {
+  total_products: 0, total_batches: 0, total_stock_value: 0,
+  expiring_soon: 0, low_stock_items: 0, out_of_stock: 0, expiring_value: 0,
+};
 
 export default function StatisticsTab() {
   const [loading, setLoading] = useState(false);
-  const [medicineStats, setMedicineStats] = useState<MedicineStatistics>({
-    total_products: 0,
-    total_batches: 0,
-    total_stock_value: 0,
-    expiring_soon: 0,
-    low_stock_items: 0,
-    out_of_stock: 0,
-    total_manufacturers: 0,
-    average_stock_level: 0
-  });
+  const [medicineStats, setMedicineStats] = useState<NormStats>(ZERO_STATS);
   const [manufacturerStats, setManufacturerStats] = useState<ManufacturerStatistics>({
     total_manufacturers: 0,
     active_manufacturers: 0,
-    total_products_supplied: 0,
-    total_credit_limit: 0,
-    total_outstanding_balance: 0
   });
 
   useEffect(() => {
@@ -64,7 +89,7 @@ export default function StatisticsTab() {
 
       if (medicineRes.ok) {
         const data = await medicineRes.json();
-        setMedicineStats(data);
+        setMedicineStats(normalizeMedStats(data));
       }
 
       if (manufacturerRes.ok) {
@@ -208,7 +233,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Stock Value</p>
                       <p className="text-3xl font-bold text-green-600 mt-2">
-                        ${medicineStats.total_stock_value.toFixed(2)}
+                        ৳{medicineStats.total_stock_value.toLocaleString("en-BD", { maximumFractionDigits: 0 })}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-green-600 opacity-20" />
@@ -220,9 +245,9 @@ export default function StatisticsTab() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground font-medium">Avg Stock Level</p>
+                      <p className="text-sm text-muted-foreground font-medium">At-Risk Value</p>
                       <p className="text-3xl font-bold text-indigo-600 mt-2">
-                        {medicineStats.average_stock_level.toFixed(1)}%
+                        ৳{medicineStats.expiring_value.toLocaleString("en-BD", { maximumFractionDigits: 0 })}
                       </p>
                     </div>
                     <TrendingUp className="w-12 h-12 text-indigo-600 opacity-20" />
@@ -262,7 +287,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Products Supplied</p>
                       <p className="text-3xl font-bold text-pink-600 mt-2">
-                        {manufacturerStats.total_products_supplied}
+                        {manufacturerStats.total_products_supplied ?? 0}
                       </p>
                     </div>
                     <Package className="w-12 h-12 text-pink-600 opacity-20" />
@@ -276,7 +301,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Credit Limit</p>
                       <p className="text-3xl font-bold text-emerald-600 mt-2">
-                        ${manufacturerStats.total_credit_limit.toFixed(2)}
+                        ৳{(manufacturerStats.total_credit_limit ?? 0).toLocaleString("en-BD", { maximumFractionDigits: 0 })}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-emerald-600 opacity-20" />
@@ -290,7 +315,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Outstanding Balance</p>
                       <p className="text-3xl font-bold text-amber-600 mt-2">
-                        ${manufacturerStats.total_outstanding_balance.toFixed(2)}
+                        ৳{(manufacturerStats.total_outstanding ?? manufacturerStats.total_outstanding_balance ?? 0).toLocaleString("en-BD", { maximumFractionDigits: 0 })}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-amber-600 opacity-20" />

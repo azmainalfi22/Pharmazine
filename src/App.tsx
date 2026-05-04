@@ -50,6 +50,7 @@ import OpeningStockPage from "./pages/OpeningStockPage";
 import StockAdjustmentPage from "./pages/StockAdjustmentPage";
 import SupplierReturnPage from "./pages/SupplierReturnPage";
 import MultiBranchManagement from "./pages/MultiBranchManagement";
+import MultiBranchDashboard from "./pages/MultiBranchDashboard";
 import BiDashboard from "./pages/BiDashboard";
 import ProcurementModule from "./pages/ProcurementModule";
 import PatientCRMModule from "./pages/PatientCRMModule";
@@ -63,7 +64,6 @@ function HomeRoute() {
   const roles = (user?.roles || []).map((r: any) => r.role);
   const isAdmin = roles.some((r: string) => ["admin", "super_admin"].includes(r));
   const isManager = roles.some((r: string) => ["manager", "pharmacy_manager"].includes(r));
-  if (isAdmin) return <Navigate to="/settings/system" replace />;
   if (isManager) return <Navigate to="/reports" replace />;
   return <EnhancedDashboard />;
 }
@@ -903,6 +903,16 @@ const App = () => (
                   <ProtectedRoute>
                     <Layout>
                       <MultiBranchManagement />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/multi-branch/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MultiBranchDashboard />
                     </Layout>
                   </ProtectedRoute>
                 }

@@ -816,38 +816,44 @@ def check_expired_batches(
 
 @router.get("/statistics/medicines", response_model=MedicineStatistics)
 def get_medicine_statistics(db: Session = Depends(get_db)):
-    """Get medicine statistics for dashboard"""
-    from main import Product
-    
-    total_medicines = db.query(func.count(Product.id)).scalar()
-    total_batches = db.query(func.count(MedicineBatch.id)).filter(MedicineBatch.is_active == True).scalar()
-    
-    # Expiring soon (within 90 days)
+    """Get medicine statistics for dashboard. Uses text() to avoid circular imports."""
+    try:
+        total_medicines = db.execute(text("SELECT COUNT(*) FROM products")).scalar() or 0
+    except Exception:
+        total_medicines = 0
+
+    total_batches = db.query(func.count(MedicineBatch.id)).filter(MedicineBatch.is_active == True).scalar() or 0
+
     expiring_soon = db.query(func.count(MedicineBatch.id)).filter(
         and_(
             MedicineBatch.is_active == True,
             MedicineBatch.expiry_date <= date.today() + timedelta(days=90),
             MedicineBatch.expiry_date > date.today()
         )
-    ).scalar()
-    
-    # Expired
+    ).scalar() or 0
+
     expired_count = db.query(func.count(MedicineBatch.id)).filter(
         and_(
             MedicineBatch.is_expired == True,
             MedicineBatch.quantity_remaining > 0
         )
-    ).scalar()
-    
-    # Low stock count (from view)
-    low_stock = db.execute(text("SELECT COUNT(*) FROM v_low_stock_medicines")).scalar()
-    
-    # Total inventory value
+    ).scalar() or 0
+
+    # Low stock: try view first, fallback to products table
+    try:
+        low_stock = db.execute(text("SELECT COUNT(*) FROM v_low_stock_medicines")).scalar() or 0
+    except Exception:
+        try:
+            low_stock = db.execute(text(
+                "SELECT COUNT(*) FROM products WHERE stock_quantity <= reorder_level AND stock_quantity > 0"
+            )).scalar() or 0
+        except Exception:
+            low_stock = 0
+
     inventory_value = db.query(
         func.sum(MedicineBatch.quantity_remaining * MedicineBatch.purchase_price)
     ).filter(MedicineBatch.is_active == True).scalar() or 0
-    
-    # Expiring value at risk
+
     expiring_value = db.query(
         func.sum(MedicineBatch.quantity_remaining * MedicineBatch.purchase_price)
     ).filter(
@@ -856,39 +862,39 @@ def get_medicine_statistics(db: Session = Depends(get_db)):
             MedicineBatch.expiry_date <= date.today() + timedelta(days=90)
         )
     ).scalar() or 0
-    
+
     return MedicineStatistics(
         total_medicines=total_medicines,
         total_batches=total_batches,
         expiring_soon_count=expiring_soon,
         expired_count=expired_count,
         low_stock_count=low_stock,
-        total_inventory_value=inventory_value,
-        expiring_value_at_risk=expiring_value
+        total_inventory_value=float(inventory_value),
+        expiring_value_at_risk=float(expiring_value)
     )
 
 
 @router.get("/statistics/manufacturers", response_model=ManufacturerStatistics)
 def get_manufacturer_statistics(db: Session = Depends(get_db)):
-    """Get manufacturer statistics"""
-    total = db.query(func.count(Manufacturer.id)).scalar()
-    active = db.query(func.count(Manufacturer.id)).filter(Manufacturer.is_active == True).scalar()
-    
+    """Get manufacturer statistics. Uses text() to avoid circular imports."""
+    total = db.query(func.count(Manufacturer.id)).scalar() or 0
+    active = db.query(func.count(Manufacturer.id)).filter(Manufacturer.is_active == True).scalar() or 0
     outstanding = db.query(func.sum(Manufacturer.current_balance)).scalar() or 0
-    
-    # This month purchases from Purchase table
-    from main import Purchase
-    from datetime import date
-    first_day_of_month = date.today().replace(day=1)
-    this_month_purchases = db.query(func.sum(Purchase.total_amount)).filter(
-        Purchase.date >= first_day_of_month.isoformat()
-    ).scalar() or 0
-    
+
+    try:
+        from datetime import date as dt
+        first_day = dt.today().replace(day=1).isoformat()
+        this_month_purchases = db.execute(text(
+            "SELECT COALESCE(SUM(total_amount),0) FROM purchases WHERE date >= :fd"
+        ), {"fd": first_day}).scalar() or 0
+    except Exception:
+        this_month_purchases = 0
+
     return ManufacturerStatistics(
         total_manufacturers=total,
         active_manufacturers=active,
-        total_outstanding=outstanding,
-        total_purchases_this_month=this_month_purchases,
+        total_outstanding=float(outstanding),
+        total_purchases_this_month=float(this_month_purchases),
         top_manufacturers=[]
     )
 

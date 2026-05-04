@@ -5323,6 +5323,66 @@ async def save_notification_preferences(req: NotifPrefsRequest, db: Session = De
 
 # ─── Phase H: Multi-Branch Endpoints ─────────────────────────────────────────
 
+@app.get("/api/branches")
+async def get_branches(db: Session = Depends(get_db)):
+    """Return all branches."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, name, address, phone, email, is_active, created_at
+            FROM branches
+            ORDER BY name
+        """)).fetchall()
+        return [
+            {
+                "id": r[0],
+                "name": r[1] or "",
+                "address": r[2] or "",
+                "phone": r[3] or "",
+                "email": r[4] or "",
+                "is_active": bool(r[5]) if r[5] is not None else True,
+                "created_at": str(r[6]) if r[6] else "",
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/branches/consolidated-pl")
+async def get_branches_consolidated_pl(days: int = 30, db: Session = Depends(get_db)):
+    """Return consolidated P&L grouped by branch for the last N days."""
+    try:
+        rows = db.execute(text("""
+            SELECT
+                COALESCE(b.name, 'Headquarters') AS branch_name,
+                COALESCE(SUM(s.total_amount), 0) AS total_revenue,
+                COALESCE(SUM(si.quantity * si.unit_price * 0.6), 0) AS total_cogs
+            FROM sales s
+            LEFT JOIN branches b ON b.id = s.branch_id
+            LEFT JOIN sale_items si ON si.sale_id = s.id
+            WHERE s.status != 'cancelled'
+              AND s.created_at >= now() - make_interval(days => :days)
+            GROUP BY COALESCE(b.name, 'Headquarters')
+            ORDER BY total_revenue DESC
+        """), {"days": days}).fetchall()
+        result = []
+        for r in rows:
+            revenue = float(r[1]) if r[1] else 0
+            cogs = float(r[2]) if r[2] else 0
+            profit = revenue - cogs
+            margin = (profit / revenue * 100) if revenue > 0 else 0
+            result.append({
+                "branch_name": r[0],
+                "total_revenue": revenue,
+                "total_cogs": cogs,
+                "gross_profit": profit,
+                "gross_margin": round(margin, 2),
+            })
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class BranchTransferRequest(BaseModel):
     from_branch_id: int
     to_branch_id: int
