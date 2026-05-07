@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -62,7 +64,6 @@ const queryClient = new QueryClient();
 function HomeRoute() {
   const { user } = useAuth();
   const roles = (user?.roles || []).map((r: any) => r.role);
-  const isAdmin = roles.some((r: string) => ["admin", "super_admin"].includes(r));
   const isManager = roles.some((r: string) => ["manager", "pharmacy_manager"].includes(r));
   if (isManager) return <Navigate to="/reports" replace />;
   return <EnhancedDashboard />;
@@ -81,6 +82,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <CurrencyProvider>
+            <LanguageProvider>
           <AppWithShortcuts>
             <Routes>
               <Route path="/auth" element={<Auth />} />
@@ -276,6 +279,16 @@ const App = () => (
               />
               <Route
                 path="/settings/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <NotificationsPage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
                 element={
                   <ProtectedRoute>
                     <Layout>
@@ -517,7 +530,27 @@ const App = () => (
                 }
               />
               <Route
+                path="/procurement"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <ProcurementModule />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/patients/crm"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <PatientCRMModule />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient-crm"
                 element={
                   <ProtectedRoute>
                     <Layout>
@@ -920,6 +953,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppWithShortcuts>
+            </LanguageProvider>
+          </CurrencyProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -10,7 +10,11 @@ import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { apiClient } from "@/integrations/api/client";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { useT } from "@/hooks/useT";
 export default function EnhancedDashboard() {
+  const { formatCurrency } = useCurrency();
+  const t = useT();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalSales: 0,

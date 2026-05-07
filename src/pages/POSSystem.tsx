@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -135,6 +136,7 @@ async function idbDelete(id: string): Promise<void> {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function POSSystem() {
+  const { formatCurrency, currency } = useCurrency();
   // Core state
   const [cart, setCart] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -558,7 +560,7 @@ export default function POSSystem() {
     // Validate splits
     const mainMethod = paymentSplits[0]?.method || "cash";
     if (mainMethod === "cash" && totalPaid < grandTotal) {
-      toast.error(`Insufficient payment: paid ৳${totalPaid.toFixed(2)}, need ৳${grandTotal.toFixed(2)}`);
+      toast.error(`Insufficient payment: paid ${formatCurrency(totalPaid)}, need ${formatCurrency(grandTotal)}`);
       return;
     }
 
@@ -808,7 +810,7 @@ export default function POSSystem() {
                             </div>
                             <div className="text-right">
                               <div className="font-bold text-primary">
-                                ৳{(product.selling_price || product.mrp).toFixed(2)}
+                                {formatCurrency((product.selling_price || product.mrp))}
                               </div>
                               {product.is_prescription_required && (
                                 <Badge variant="destructive" className="text-xs mt-1">Rx</Badge>
@@ -889,8 +891,8 @@ export default function POSSystem() {
                               <Plus className="w-3 h-3" />
                             </Button>
                           </div>
-                          <div className="text-sm text-muted-foreground">× ৳{item.unit_price.toFixed(2)}</div>
-                          <div className="ml-auto font-bold text-primary">৳{item.total_price.toFixed(2)}</div>
+                          <div className="text-sm text-muted-foreground">× {formatCurrency(item.unit_price)}</div>
+                          <div className="ml-auto font-bold text-primary">{formatCurrency(item.total_price)}</div>
                         </div>
                       </div>
                     ))}
@@ -911,11 +913,11 @@ export default function POSSystem() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="font-medium">৳{totals.itemsTotal.toFixed(2)}</span>
+                  <span className="font-medium">{formatCurrency(totals.itemsTotal)}</span>
                 </div>
 
                 <div>
-                  <Label className="text-xs">Discount (৳)</Label>
+                  <Label className="text-xs">Discount ({currency === "BDT" ? "৳" : "$"})</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -926,7 +928,7 @@ export default function POSSystem() {
                 </div>
 
                 <div>
-                  <Label className="text-xs">Additional Tax (৳)</Label>
+                  <Label className="text-xs">Additional Tax ({currency === "BDT" ? "৳" : "$"})</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -939,14 +941,14 @@ export default function POSSystem() {
                 {loyaltyRedeem > 0 && (
                   <div className="flex justify-between text-sm text-amber-600">
                     <span>Loyalty Redeem:</span>
-                    <span>-৳{loyaltyRedeem.toFixed(2)}</span>
+                    <span>-{formatCurrency(loyaltyRedeem)}</span>
                   </div>
                 )}
 
                 <div className="border-t pt-2">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total:</span>
-                    <span className="text-primary">৳{totals.grandTotal.toFixed(2)}</span>
+                    <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
                   </div>
                 </div>
               </div>
@@ -1011,13 +1013,13 @@ export default function POSSystem() {
                 {totalPaid > 0 && (
                   <div className={`text-sm font-medium flex justify-between ${totalPaid >= totals.grandTotal ? "text-green-600" : "text-red-500"}`}>
                     <span>Paid:</span>
-                    <span>৳{totalPaid.toFixed(2)}</span>
+                    <span>{formatCurrency(totalPaid)}</span>
                   </div>
                 )}
                 {totalPaid > totals.grandTotal && totals.grandTotal > 0 && (
                   <div className="text-sm text-green-600 flex justify-between">
                     <span>Change:</span>
-                    <span>৳{(totalPaid - totals.grandTotal).toFixed(2)}</span>
+                    <span>{formatCurrency((totalPaid - totals.grandTotal))}</span>
                   </div>
                 )}
               </div>
@@ -1077,10 +1079,10 @@ export default function POSSystem() {
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-lg text-primary">
-                        ৳{(batch.selling_price || 0).toFixed(2)}
+                        {formatCurrency((batch.selling_price || 0))}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        MRP: ৳{(batch.mrp || 0).toFixed(2)}
+                        MRP: {formatCurrency((batch.mrp || 0))}
                       </div>
                     </div>
                   </div>
@@ -1172,23 +1174,23 @@ export default function POSSystem() {
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
-                <span>৳{totals.itemsTotal.toFixed(2)}</span>
+                <span>{formatCurrency(totals.itemsTotal)}</span>
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-sm text-red-600">
                   <span>Discount{loyaltyRedeem > 0 ? ` (incl. ${loyaltyRedeem} pts)` : ""}:</span>
-                  <span>-৳{totals.discount.toFixed(2)}</span>
+                  <span>-{formatCurrency(totals.discount)}</span>
                 </div>
               )}
               {totals.tax > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>Tax:</span>
-                  <span>৳{totals.tax.toFixed(2)}</span>
+                  <span>{formatCurrency(totals.tax)}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold border-t pt-2">
                 <span>Grand Total:</span>
-                <span className="text-primary">৳{totals.grandTotal.toFixed(2)}</span>
+                <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
               </div>
 
               {/* C3: Payment splits summary */}
@@ -1197,13 +1199,13 @@ export default function POSSystem() {
               {paymentSplits.filter((s) => s.amount > 0).map((s, i) => (
                 <div key={i} className="flex justify-between text-sm">
                   <span className="capitalize">{s.method}:</span>
-                  <Badge variant="outline" className="capitalize">৳{s.amount.toFixed(2)}</Badge>
+                  <Badge variant="outline" className="capitalize">{formatCurrency(s.amount)}</Badge>
                 </div>
               ))}
               {totalPaid > totals.grandTotal && (
                 <div className="flex justify-between text-green-600 text-sm font-medium">
                   <span>Change:</span>
-                  <span>৳{(totalPaid - totals.grandTotal).toFixed(2)}</span>
+                  <span>{formatCurrency((totalPaid - totals.grandTotal))}</span>
                 </div>
               )}
               {!isOnline && (
@@ -1321,7 +1323,7 @@ function SalesReturnPanel({ onClose }: { onClose: () => void }) {
         <div className="space-y-3">
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="font-medium">{sale.customer_name}</p>
-            <p className="text-sm text-gray-600">Net Amount: ৳{sale.net_amount?.toFixed(2)}</p>
+            <p className="text-sm text-gray-600">Net Amount: {formatCurrency(sale.net_amount ?? 0)}</p>
             <p className="text-xs text-gray-400">ID: {sale.id}</p>
           </div>
           <div>

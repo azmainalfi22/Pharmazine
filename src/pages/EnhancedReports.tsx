@@ -15,7 +15,9 @@ import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 export default function EnhancedReports() {
+  const { formatCurrency } = useCurrency();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -458,7 +460,7 @@ export default function EnhancedReports() {
               <div className="text-xs text-white/70 mt-1">Total Sales</div>
             </div>
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
-              <div className="text-2xl font-bold text-white">৳{(salesStats.totalRevenue / 1000).toFixed(1)}k</div>
+              <div className="text-2xl font-bold text-white">{formatCurrency((salesStats.totalRevenue / 1000))}k</div>
               <div className="text-xs text-white/70 mt-1">Revenue</div>
             </div>
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg text-center">
@@ -624,7 +626,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold text-green-600">৳{salesStats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(salesStats.totalRevenue)}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-green-600 opacity-20" />
                 </div>
@@ -636,7 +638,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Est. Profit</p>
-                    <p className="text-2xl font-bold text-blue-600">৳{salesStats.totalProfit.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(salesStats.totalProfit)}</p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-blue-600 opacity-20" />
                 </div>
@@ -648,7 +650,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
-                    <p className="text-2xl font-bold">৳{salesStats.averageOrderValue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(salesStats.averageOrderValue)}</p>
                   </div>
                   <BarChart3 className="w-8 h-8 text-purple-600 opacity-20" />
                 </div>
@@ -700,10 +702,10 @@ export default function EnhancedReports() {
                         <TableRow key={sale.id}>
                           <TableCell>{format(new Date(sale.created_at), "dd MMM yyyy HH:mm")}</TableCell>
                           <TableCell className="font-medium">{sale.customer_name}</TableCell>
-                          <TableCell className="text-right">৳{parseFloat(sale.total_amount || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-right text-red-600">৳{parseFloat(sale.discount || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-right">৳{parseFloat(sale.tax || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-right font-bold">৳{parseFloat(sale.net_amount || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(parseFloat(sale.total_amount || 0))}</TableCell>
+                          <TableCell className="text-right text-red-600">{formatCurrency(parseFloat(sale.discount || 0))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(parseFloat(sale.tax || 0))}</TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency(parseFloat(sale.net_amount || 0))}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="pharmacy-badge capitalize">
                               {sale.payment_method}
@@ -750,7 +752,7 @@ export default function EnhancedReports() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="font-bold text-green-600">৳{customer.total.toFixed(2)}</div>
+                            <div className="font-bold text-green-600">{formatCurrency(customer.total)}</div>
                           </div>
                         </div>
                       ))}
@@ -784,7 +786,7 @@ export default function EnhancedReports() {
                               <CreditCard className="w-5 h-5 text-primary/50" />
                               <div className="font-medium capitalize">{method}</div>
                             </div>
-                            <div className="font-bold">৳{total.toFixed(2)}</div>
+                            <div className="font-bold">{formatCurrency(total)}</div>
                           </div>
                         ));
                     })()}
@@ -815,7 +817,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Stock Value</p>
-                    <p className="text-2xl font-bold text-green-600">৳{stockStats.totalValue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(stockStats.totalValue)}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-green-600 opacity-20" />
                 </div>
@@ -886,10 +888,10 @@ export default function EnhancedReports() {
                               {product.stock_quantity}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right">৳{parseFloat(product.cost_price || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-right">৳{parseFloat(product.selling_price || product.unit_price || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(parseFloat(product.cost_price || 0))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(parseFloat(product.selling_price || product.unit_price || 0))}</TableCell>
                           <TableCell className="text-right font-bold">
-                            ৳{(parseFloat(product.stock_quantity || 0) * parseFloat(product.cost_price || 0)).toFixed(2)}
+                            {formatCurrency((parseFloat(product.stock_quantity || 0) * parseFloat(product.cost_price || 0)))}
                           </TableCell>
                           <TableCell>
                             {parseFloat(product.stock_quantity || 0) <= parseFloat(product.min_stock_level || 0) ? (
@@ -942,9 +944,9 @@ export default function EnhancedReports() {
                           <TableCell className="font-medium">{alert.product_name}</TableCell>
                           <TableCell>{alert.batch_number}</TableCell>
                           <TableCell className="text-right">{alert.quantity_remaining}</TableCell>
-                          <TableCell className="text-right">৳{parseFloat(alert.purchase_price || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(parseFloat(alert.purchase_price || 0))}</TableCell>
                           <TableCell className="text-right font-bold text-red-600">
-                            ৳{parseFloat(alert.value_at_risk || 0).toFixed(2)}
+                            {formatCurrency(parseFloat(alert.value_at_risk || 0))}
                           </TableCell>
                           <TableCell>
                             {format(new Date(alert.expiry_date), "dd MMM yyyy")}
@@ -986,28 +988,28 @@ export default function EnhancedReports() {
                   <div className="rounded-lg border p-6 space-y-4">
                     <div className="flex justify-between items-center text-lg">
                       <span className="font-medium">Revenue</span>
-                      <span className="font-bold text-green-600">৳{financialData.totalSales.toFixed(2)}</span>
+                      <span className="font-bold text-green-600">{formatCurrency(financialData.totalSales)}</span>
                     </div>
 
                     <div className="flex justify-between items-center border-t pt-4">
                       <span className="text-muted-foreground">Cost of Goods Sold (COGS)</span>
-                      <span className="font-medium text-red-600">৳{financialData.cogs.toFixed(2)}</span>
+                      <span className="font-medium text-red-600">{formatCurrency(financialData.cogs)}</span>
                     </div>
 
                     <div className="flex justify-between items-center border-t pt-4">
                       <span className="font-medium">Gross Profit</span>
-                      <span className="font-bold text-blue-600">৳{financialData.grossProfit.toFixed(2)}</span>
+                      <span className="font-bold text-blue-600">{formatCurrency(financialData.grossProfit)}</span>
                     </div>
 
                     <div className="flex justify-between items-center border-t pt-4">
                       <span className="text-muted-foreground">Operating Expenses</span>
-                      <span className="font-medium text-red-600">৳{financialData.expenses.toFixed(2)}</span>
+                      <span className="font-medium text-red-600">{formatCurrency(financialData.expenses)}</span>
                     </div>
 
                     <div className="flex justify-between items-center border-t-2 border-primary pt-4">
                       <span className="text-xl font-bold">Net Profit</span>
                       <span className="text-3xl font-bold text-primary">
-                        ৳{financialData.netProfit.toFixed(2)}
+                        {formatCurrency(financialData.netProfit)}
                       </span>
                     </div>
 
@@ -1080,7 +1082,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold text-blue-600">৳{customerStats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(customerStats.totalRevenue)}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-blue-600 opacity-20" />
                 </div>
@@ -1092,7 +1094,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
-                    <p className="text-2xl font-bold">৳{customerStats.averageOrderValue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(customerStats.averageOrderValue)}</p>
                   </div>
                   <BarChart3 className="w-8 h-8 text-purple-600 opacity-20" />
                 </div>
@@ -1145,8 +1147,8 @@ export default function EnhancedReports() {
                           <TableCell>{customer.email || "N/A"}</TableCell>
                           <TableCell>{customer.phone || "N/A"}</TableCell>
                           <TableCell className="text-right">{customer.purchaseCount || 0}</TableCell>
-                          <TableCell className="text-right font-bold">৳{(customer.totalRevenue || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-right">৳{(customer.averageOrderValue || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency((customer.totalRevenue || 0))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency((customer.averageOrderValue || 0))}</TableCell>
                           <TableCell>
                             {customer.lastPurchase 
                               ? format(new Date(customer.lastPurchase), "dd MMM yyyy")
@@ -1183,7 +1185,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Purchase Value</p>
-                    <p className="text-2xl font-bold text-blue-600">৳{purchaseStats.totalValue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(purchaseStats.totalValue)}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-blue-600 opacity-20" />
                 </div>
@@ -1195,7 +1197,7 @@ export default function EnhancedReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Purchase</p>
-                    <p className="text-2xl font-bold text-green-600">৳{purchaseStats.averagePurchase.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(purchaseStats.averagePurchase)}</p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-green-600 opacity-20" />
                 </div>
@@ -1266,7 +1268,7 @@ export default function EnhancedReports() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right font-bold">
-                            ৳{parseFloat(purchase.total_amount || purchase.amount || 0).toFixed(2)}
+                            {formatCurrency(parseFloat(purchase.total_amount || purchase.amount || 0))}
                           </TableCell>
                           <TableCell className="max-w-xs truncate">{purchase.notes || "N/A"}</TableCell>
                         </TableRow>

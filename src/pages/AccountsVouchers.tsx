@@ -15,7 +15,9 @@ import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 export default function AccountsVouchers() {
+  const { formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState("journal");
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -205,7 +207,7 @@ export default function AccountsVouchers() {
                           <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
                           <TableCell><Badge variant="outline">{transaction.type}</Badge></TableCell>
                           <TableCell>{transaction.description || "-"}</TableCell>
-                          <TableCell className="text-right font-medium">৳{transaction.amount.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-medium">{formatCurrency(transaction.amount)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -236,7 +238,7 @@ export default function AccountsVouchers() {
                         <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{transaction.reference_id || "-"}</TableCell>
                         <TableCell>{transaction.description || "-"}</TableCell>
-                        <TableCell className="text-right font-medium text-green-600">৳{transaction.amount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-medium text-green-600">{formatCurrency(transaction.amount)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -265,7 +267,7 @@ export default function AccountsVouchers() {
                         <TableCell>{format(new Date(transaction.date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{transaction.reference_id || "-"}</TableCell>
                         <TableCell>{transaction.description || "-"}</TableCell>
-                        <TableCell className="text-right font-medium text-red-600">৳{transaction.amount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-medium text-red-600">{formatCurrency(transaction.amount)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

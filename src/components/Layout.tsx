@@ -44,6 +44,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LayoutProps {
   children: ReactNode;
@@ -52,6 +54,8 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { signOut, user } = useAuth();
   const location = useLocation();
+  const { currency, setCurrency } = useCurrency();
+  const { lang, setLang, t } = useLanguage();
   const [expandedMenus, setExpandedMenus] = useState<string[]>([
     "inventory",
     "purchase",
@@ -60,272 +64,272 @@ const Layout = ({ children }: LayoutProps) => {
   const isAdmin = (user?.roles || []).some((r) => r.role === "admin");
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
     {
       path: "/sales",
-      label: "POS & Sales",
+      label: t("nav.pos"),
       icon: ShoppingCart,
       submenu: [
-        { path: "/sales", label: "New Sale (POS)", icon: CreditCard },
-        { path: "/sales/history", label: "Sales History", icon: Receipt },
+        { path: "/sales", label: t("nav.newSale"), icon: CreditCard },
+        { path: "/sales/history", label: t("nav.salesHistory"), icon: Receipt },
         {
           path: "/inventory/stock-in/sales-return",
-          label: "Customer Returns",
+          label: t("nav.customerReturns"),
           icon: RotateCcw,
         },
       ],
     },
     {
       path: "/inventory",
-      label: "Inventory",
+      label: t("nav.inventory"),
       icon: Package,
       submenu: [
-        { path: "/inventory", label: "Products & Stock", icon: Package },
+        { path: "/inventory", label: t("nav.products"), icon: Package },
         {
           path: "/inventory/movements",
-          label: "Stock Movements",
+          label: t("nav.stockMovements"),
           icon: ArrowRightLeft,
         },
         {
           path: "/inventory/low-stock",
-          label: "Low Stock Alerts",
+          label: t("nav.lowStockAlerts"),
           icon: AlertTriangle,
         },
         {
           path: "/inventory/analytics",
-          label: "ABC Analysis",
+          label: t("nav.abcAnalysis"),
           icon: BarChart3,
         },
         {
           path: "/inventory/auto-reorder",
-          label: "Auto-Reorder",
+          label: t("nav.autoReorder"),
           icon: TrendingUp,
         },
         {
           path: "/inventory/stock-in/stock-adjustment",
-          label: "Physical Count",
+          label: t("nav.physicalCount"),
           icon: Settings,
         },
       ],
     },
     {
       path: "/purchase",
-      label: "Purchases & Suppliers",
+      label: t("nav.purchasesSuppliers"),
       icon: ShoppingBag,
       submenu: [
-        { path: "/setup/suppliers", label: "Manage Suppliers", icon: Truck },
-        { path: "/purchase", label: "Purchase Orders", icon: ShoppingCart },
-        { path: "/procurement/module", label: "Procurement Module", icon: Briefcase },
+        { path: "/setup/suppliers", label: t("nav.manageSuppliers"), icon: Truck },
+        { path: "/purchase", label: t("nav.purchaseOrders"), icon: ShoppingCart },
+        { path: "/procurement/module", label: t("nav.procurementModule"), icon: Briefcase },
         {
           path: "/inventory/stock-out/supplier-return",
-          label: "Return to Supplier",
+          label: t("nav.returnToSupplier"),
           icon: RotateCcw,
         },
       ],
     },
     {
       path: "/medicine-management",
-      label: "Medicine Management",
+      label: t("nav.medicineManagement"),
       icon: Pill,
       submenu: [
         {
           path: "/medicine-management/statistics",
-          label: "Statistics & Analytics",
+          label: t("nav.statisticsAnalytics"),
           icon: BarChart3,
         },
         {
           path: "/medicine-management/categories",
-          label: "Dosage Forms",
+          label: t("nav.dosageForms"),
           icon: FolderTree,
         },
         {
           path: "/medicine-management/types",
-          label: "Medicine Types",
+          label: t("nav.medicineTypes"),
           icon: Layers,
         },
         {
           path: "/medicine-management/units",
-          label: "Unit Types",
+          label: t("nav.unitTypes"),
           icon: Package2,
         },
         {
           path: "/medicine-management/manufacturers",
-          label: "Manufacturers",
+          label: t("nav.manufacturers"),
           icon: Building2,
         },
         {
           path: "/medicine-management/batches",
-          label: "Batch Tracking",
+          label: t("nav.batchTracking"),
           icon: Package,
         },
         {
           path: "/medicine-management/expiry-alerts",
-          label: "Expiry Alerts",
+          label: t("nav.expiryAlerts"),
           icon: AlertTriangle,
         },
         {
           path: "/medicine-management/waste",
-          label: "Waste & Damaged",
+          label: t("nav.wasteDamaged"),
           icon: AlertTriangle,
         },
         {
           path: "/medicine-management/transactions",
-          label: "Batch Transactions",
+          label: t("nav.batchTransactions"),
           icon: ArrowRightLeft,
         },
         {
           path: "/medicine-management/barcode",
-          label: "Barcode Generator",
+          label: t("nav.barcodeGenerator"),
           icon: Package2,
         },
         {
           path: "/medicine-management/discounts",
-          label: "Discounts & Pricing",
+          label: t("nav.discountsPricing"),
           icon: DollarSign,
         },
       ],
     },
-    { path: "/customers", label: "Customers", icon: Users },
-    { path: "/patients/crm", label: "Patient CRM", icon: Heart },
-    { path: "/patient-history", label: "Patient History", icon: FileText },
+    { path: "/customers", label: t("nav.customers"), icon: Users },
+    { path: "/patients/crm", label: t("nav.patients"), icon: Heart },
+    { path: "/patient-history", label: t("nav.patientHistory"), icon: FileText },
     {
       path: "/pharmacy-care",
-      label: "Pharmacy Care",
+      label: t("nav.pharmacyCare"),
       icon: Heart,
       submenu: [
         {
           path: "/prescriptions",
-          label: "Prescription Management",
+          label: t("nav.prescriptionMgmt"),
           icon: FileText,
         },
         {
           path: "/drug-interactions",
-          label: "Drug Interaction Checker",
+          label: t("nav.drugInteractions"),
           icon: Shield,
         },
-        { path: "/refill-reminders", label: "Refill Reminders", icon: Bell },
+        { path: "/refill-reminders", label: t("nav.refillReminders"), icon: Bell },
         {
           path: "/allergy-management",
-          label: "Allergy Management",
+          label: t("nav.allergyMgmt"),
           icon: AlertTriangle,
         },
         {
           path: "/insurance-claims",
-          label: "Insurance Claims",
+          label: t("nav.insuranceClaims"),
           icon: CreditCard,
         },
       ],
     },
-    { path: "/messages", label: "Internal Messages", icon: MessageSquare },
+    { path: "/messages", label: t("nav.internalMessages"), icon: MessageSquare },
     {
       path: "/reports",
-      label: "Reports & Analytics",
+      label: t("nav.reports"),
       icon: BarChart3,
       submenu: [
-        { path: "/reports/bi-dashboard", label: "BI Analytics", icon: BarChart3 },
-        { path: "/reports/medicine", label: "Medicine Report", icon: Pill },
-        { path: "/reports/sales", label: "Sales Report", icon: ShoppingCart },
-        { path: "/reports/stock", label: "Stock Report", icon: Package },
+        { path: "/reports/bi-dashboard", label: t("nav.biAnalytics"), icon: BarChart3 },
+        { path: "/reports/medicine", label: t("nav.medicineReport"), icon: Pill },
+        { path: "/reports/sales", label: t("nav.salesReport"), icon: ShoppingCart },
+        { path: "/reports/stock", label: t("nav.stockReport"), icon: Package },
         {
           path: "/reports/financial",
-          label: "Financial Report",
+          label: t("nav.financialReport"),
           icon: DollarSign,
         },
-        { path: "/reports/customer", label: "Customer Report", icon: Users },
+        { path: "/reports/customer", label: t("nav.customerReport"), icon: Users },
         {
           path: "/reports/purchase",
-          label: "Purchase Report",
+          label: t("nav.purchaseReport"),
           icon: TrendingUp,
         },
       ],
     },
     {
       path: "/payments",
-      label: "Payments & Finance",
+      label: t("nav.paymentsFinance"),
       icon: DollarSign,
       submenu: [
         {
           path: "/payments/dashboard",
-          label: "Financial Dashboard",
+          label: t("nav.financialDashboard"),
           icon: BarChart3,
         },
         {
           path: "/payments/collection",
-          label: "Payment Collection",
+          label: t("nav.paymentCollection"),
           icon: CreditCard,
         },
-        { path: "/payments/vouchers", label: "Vouchers", icon: FileText },
+        { path: "/payments/vouchers", label: t("nav.vouchers"), icon: FileText },
         {
           path: "/payments/receivables",
-          label: "Accounts Receivable",
+          label: t("nav.accountsReceivable"),
           icon: TrendingUp,
         },
         {
           path: "/payments/payables",
-          label: "Accounts Payable",
+          label: t("nav.accountsPayable"),
           icon: TrendingUp,
         },
-        { path: "/payments/cashflow", label: "Cash Flow", icon: DollarSign },
+        { path: "/payments/cashflow", label: t("nav.cashFlow"), icon: DollarSign },
       ],
     },
     // Optional Modules
-    { path: "/services", label: "Services & Appointments", icon: Stethoscope },
-    { path: "/crm", label: "CRM & Loyalty", icon: TrendingUp },
+    { path: "/services", label: t("nav.servicesAppointments"), icon: Stethoscope },
+    { path: "/crm", label: t("nav.crmLoyalty"), icon: TrendingUp },
     // Admin-only sections
     ...(isAdmin
-      ? [{ path: "/hrm", label: "HR & Payroll", icon: Briefcase }]
+      ? [{ path: "/hrm", label: t("nav.hrPayroll"), icon: Briefcase }]
       : []),
     ...(isAdmin
-      ? [{ path: "/users", label: "User Management", icon: Users }]
+      ? [{ path: "/users", label: t("nav.users"), icon: Users }]
       : []),
     ...(isAdmin
       ? [
-          { path: "/multi-branch", label: "Multi-Branch", icon: Building2 },
-          { path: "/multi-branch/dashboard", label: "Branch Dashboard", icon: Building2 },
-          { path: "/branch/transfers", label: "Inter-Branch Transfers", icon: ArrowRightLeft },
+          { path: "/multi-branch", label: t("nav.multiBranch"), icon: Building2 },
+          { path: "/multi-branch/dashboard", label: t("nav.multiBranchDashboard"), icon: Building2 },
+          { path: "/branch/transfers", label: t("nav.interBranchTransfers"), icon: ArrowRightLeft },
         ]
       : []),
     ...(isAdmin
       ? [
           {
             path: "/setup",
-            label: "System Setup",
+            label: t("nav.systemSetup"),
             icon: Settings,
             submenu: [
-              { path: "/setup", label: "Product Categories", icon: FolderTree },
+              { path: "/setup", label: t("nav.productCategories"), icon: FolderTree },
               {
                 path: "/inventory/stock-in/opening-stock",
-                label: "Opening Stock",
+                label: t("nav.openingStock"),
                 icon: Warehouse,
               },
               {
                 path: "/setup/companies",
-                label: "Company Info",
+                label: t("nav.companyInfo"),
                 icon: Building2,
               },
               {
                 path: "/settings/system",
-                label: "System Configuration",
+                label: t("nav.system"),
                 icon: Settings,
               },
               {
                 path: "/settings/security",
-                label: "Security & 2FA",
+                label: t("nav.security"),
                 icon: Shield,
               },
               {
                 path: "/settings/notifications",
-                label: "Notifications",
+                label: t("nav.notifications"),
                 icon: Bell,
               },
-              { path: "/settings/backups", label: "Backups", icon: Database },
+              { path: "/settings/backups", label: t("nav.backups"), icon: Database },
               {
                 path: "/settings/performance",
-                label: "Performance",
+                label: t("nav.performance"),
                 icon: TrendingUp,
               },
-              { path: "/import", label: "Import Data", icon: ArrowDownCircle },
-              { path: "/audit-logs", label: "Audit Logs", icon: FileText },
+              { path: "/import", label: t("nav.importData"), icon: ArrowDownCircle },
+              { path: "/audit-logs", label: t("nav.auditLogs"), icon: FileText },
             ],
           },
         ]
@@ -608,7 +612,23 @@ const Layout = ({ children }: LayoutProps) => {
 
           {/* Glassmorphic User Profile & Logout */}
           <div className="p-4 border-t border-white/20 dark:border-gray-700/30 backdrop-blur-xl">
-            <div className="mb-2 flex justify-end px-1">
+            <div className="mb-2 flex justify-end items-center gap-1.5 px-1">
+              {/* Currency toggle */}
+              <button
+                onClick={() => setCurrency(currency === "BDT" ? "USD" : "BDT")}
+                className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/60 dark:bg-gray-700/60 border border-white/40 dark:border-gray-600/40 hover:bg-primary/10 transition-colors text-primary"
+                title="Toggle currency"
+              >
+                {currency === "BDT" ? "৳ BDT" : "$ USD"}
+              </button>
+              {/* Language toggle */}
+              <button
+                onClick={() => setLang(lang === "en" ? "bn" : "en")}
+                className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/60 dark:bg-gray-700/60 border border-white/40 dark:border-gray-600/40 hover:bg-primary/10 transition-colors text-primary"
+                title="Toggle language"
+              >
+                {lang === "en" ? "EN" : "বাংলা"}
+              </button>
               <NotificationBell />
             </div>
             <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">

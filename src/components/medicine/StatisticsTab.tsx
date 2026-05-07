@@ -7,6 +7,7 @@ import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { toast } from "sonner";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface MedicineStatistics {
   // Backend field names (pharmacy_routes.py / MedicineStatistics pydantic model)
   total_medicines?: number;
@@ -64,6 +65,7 @@ const ZERO_STATS: NormStats = {
 };
 
 export default function StatisticsTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [medicineStats, setMedicineStats] = useState<NormStats>(ZERO_STATS);
   const [manufacturerStats, setManufacturerStats] = useState<ManufacturerStatistics>({
@@ -233,7 +235,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Stock Value</p>
                       <p className="text-3xl font-bold text-green-600 mt-2">
-                        ৳{medicineStats.total_stock_value.toLocaleString("en-BD", { maximumFractionDigits: 0 })}
+                        {formatCurrency(medicineStats.total_stock_value)}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-green-600 opacity-20" />
@@ -247,7 +249,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">At-Risk Value</p>
                       <p className="text-3xl font-bold text-indigo-600 mt-2">
-                        ৳{medicineStats.expiring_value.toLocaleString("en-BD", { maximumFractionDigits: 0 })}
+                        {formatCurrency(medicineStats.expiring_value)}
                       </p>
                     </div>
                     <TrendingUp className="w-12 h-12 text-indigo-600 opacity-20" />
@@ -301,7 +303,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Credit Limit</p>
                       <p className="text-3xl font-bold text-emerald-600 mt-2">
-                        ৳{(manufacturerStats.total_credit_limit ?? 0).toLocaleString("en-BD", { maximumFractionDigits: 0 })}
+                        {formatCurrency(manufacturerStats.total_credit_limit ?? 0)}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-emerald-600 opacity-20" />
@@ -315,7 +317,7 @@ export default function StatisticsTab() {
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Outstanding Balance</p>
                       <p className="text-3xl font-bold text-amber-600 mt-2">
-                        ৳{(manufacturerStats.total_outstanding ?? manufacturerStats.total_outstanding_balance ?? 0).toLocaleString("en-BD", { maximumFractionDigits: 0 })}
+                        {formatCurrency(manufacturerStats.total_outstanding ?? manufacturerStats.total_outstanding_balance ?? 0)}
                       </p>
                     </div>
                     <DollarSign className="w-12 h-12 text-amber-600 opacity-20" />

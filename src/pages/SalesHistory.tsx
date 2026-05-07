@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface Sale {
   id: string;
   customer_name: string;
@@ -25,6 +26,7 @@ interface Sale {
 }
 
 export default function SalesHistory() {
+  const { formatCurrency } = useCurrency();
   const [sales, setSales] = useState<Sale[]>([]);
   const [filteredSales, setFilteredSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -202,7 +204,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">REVENUE</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">৳{stats.totalRevenue.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.totalRevenue)}</div>
               <div className="text-xs text-white/70">Total Amount</div>
             </div>
 
@@ -211,7 +213,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CASH</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">৳{stats.cashSales.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.cashSales)}</div>
               <div className="text-xs text-white/70">Cash Sales</div>
             </div>
 
@@ -220,7 +222,7 @@ export default function SalesHistory() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CARD</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">৳{stats.cardSales.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.cardSales)}</div>
               <div className="text-xs text-white/70">Card Sales</div>
             </div>
           </div>
@@ -316,15 +318,15 @@ export default function SalesHistory() {
                       </TableCell>
                       <TableCell>{sale.customer_name}</TableCell>
                       <TableCell>{sale.customer_phone || "-"}</TableCell>
-                      <TableCell className="text-right">৳{sale.total_amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(sale.total_amount)}</TableCell>
                       <TableCell className="text-right">
-                        {sale.discount > 0 ? `৳${sale.discount.toFixed(2)}` : "-"}
+                        {sale.discount > 0 ? formatCurrency(sale.discount) : "-"}
                       </TableCell>
                       <TableCell className="text-right">
-                        {sale.tax > 0 ? `৳${sale.tax.toFixed(2)}` : "-"}
+                        {sale.tax > 0 ? formatCurrency(sale.tax) : "-"}
                       </TableCell>
                       <TableCell className="text-right font-bold text-primary">
-                        ৳{sale.net_amount.toFixed(2)}
+                        {formatCurrency(sale.net_amount)}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
