@@ -105,11 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Role-based post-login navigation
         const roleNames = (roles || []).map((r) => r.role);
-        const isAdmin = roleNames.some((r) => ["admin", "super_admin"].includes(r));
         const isManager = roleNames.some((r) => ["manager", "pharmacy_manager"].includes(r));
-        if (isAdmin) {
-          navigate("/settings/system", { replace: true });
-        } else if (isManager) {
+        if (isManager) {
           navigate("/reports", { replace: true });
         } else {
           navigate("/", { replace: true });
