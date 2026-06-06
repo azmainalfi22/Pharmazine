@@ -1403,6 +1403,13 @@ def require_admin():
 def require_manager():
     return require_roles(["admin", "manager", "pharmacy_manager"])
 
+def require_staff():
+    """Any authenticated staff member (admin, manager, pharmacy_manager, employee).
+    Used for day-to-day operational writes (products, purchases, customers, etc.)
+    so the whole pharmacy team can operate the system. Genuinely admin-only actions
+    (user/role management) continue to use require_admin()."""
+    return require_roles(["admin", "manager", "pharmacy_manager", "employee"])
+
 def require_permission(permission):
     """Require specific permission for endpoint access"""
     from rbac import RBACHelper
@@ -2641,7 +2648,7 @@ async def get_sale_items(sale_id: str, db: Session = Depends(get_db)):
     return db.query(SaleItem).filter(SaleItem.sale_id == sale_id).all()
 
 # POST endpoints for creating records
-@app.post("/api/categories", response_model=CategoryResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/categories", response_model=CategoryResponse, dependencies=[Depends(require_staff())])
 async def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
     db_category = Category(
         id=str(uuid.uuid4()),
@@ -2653,7 +2660,7 @@ async def create_category(category: CategoryCreate, db: Session = Depends(get_db
     write_audit_log(db, None, "create", "categories", db_category.id, None, {"name": db_category.name, "description": db_category.description})
     return db_category
 
-@app.post("/api/subcategories", response_model=SubcategoryResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/subcategories", response_model=SubcategoryResponse, dependencies=[Depends(require_staff())])
 async def create_subcategory(subcategory: SubcategoryCreate, db: Session = Depends(get_db)):
     db_subcategory = Subcategory(
         id=str(uuid.uuid4()),
@@ -2664,7 +2671,7 @@ async def create_subcategory(subcategory: SubcategoryCreate, db: Session = Depen
     db.refresh(db_subcategory)
     return db_subcategory
 
-@app.put("/api/subcategories/{subcategory_id}", response_model=SubcategoryResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/subcategories/{subcategory_id}", response_model=SubcategoryResponse, dependencies=[Depends(require_staff())])
 async def update_subcategory(subcategory_id: str, subcategory: SubcategoryCreate, db: Session = Depends(get_db)):
     db_subcategory = db.query(Subcategory).filter(Subcategory.id == subcategory_id).first()
     if not db_subcategory:
@@ -2677,7 +2684,7 @@ async def update_subcategory(subcategory_id: str, subcategory: SubcategoryCreate
     db.refresh(db_subcategory)
     return db_subcategory
 
-@app.delete("/api/subcategories/{subcategory_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/subcategories/{subcategory_id}", dependencies=[Depends(require_staff())])
 async def delete_subcategory(subcategory_id: str, db: Session = Depends(get_db)):
     db_subcategory = db.query(Subcategory).filter(Subcategory.id == subcategory_id).first()
     if not db_subcategory:
@@ -2687,7 +2694,7 @@ async def delete_subcategory(subcategory_id: str, db: Session = Depends(get_db))
     db.commit()
     return {"message": "Subcategory deleted successfully"}
 
-@app.post("/api/countries", response_model=CountryResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/countries", response_model=CountryResponse, dependencies=[Depends(require_staff())])
 async def create_country(country: CountryCreate, db: Session = Depends(get_db)):
     db_country = Country(
         id=str(uuid.uuid4()),
@@ -2698,7 +2705,7 @@ async def create_country(country: CountryCreate, db: Session = Depends(get_db)):
     db.refresh(db_country)
     return db_country
 
-@app.put("/api/countries/{country_id}", response_model=CountryResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/countries/{country_id}", response_model=CountryResponse, dependencies=[Depends(require_staff())])
 async def update_country(country_id: str, country: CountryCreate, db: Session = Depends(get_db)):
     db_country = db.query(Country).filter(Country.id == country_id).first()
     if not db_country:
@@ -2711,7 +2718,7 @@ async def update_country(country_id: str, country: CountryCreate, db: Session = 
     db.refresh(db_country)
     return db_country
 
-@app.delete("/api/countries/{country_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/countries/{country_id}", dependencies=[Depends(require_staff())])
 async def delete_country(country_id: str, db: Session = Depends(get_db)):
     db_country = db.query(Country).filter(Country.id == country_id).first()
     if not db_country:
@@ -2721,7 +2728,7 @@ async def delete_country(country_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Country deleted successfully"}
 
-@app.post("/api/suppliers", response_model=SupplierResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/suppliers", response_model=SupplierResponse, dependencies=[Depends(require_staff())])
 async def create_supplier(supplier: SupplierCreate, db: Session = Depends(get_db)):
     db_supplier = Supplier(
         id=str(uuid.uuid4()),
@@ -2732,7 +2739,7 @@ async def create_supplier(supplier: SupplierCreate, db: Session = Depends(get_db
     db.refresh(db_supplier)
     return db_supplier
 
-@app.post("/api/customers", response_model=CustomerResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/customers", response_model=CustomerResponse, dependencies=[Depends(require_staff())])
 async def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
     db_customer = Customer(
         id=str(uuid.uuid4()),
@@ -2743,7 +2750,7 @@ async def create_customer(customer: CustomerCreate, db: Session = Depends(get_db
     db.refresh(db_customer)
     return db_customer
 
-@app.post("/api/companies", response_model=CompanyResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/companies", response_model=CompanyResponse, dependencies=[Depends(require_staff())])
 async def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     db_company = Company(
         id=str(uuid.uuid4()),
@@ -2754,16 +2761,22 @@ async def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     db.refresh(db_company)
     return db_company
 
-@app.post("/api/products", response_model=ProductResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/products", response_model=ProductResponse, dependencies=[Depends(require_staff())])
 async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     # Check if SKU already exists
     existing_product = db.query(Product).filter(Product.sku == product.sku).first()
     if existing_product:
         raise HTTPException(status_code=400, detail="Product with this SKU already exists")
     
+    # Only pass keys that are real columns on the Product model. ProductCreate
+    # carries legacy fields (batch_number, expiry_date, manufacturing_date) that
+    # were moved to medicine_batches and no longer exist on Product — passing them
+    # to the constructor would raise a TypeError.
+    valid_cols = {c.name for c in Product.__table__.columns}
+    data = {k: v for k, v in product.model_dump().items() if k in valid_cols}
     db_product = Product(
         id=str(uuid.uuid4()),
-        **product.model_dump()
+        **data
     )
     db.add(db_product)
     db.commit()
@@ -2772,7 +2785,7 @@ async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     return db_product
 
 # UPDATE and DELETE endpoints
-@app.put("/api/categories/{category_id}", response_model=CategoryResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/categories/{category_id}", response_model=CategoryResponse, dependencies=[Depends(require_staff())])
 async def update_category(category_id: str, category: CategoryCreate, db: Session = Depends(get_db)):
     db_category = db.query(Category).filter(Category.id == category_id).first()
     if not db_category:
@@ -2786,7 +2799,7 @@ async def update_category(category_id: str, category: CategoryCreate, db: Sessio
     write_audit_log(db, None, "update", "categories", db_category.id, old_state, {"name": db_category.name, "description": db_category.description})
     return db_category
 
-@app.delete("/api/categories/{category_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/categories/{category_id}", dependencies=[Depends(require_staff())])
 async def delete_category(category_id: str, db: Session = Depends(get_db)):
     db_category = db.query(Category).filter(Category.id == category_id).first()
     if not db_category:
@@ -2797,7 +2810,7 @@ async def delete_category(category_id: str, db: Session = Depends(get_db)):
     write_audit_log(db, None, "delete", "categories", category_id, old_state, None)
     return {"message": "Category deleted successfully"}
 
-@app.put("/api/suppliers/{supplier_id}", response_model=SupplierResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/suppliers/{supplier_id}", response_model=SupplierResponse, dependencies=[Depends(require_staff())])
 async def update_supplier(supplier_id: str, supplier: SupplierCreate, db: Session = Depends(get_db)):
     db_supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
     if not db_supplier:
@@ -2810,7 +2823,7 @@ async def update_supplier(supplier_id: str, supplier: SupplierCreate, db: Sessio
     db.refresh(db_supplier)
     return db_supplier
 
-@app.delete("/api/suppliers/{supplier_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/suppliers/{supplier_id}", dependencies=[Depends(require_staff())])
 async def delete_supplier(supplier_id: str, db: Session = Depends(get_db)):
     db_supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
     if not db_supplier:
@@ -2820,7 +2833,7 @@ async def delete_supplier(supplier_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Supplier deleted successfully"}
 
-@app.put("/api/customers/{customer_id}", response_model=CustomerResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/customers/{customer_id}", response_model=CustomerResponse, dependencies=[Depends(require_staff())])
 async def update_customer(customer_id: str, customer: CustomerCreate, db: Session = Depends(get_db)):
     db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not db_customer:
@@ -2833,7 +2846,7 @@ async def update_customer(customer_id: str, customer: CustomerCreate, db: Sessio
     db.refresh(db_customer)
     return db_customer
 
-@app.delete("/api/customers/{customer_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/customers/{customer_id}", dependencies=[Depends(require_staff())])
 async def delete_customer(customer_id: str, db: Session = Depends(get_db)):
     db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not db_customer:
@@ -2843,7 +2856,7 @@ async def delete_customer(customer_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Customer deleted successfully"}
 
-@app.put("/api/products/{product_id}", response_model=ProductResponse, dependencies=[Depends(require_admin())])
+@app.put("/api/products/{product_id}", response_model=ProductResponse, dependencies=[Depends(require_staff())])
 async def update_product(product_id: str, product: ProductCreate, db: Session = Depends(get_db)):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
@@ -2855,15 +2868,17 @@ async def update_product(product_id: str, product: ProductCreate, db: Session = 
         if existing_product:
             raise HTTPException(status_code=400, detail="Product with this SKU already exists")
     
+    valid_cols = {c.name for c in Product.__table__.columns}
     for key, value in product.model_dump().items():
-        setattr(db_product, key, value)
-    
+        if key in valid_cols:
+            setattr(db_product, key, value)
+
     db.commit()
     db.refresh(db_product)
     write_audit_log(db, None, "update", "products", db_product.id, None, {"name": db_product.name, "sku": db_product.sku})
     return db_product
 
-@app.delete("/api/products/{product_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/products/{product_id}", dependencies=[Depends(require_staff())])
 async def delete_product(product_id: str, db: Session = Depends(get_db)):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
@@ -3355,7 +3370,7 @@ async def list_requisitions(db: Session = Depends(get_db), current_user: Profile
         q = q.filter(Requisition.requested_by == current_user.id)
     return q.order_by(Requisition.created_at.desc()).all()
 
-@app.post("/api/requisitions/{req_id}/approve", response_model=RequisitionResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/requisitions/{req_id}/approve", response_model=RequisitionResponse, dependencies=[Depends(require_staff())])
 async def approve_requisition(req_id: str, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
     req = db.query(Requisition).filter(Requisition.id == req_id).first()
     if not req:
@@ -3367,7 +3382,7 @@ async def approve_requisition(req_id: str, db: Session = Depends(get_db), curren
     db.refresh(req)
     return req
 
-@app.post("/api/requisitions/{req_id}/purchase", response_model=RequisitionResponse, dependencies=[Depends(require_admin())])
+@app.post("/api/requisitions/{req_id}/purchase", response_model=RequisitionResponse, dependencies=[Depends(require_staff())])
 async def mark_requisition_purchased(req_id: str, db: Session = Depends(get_db)):
     req = db.query(Requisition).filter(Requisition.id == req_id).first()
     if not req:
@@ -3378,7 +3393,7 @@ async def mark_requisition_purchased(req_id: str, db: Session = Depends(get_db))
     return req
 
 # Finance Endpoints (Admin only)
-@app.post("/api/transactions", dependencies=[Depends(require_admin())])
+@app.post("/api/transactions", dependencies=[Depends(require_staff())])
 async def create_transaction(payload: TransactionCreate, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
     tr = Transaction(
         id=str(uuid.uuid4()),
@@ -3393,7 +3408,7 @@ async def create_transaction(payload: TransactionCreate, db: Session = Depends(g
     db.commit()
     return {"id": tr.id}
 
-@app.get("/api/transactions", dependencies=[Depends(require_admin())])
+@app.get("/api/transactions", dependencies=[Depends(require_staff())])
 async def list_transactions(db: Session = Depends(get_db), from_date: Optional[str] = None, to_date: Optional[str] = None, type: Optional[str] = None):
     q = db.query(Transaction)
     if from_date:
@@ -3413,7 +3428,7 @@ async def list_transactions(db: Session = Depends(get_db), from_date: Optional[s
         } for t in q.order_by(Transaction.date.desc()).all()
     ]
 
-@app.post("/api/expenses", dependencies=[Depends(require_admin())])
+@app.post("/api/expenses", dependencies=[Depends(require_staff())])
 async def create_expense(payload: ExpenseCreate, db: Session = Depends(get_db)):
     ex = Expense(
         id=str(uuid.uuid4()),
@@ -3427,7 +3442,7 @@ async def create_expense(payload: ExpenseCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"id": ex.id}
 
-@app.get("/api/expenses", dependencies=[Depends(require_admin())])
+@app.get("/api/expenses", dependencies=[Depends(require_staff())])
 async def list_expenses(db: Session = Depends(get_db), from_date: Optional[str] = None, to_date: Optional[str] = None, category: Optional[str] = None):
     q = db.query(Expense)
     if from_date:
@@ -3446,7 +3461,7 @@ async def list_expenses(db: Session = Depends(get_db), from_date: Optional[str] 
         } for e in q.order_by(Expense.date.desc()).all()
     ]
 
-@app.get("/api/reports/finance/trial-balance", dependencies=[Depends(require_admin())])
+@app.get("/api/reports/finance/trial-balance", dependencies=[Depends(require_staff())])
 async def trial_balance_report(db: Session = Depends(get_db), from_date: Optional[str] = None, to_date: Optional[str] = None):
     # Sum transactions by type; simple model
     q = db.query(Transaction)
@@ -3460,7 +3475,7 @@ async def trial_balance_report(db: Session = Depends(get_db), from_date: Optiona
         totals[r.type] = totals.get(r.type, 0.0) + (r.amount or 0.0)
     return {"totals": totals}
 
-@app.get("/api/reports/profit-loss", dependencies=[Depends(require_admin())])
+@app.get("/api/reports/profit-loss", dependencies=[Depends(require_staff())])
 async def profit_loss_report(db: Session = Depends(get_db), from_date: Optional[str] = None, to_date: Optional[str] = None):
     sq = db.query(Sale)
     if from_date:
@@ -3496,7 +3511,7 @@ async def profit_loss_report(db: Session = Depends(get_db), from_date: Optional[
         "net_profit": net_profit
     }
 
-@app.get("/api/reports/stock/export", dependencies=[Depends(require_admin())])
+@app.get("/api/reports/stock/export", dependencies=[Depends(require_staff())])
 async def export_stock_csv(db: Session = Depends(get_db)):
     products = db.query(Product).all()
     sio = StringIO()
@@ -3510,7 +3525,7 @@ async def export_stock_csv(db: Session = Depends(get_db)):
         "Content-Disposition": "attachment; filename=stock_export.csv"
     })
 
-@app.get("/api/reports/sales/export", dependencies=[Depends(require_admin())])
+@app.get("/api/reports/sales/export", dependencies=[Depends(require_staff())])
 async def export_sales_csv(db: Session = Depends(get_db)):
     sales = db.query(Sale).order_by(Sale.created_at.desc()).all()
     sio = StringIO()
@@ -3651,7 +3666,7 @@ def _csv_stream(headers: list[str]):
     sio.seek(0)
     return sio
 
-@app.get("/api/import/templates/{kind}.csv", dependencies=[Depends(require_admin())])
+@app.get("/api/import/templates/{kind}.csv", dependencies=[Depends(require_staff())])
 async def download_template(kind: str):
     kind = kind.lower()
     if kind not in TEMPLATE_HEADERS:
@@ -3661,7 +3676,7 @@ async def download_template(kind: str):
         "Content-Disposition": f"attachment; filename={kind}_template.csv"
     })
 
-@app.post("/api/import/products", dependencies=[Depends(require_admin())])
+@app.post("/api/import/products", dependencies=[Depends(require_staff())])
 async def import_products(file: UploadFile = File(...), db: Session = Depends(get_db)):
     created = 0
     updated = 0
@@ -3710,7 +3725,7 @@ async def import_products(file: UploadFile = File(...), db: Session = Depends(ge
     db.commit()
     return {"created": created, "updated": updated}
 
-@app.post("/api/import/suppliers", dependencies=[Depends(require_admin())])
+@app.post("/api/import/suppliers", dependencies=[Depends(require_staff())])
 async def import_suppliers(file: UploadFile = File(...), db: Session = Depends(get_db)):
     created = 0
     with TextIOWrapper(file.file, encoding="utf-8") as f:
@@ -3733,7 +3748,7 @@ async def import_suppliers(file: UploadFile = File(...), db: Session = Depends(g
     db.commit()
     return {"created": created}
 
-@app.post("/api/import/customers", dependencies=[Depends(require_admin())])
+@app.post("/api/import/customers", dependencies=[Depends(require_staff())])
 async def import_customers(file: UploadFile = File(...), db: Session = Depends(get_db)):
     created = 0
     with TextIOWrapper(file.file, encoding="utf-8") as f:
@@ -3755,7 +3770,7 @@ async def import_customers(file: UploadFile = File(...), db: Session = Depends(g
     db.commit()
     return {"created": created}
 
-@app.post("/api/import/opening-stock", dependencies=[Depends(require_admin())])
+@app.post("/api/import/opening-stock", dependencies=[Depends(require_staff())])
 async def import_opening_stock(file: UploadFile = File(...), db: Session = Depends(get_db)):
     updated = 0
     with TextIOWrapper(file.file, encoding="utf-8") as f:
@@ -3852,7 +3867,7 @@ async def record_sale_payment(
     db.refresh(pay)
     return {"id": pay.id, "status": pay.status}
 
-@app.post("/api/payments/{payment_id}/clear", dependencies=[Depends(require_admin())])
+@app.post("/api/payments/{payment_id}/clear", dependencies=[Depends(require_staff())])
 async def clear_payment(payment_id: str, db: Session = Depends(get_db)):
     pay = db.query(SalePayment).filter(SalePayment.id == payment_id).first()
     if not pay:
@@ -3945,7 +3960,7 @@ async def get_grn(grn_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="GRN not found")
     return grn
 
-@app.post("/api/purchases", dependencies=[Depends(require_admin())])
+@app.post("/api/purchases", dependencies=[Depends(require_staff())])
 async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
     if not payload.items or len(payload.items) == 0:
         raise HTTPException(status_code=400, detail="Purchase must include items")
@@ -3992,7 +4007,7 @@ async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)
         items=[PurchaseItemResponse(**{k: getattr(it, k) for k in ['id', 'purchase_id', 'product_id', 'qty', 'unit', 'unit_price', 'total_price', 'batch_no', 'expiry_date', 'mrp', 'gst_percent']}) for it in items]
     )
 
-@app.put("/api/purchases/{purchase_id}", dependencies=[Depends(require_admin())])
+@app.put("/api/purchases/{purchase_id}", dependencies=[Depends(require_staff())])
 async def update_purchase(purchase_id: str, payload: PurchaseCreate, db: Session = Depends(get_db), current_user: Profile = Depends(get_current_user)):
     purchase = db.query(Purchase).filter(Purchase.id == purchase_id).first()
     if not purchase:
@@ -4046,7 +4061,7 @@ async def update_purchase(purchase_id: str, payload: PurchaseCreate, db: Session
         items=[PurchaseItemResponse(**{k: getattr(it, k) for k in ['id', 'purchase_id', 'product_id', 'qty', 'unit', 'unit_price', 'total_price', 'batch_no', 'expiry_date', 'mrp', 'gst_percent']}) for it in items]
     )
 
-@app.delete("/api/purchases/{purchase_id}", dependencies=[Depends(require_admin())])
+@app.delete("/api/purchases/{purchase_id}", dependencies=[Depends(require_staff())])
 async def delete_purchase(purchase_id: str, db: Session = Depends(get_db)):
     purchase = db.query(Purchase).filter(Purchase.id == purchase_id).first()
     if not purchase:
@@ -4059,7 +4074,7 @@ async def delete_purchase(purchase_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Purchase deleted successfully"}
 
-@app.post("/api/grn", dependencies=[Depends(require_admin())])
+@app.post("/api/grn", dependencies=[Depends(require_staff())])
 async def confirm_grn(payload: GRNCreate, db: Session = Depends(get_db)):
     purchase = db.query(Purchase).filter(Purchase.id == payload.purchase_id).first()
     if not purchase:

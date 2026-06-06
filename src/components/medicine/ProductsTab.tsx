@@ -192,8 +192,8 @@ export default function ProductsTab() {
     try {
       const payload = {
         ...form,
-        category_id: form.category_id || null,
-        supplier_id: form.supplier_id || null,
+        category_id: form.category_id && form.category_id !== "none" ? form.category_id : null,
+        supplier_id: form.supplier_id && form.supplier_id !== "none" ? form.supplier_id : null,
       };
       const url = editing
         ? `${API_CONFIG.API_ROOT}/products/${editing.id}`
@@ -465,12 +465,12 @@ export default function ProductsTab() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Category</Label>
-                  <Select value={form.category_id} onValueChange={v => f("category_id", v)}>
+                  <Select value={form.category_id || "none"} onValueChange={v => f("category_id", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">— None —</SelectItem>
+                      <SelectItem value="none">— None —</SelectItem>
                       {categories.map(c => (
                         <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                       ))}
@@ -479,12 +479,12 @@ export default function ProductsTab() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Default Supplier</Label>
-                  <Select value={form.supplier_id} onValueChange={v => f("supplier_id", v)}>
+                  <Select value={form.supplier_id || "none"} onValueChange={v => f("supplier_id", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select supplier" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">— None —</SelectItem>
+                      <SelectItem value="none">— None —</SelectItem>
                       {suppliers.map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                       ))}
