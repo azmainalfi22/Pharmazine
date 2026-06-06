@@ -774,20 +774,20 @@ def get_waste_products(
         SELECT
             w.id::text AS id,
             w.batch_id::text AS batch_id,
-            w.product_id,
+            w.product_id::text AS product_id,
             w.batch_number,
             w.quantity,
             w.reason,
             w.value_loss,
-            w.store_id,
+            w.store_id::text AS store_id,
             w.reported_by,
             w.approved_by,
             w.disposal_method,
             w.notes,
             w.created_at,
-            COALESCE(p.name, w.product_id) AS product_name
+            COALESCE(p.name, w.product_id::text) AS product_name
         FROM waste_products w
-        LEFT JOIN products p ON p.id::text = w.product_id
+        LEFT JOIN products p ON p.id::text = w.product_id::text
         {reason_filter}
         ORDER BY w.created_at DESC
         OFFSET :skip LIMIT :limit
