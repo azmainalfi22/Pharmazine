@@ -103,14 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(userData);
         localStorage.setItem("pharmazine_user", JSON.stringify(userData));
 
-        // Role-based post-login navigation
-        const roleNames = (roles || []).map((r) => r.role);
-        const isManager = roleNames.some((r) => ["manager", "pharmacy_manager"].includes(r));
-        if (isManager) {
-          navigate("/reports", { replace: true });
-        } else {
-          navigate("/", { replace: true });
-        }
+        // All users — regardless of role — land on the dashboard after login.
+        navigate("/", { replace: true });
         return true;
       }
 

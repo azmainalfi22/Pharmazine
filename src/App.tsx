@@ -2,9 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -62,10 +61,7 @@ import SecuritySettingsPage from "./pages/SecuritySettingsPage";
 const queryClient = new QueryClient();
 
 function HomeRoute() {
-  const { user } = useAuth();
-  const roles = (user?.roles || []).map((r: any) => r.role);
-  const isManager = roles.some((r: string) => ["manager", "pharmacy_manager"].includes(r));
-  if (isManager) return <Navigate to="/reports" replace />;
+  // Every user, regardless of role, lands on the dashboard.
   return <EnhancedDashboard />;
 }
 
