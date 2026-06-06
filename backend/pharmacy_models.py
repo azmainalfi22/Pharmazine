@@ -530,8 +530,9 @@ class WasteProductCreate(WasteProductBase):
 
 class WasteProductResponse(WasteProductBase):
     id: str
+    product_name: Optional[str] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -656,6 +657,9 @@ class MedicineStatistics(BaseModel):
     expiring_soon_count: int  # Within 90 days
     expired_count: int
     low_stock_count: int
+    out_of_stock_count: int = 0
+    total_manufacturers: int = 0
+    average_stock_level: float = 0.0
     total_inventory_value: Decimal
     expiring_value_at_risk: Decimal
 

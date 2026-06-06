@@ -768,14 +768,35 @@ def get_waste_products(
     reason: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Get waste products log"""
-    query = db.query(WasteProduct)
-    
+    """Get waste products log, with joined product name"""
+    reason_filter = "AND w.reason = :reason" if reason else ""
+    sql = text(f"""
+        SELECT
+            w.id::text AS id,
+            w.batch_id::text AS batch_id,
+            w.product_id,
+            w.batch_number,
+            w.quantity,
+            w.reason,
+            w.value_loss,
+            w.store_id,
+            w.reported_by,
+            w.approved_by,
+            w.disposal_method,
+            w.notes,
+            w.created_at,
+            COALESCE(p.name, w.product_id) AS product_name
+        FROM waste_products w
+        LEFT JOIN products p ON p.id::text = w.product_id
+        {reason_filter}
+        ORDER BY w.created_at DESC
+        OFFSET :skip LIMIT :limit
+    """)
+    params = {"skip": skip, "limit": limit}
     if reason:
-        query = query.filter(WasteProduct.reason == reason)
-    
-    waste = query.order_by(WasteProduct.created_at.desc()).offset(skip).limit(limit).all()
-    return waste
+        params["reason"] = reason
+    rows = db.execute(sql, params).fetchall()
+    return [dict(row._mapping) for row in rows]
 
 
 # ============================================
@@ -863,12 +884,38 @@ def get_medicine_statistics(db: Session = Depends(get_db)):
         )
     ).scalar() or 0
 
+    # Out of stock: products with 0 remaining quantity across all active batches
+    try:
+        out_of_stock = db.execute(text(
+            "SELECT COUNT(*) FROM products WHERE stock_quantity = 0 OR stock_quantity IS NULL"
+        )).scalar() or 0
+    except Exception:
+        out_of_stock = 0
+
+    # Total manufacturers
+    try:
+        total_manufacturers = db.query(func.count(Manufacturer.id)).scalar() or 0
+    except Exception:
+        total_manufacturers = 0
+
+    # Average stock level: average of (stock_quantity / NULLIF(max_stock_level,0) * 100)
+    try:
+        avg_level = db.execute(text(
+            "SELECT AVG(CASE WHEN max_stock_level > 0 THEN (stock_quantity::float / max_stock_level) * 100 ELSE NULL END) FROM products"
+        )).scalar()
+        average_stock_level = float(avg_level) if avg_level is not None else 0.0
+    except Exception:
+        average_stock_level = 0.0
+
     return MedicineStatistics(
         total_medicines=total_medicines,
         total_batches=total_batches,
         expiring_soon_count=expiring_soon,
         expired_count=expired_count,
         low_stock_count=low_stock,
+        out_of_stock_count=out_of_stock,
+        total_manufacturers=total_manufacturers,
+        average_stock_level=average_stock_level,
         total_inventory_value=float(inventory_value),
         expiring_value_at_risk=float(expiring_value)
     )

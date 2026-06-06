@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Building2, Package, DollarSign } from "lucide-react";
+import { Building2, Package } from "lucide-react";
 
 interface ManufacturerData {
   name: string;
@@ -11,9 +11,10 @@ interface ManufacturerData {
 
 interface ManufacturerPerformanceChartProps {
   data: ManufacturerData[];
+  formatCurrency?: (amount: number) => string;
 }
 
-export default function ManufacturerPerformanceChart({ data }: ManufacturerPerformanceChartProps) {
+export default function ManufacturerPerformanceChart({ data, formatCurrency = (n) => `$${n.toFixed(2)}` }: ManufacturerPerformanceChartProps) {
   const maxValue = Math.max(...data.map(d => d.totalValue));
 
   return (
@@ -45,8 +46,7 @@ export default function ManufacturerPerformanceChart({ data }: ManufacturerPerfo
                       {manufacturer.productsSupplied}
                     </div>
                     <div className="flex items-center gap-1 font-bold text-cyan-600">
-                      <DollarSign className="w-3 h-3" />
-                      ${manufacturer.totalValue.toFixed(2)}
+                      {formatCurrency(manufacturer.totalValue)}
                     </div>
                   </div>
                 </div>

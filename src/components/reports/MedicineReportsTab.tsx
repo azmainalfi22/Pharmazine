@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import ExpiryTrendChart from "@/components/reports/ExpiryTrendChart";
 import ManufacturerPerformanceChart from "@/components/reports/ManufacturerPerformanceChart";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 import { logger } from "@/utils/logger";
 interface MedicineReportData {
@@ -45,6 +46,7 @@ interface MedicineReportsTabProps {
 }
 
 export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProps) {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [medicineStats, setMedicineStats] = useState<MedicineReportData>({
     totalProducts: 0,
@@ -75,10 +77,22 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
       const statsRes = await fetch(`${API_CONFIG.PHARMACY_BASE}/statistics/medicines`, {
         headers: getAuthHeaders()
       });
-      
+
       if (statsRes.ok) {
         const stats = await statsRes.json();
-        setMedicineStats(stats);
+        // Map snake_case API response → camelCase interface
+        setMedicineStats(prev => ({
+          ...prev,
+          totalProducts: stats.total_medicines ?? 0,
+          totalBatches: stats.total_batches ?? 0,
+          totalStockValue: parseFloat(stats.total_inventory_value ?? 0),
+          expiringSoon: stats.expiring_soon_count ?? 0,
+          lowStockItems: stats.low_stock_count ?? 0,
+          outOfStock: stats.out_of_stock_count ?? 0,
+          totalManufacturers: stats.total_manufacturers ?? 0,
+          averageStockLevel: stats.average_stock_level ?? 0,
+          expiredValue: parseFloat(stats.expiring_value_at_risk ?? 0),
+        }));
       }
 
       // Load expiry alerts for breakdown
@@ -107,6 +121,23 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
         });
 
         setExpiryBreakdown(breakdown);
+
+        // Build expiry trend by grouping alerts by month
+        const trendMap: Record<string, { expired: number; expiringSoon: number; totalValue: number }> = {};
+        alerts.forEach((alert: any) => {
+          const month = format(new Date(alert.expiry_date), "MMM yyyy");
+          if (!trendMap[month]) trendMap[month] = { expired: 0, expiringSoon: 0, totalValue: 0 };
+          if (alert.alert_level === "expired") {
+            trendMap[month].expired += 1;
+          } else {
+            trendMap[month].expiringSoon += 1;
+          }
+          trendMap[month].totalValue += parseFloat(alert.value_at_risk || 0);
+        });
+        const trend = Object.entries(trendMap)
+          .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+          .map(([month, data]) => ({ month, ...data }));
+        setExpiryTrend(trend);
       }
 
       // Load waste products
@@ -117,8 +148,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
       if (wasteRes.ok) {
         const waste = await wasteRes.json();
         setWasteData(waste);
-        
-        const totalWaste = waste.reduce((sum: number, w: any) => sum + (w.value_loss || 0), 0);
+        const totalWaste = waste.reduce((sum: number, w: any) => sum + (parseFloat(w.value_loss) || 0), 0);
         setMedicineStats(prev => ({ ...prev, totalWasteValue: totalWaste }));
       }
 
@@ -181,18 +211,18 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
       ["INVENTORY SUMMARY"],
       ["Total Products", medicineStats.totalProducts],
       ["Total Batches", medicineStats.totalBatches],
-      ["Stock Value", `$${medicineStats.totalStockValue.toFixed(2)}`],
+      ["Stock Value", formatCurrency(medicineStats.totalStockValue)],
       ["Expiring Soon", medicineStats.expiringSoon],
       ["Low Stock Items", medicineStats.lowStockItems],
       ["Out of Stock", medicineStats.outOfStock],
       [],
       ["EXPIRY BREAKDOWN"],
       ["Alert Level", "Count", "Quantity", "Value at Risk"],
-      ...expiryBreakdown.map(e => [e.alert_level, e.count, e.total_quantity, `$${e.value_at_risk.toFixed(2)}`]),
+      ...expiryBreakdown.map(e => [e.alert_level, e.count, e.total_quantity, formatCurrency(e.value_at_risk)]),
       [],
       ["WASTE SUMMARY"],
       ["Total Waste Items", wasteData.length],
-      ["Total Financial Loss", `$${medicineStats.totalWasteValue.toFixed(2)}`]
+      ["Total Financial Loss", formatCurrency(medicineStats.totalWasteValue)]
     ].map(row => row.join(",")).join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -241,7 +271,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Stock Value</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">${medicineStats.totalStockValue.toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-green-600 mt-2">{formatCurrency(medicineStats.totalStockValue)}</p>
                   </div>
                   <DollarSign className="w-12 h-12 text-green-600 opacity-20" />
                 </div>
@@ -289,7 +319,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Waste Loss</p>
-                    <p className="text-3xl font-bold text-rose-600 mt-2">${medicineStats.totalWasteValue.toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-rose-600 mt-2">{formatCurrency(medicineStats.totalWasteValue)}</p>
                   </div>
                   <AlertTriangle className="w-12 h-12 text-rose-600 opacity-20" />
                 </div>
@@ -356,7 +386,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                           <TableCell className="text-right font-medium">{item.count}</TableCell>
                           <TableCell className="text-right">{item.total_quantity}</TableCell>
                           <TableCell className="text-right font-bold text-red-600">
-                            ${item.value_at_risk.toFixed(2)}
+                            {formatCurrency(item.value_at_risk)}
                           </TableCell>
                           <TableCell className="text-right">
                             <span className={percentage > 30 ? 'text-red-600 font-bold' : ''}>
@@ -375,7 +405,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                         {expiryBreakdown.reduce((sum, i) => sum + i.total_quantity, 0)}
                       </TableCell>
                       <TableCell className="text-right text-red-600">
-                        ${expiryBreakdown.reduce((sum, i) => sum + i.value_at_risk, 0).toFixed(2)}
+                        {formatCurrency(expiryBreakdown.reduce((sum, i) => sum + i.value_at_risk, 0))}
                       </TableCell>
                       <TableCell className="text-right">100%</TableCell>
                     </TableRow>
@@ -424,7 +454,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                       <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Financial Loss</p>
                         <p className="text-2xl font-bold text-rose-600">
-                          ${medicineStats.totalWasteValue.toFixed(2)}
+                          {formatCurrency(medicineStats.totalWasteValue)}
                         </p>
                       </CardContent>
                     </Card>
@@ -453,7 +483,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                             <TableCell className="capitalize">{waste.reason}</TableCell>
                             <TableCell className="text-right">{waste.quantity}</TableCell>
                             <TableCell className="text-right font-medium text-red-600">
-                              ${(waste.value_loss || 0).toFixed(2)}
+                              {formatCurrency(waste.value_loss || 0)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -465,9 +495,14 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </CardContent>
           </Card>
 
+          {/* Expiry Trend Chart */}
+          {expiryTrend.length > 0 && (
+            <ExpiryTrendChart data={expiryTrend} formatCurrency={formatCurrency} />
+          )}
+
           {/* Manufacturer Performance Chart */}
           {manufacturerData.length > 0 && (
-            <ManufacturerPerformanceChart data={manufacturerData} />
+            <ManufacturerPerformanceChart data={manufacturerData} formatCurrency={formatCurrency} />
           )}
 
           {/* Export Actions */}
