@@ -136,7 +136,7 @@ async function idbDelete(id: string): Promise<void> {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function POSSystem() {
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency, currency, EXCHANGE_RATE } = useCurrency();
   // Core state
   const [cart, setCart] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -566,15 +566,17 @@ export default function POSSystem() {
 
     const salePayload: Record<string, unknown> = {
       customer_name: customerInfo.name,
-      customer_phone: customerInfo.phone,
-      customer_email: customerInfo.email,
+      customer_phone: customerInfo.phone || null,
+      customer_email: customerInfo.email || null,
       total_amount: totals.itemsTotal,
-      discount: totals.discount,
+      // Use the actually-applied discount (capped at subtotal) so the backend
+      // net_amount validator (total_amount - discount + tax == net_amount) passes.
+      discount: totals.itemsTotal - totals.afterDiscount,
       tax: totals.tax,
       net_amount: grandTotal,
       payment_method: mainMethod,
       payment_status: "completed",
-      notes: paymentInfo.notes,
+      notes: paymentInfo.notes || null,
       created_by: null,
     };
 
@@ -921,8 +923,15 @@ export default function POSSystem() {
                   <Input
                     type="number"
                     step="0.01"
-                    value={paymentInfo.discount}
-                    onChange={(e) => setPaymentInfo({ ...paymentInfo, discount: parseFloat(e.target.value) || 0 })}
+                    value={
+                      currency === "USD"
+                        ? +(paymentInfo.discount / EXCHANGE_RATE).toFixed(2)
+                        : paymentInfo.discount
+                    }
+                    onChange={(e) => {
+                      const raw = parseFloat(e.target.value) || 0;
+                      setPaymentInfo({ ...paymentInfo, discount: currency === "USD" ? raw * EXCHANGE_RATE : raw });
+                    }}
                     className="pharmacy-input"
                   />
                 </div>
@@ -932,8 +941,15 @@ export default function POSSystem() {
                   <Input
                     type="number"
                     step="0.01"
-                    value={paymentInfo.tax}
-                    onChange={(e) => setPaymentInfo({ ...paymentInfo, tax: parseFloat(e.target.value) || 0 })}
+                    value={
+                      currency === "USD"
+                        ? +(paymentInfo.tax / EXCHANGE_RATE).toFixed(2)
+                        : paymentInfo.tax
+                    }
+                    onChange={(e) => {
+                      const raw = parseFloat(e.target.value) || 0;
+                      setPaymentInfo({ ...paymentInfo, tax: currency === "USD" ? raw * EXCHANGE_RATE : raw });
+                    }}
                     className="pharmacy-input"
                   />
                 </div>
@@ -978,9 +994,18 @@ export default function POSSystem() {
                       <Input
                         type="number"
                         step="0.01"
-                        value={split.amount || ""}
+                        value={
+                          split.amount
+                            ? currency === "USD"
+                              ? +(split.amount / EXCHANGE_RATE).toFixed(2)
+                              : split.amount
+                            : ""
+                        }
                         placeholder="Amount"
-                        onChange={(e) => updateSplit(i, { amount: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => {
+                          const raw = parseFloat(e.target.value) || 0;
+                          updateSplit(i, { amount: currency === "USD" ? raw * EXCHANGE_RATE : raw });
+                        }}
                         className="pharmacy-input"
                       />
                     </div>
