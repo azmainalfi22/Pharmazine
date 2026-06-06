@@ -5,10 +5,16 @@ type Currency = "BDT" | "USD";
 const EXCHANGE_RATE = 110; // 1 USD = 110 BDT
 
 function formatCurrency(amount: number, currency: Currency): string {
+  // Coerce undefined/null/NaN/Infinity to 0 so a single bad value can never
+  // throw during render (undefined.toLocaleString() would crash the whole app).
+  const safe = Number(amount);
+  const value = Number.isFinite(safe) ? safe : 0;
   if (currency === "USD") {
-    return "$" + (amount / EXCHANGE_RATE).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return "$" + (value / EXCHANGE_RATE).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  return "৳" + amount.toLocaleString("en-BD", { maximumFractionDigits: 0 });
+  // 2 decimals so displayed line totals stay consistent with the underlying
+  // math (rounding to whole taka made sums look like they didn't add up).
+  return "৳" + value.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 interface CurrencyContextValue {

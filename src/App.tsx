@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Layout from "@/components/Layout";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import Auth from "./pages/Auth";
@@ -81,6 +82,7 @@ const App = () => (
           <CurrencyProvider>
             <LanguageProvider>
           <AppWithShortcuts>
+            <ErrorBoundary>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route
@@ -958,6 +960,7 @@ const App = () => (
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ErrorBoundary>
           </AppWithShortcuts>
             </LanguageProvider>
           </CurrencyProvider>
