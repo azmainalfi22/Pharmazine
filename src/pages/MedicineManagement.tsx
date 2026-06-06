@@ -1288,6 +1288,7 @@ export default function MedicineManagement() {
             loading={loading}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
+            onRefresh={loadBatches}
           />
         </TabsContent>
 

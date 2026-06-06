@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface DiscountConfig {
   id: string;
   name: string;
@@ -37,6 +38,7 @@ interface DiscountTabProps {
 }
 
 export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabProps) {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [discounts, setDiscounts] = useState<DiscountConfig[]>([]);
   const [dialog, setDialog] = useState(false);
@@ -472,7 +474,7 @@ export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabPr
                       <TableCell className="text-right font-semibold">
                         {discount.discount_type === 'percentage' 
                           ? `${discount.discount_percentage}%`
-                          : `$${discount.discount_amount.toFixed(2)}`}
+                          : formatCurrency(discount.discount_amount)}
                       </TableCell>
                       <TableCell className="capitalize">{discount.applicable_to || 'all'}</TableCell>
                       <TableCell className="text-sm">

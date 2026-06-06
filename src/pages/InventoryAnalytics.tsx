@@ -10,6 +10,7 @@ import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface ProductAnalytics {
   product_id: string;
   product_name: string;
@@ -24,6 +25,7 @@ interface ProductAnalytics {
 }
 
 export default function InventoryAnalytics() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<ProductAnalytics[]>([]);
   const [days, setDays] = useState("30");
@@ -195,7 +197,7 @@ export default function InventoryAnalytics() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class A Products</p>
                 <p className="text-2xl font-bold">{stats.a.count}</p>
-                <p className="text-xs text-muted-foreground mt-1">${stats.a.revenue.toFixed(0)} ({stats.a.percentage.toFixed(1)}%)</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(stats.a.revenue)} ({stats.a.percentage.toFixed(1)}%)</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -209,7 +211,7 @@ export default function InventoryAnalytics() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class B Products</p>
                 <p className="text-2xl font-bold">{stats.b.count}</p>
-                <p className="text-xs text-muted-foreground mt-1">${stats.b.revenue.toFixed(0)} ({stats.b.percentage.toFixed(1)}%)</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(stats.b.revenue)} ({stats.b.percentage.toFixed(1)}%)</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Package className="h-6 w-6 text-blue-600" />
@@ -223,7 +225,7 @@ export default function InventoryAnalytics() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class C Products</p>
                 <p className="text-2xl font-bold">{stats.c.count}</p>
-                <p className="text-xs text-muted-foreground mt-1">${stats.c.revenue.toFixed(0)} ({stats.c.percentage.toFixed(1)}%)</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(stats.c.revenue)} ({stats.c.percentage.toFixed(1)}%)</p>
               </div>
               <div className="p-3 bg-gray-100 rounded-lg">
                 <Package className="h-6 w-6 text-gray-600" />
@@ -236,7 +238,7 @@ export default function InventoryAnalytics() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">${stats.total.toFixed(0)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.total)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{analytics.length} products</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -363,7 +365,7 @@ export default function InventoryAnalytics() {
                       </TableCell>
                       <TableCell className="text-right font-medium">{item.total_sold.toFixed(0)}</TableCell>
                       <TableCell className="text-right">{item.order_count}</TableCell>
-                      <TableCell className="text-right font-bold text-green-600">${item.total_revenue.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-bold text-green-600">{formatCurrency(item.total_revenue)}</TableCell>
                       <TableCell className="text-right">{item.avg_daily_sales.toFixed(2)}</TableCell>
                       <TableCell className="text-center">
                         <Badge variant={item.current_stock === 0 ? 'destructive' : 'outline'}>

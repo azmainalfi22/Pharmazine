@@ -9,6 +9,7 @@ import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { Link } from "react-router-dom";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface Product {
   id: string;
   name: string;
@@ -22,6 +23,7 @@ interface Product {
 }
 
 export default function LowStockAlerts() {
+  const { formatCurrency } = useCurrency();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -209,7 +211,7 @@ export default function LowStockAlerts() {
                           {product.min_stock_level || product.reorder_level || 10}
                         </TableCell>
                         <TableCell className="text-center font-bold text-blue-600">{quantityNeeded}</TableCell>
-                        <TableCell className="text-right font-medium">${estimatedCost.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(estimatedCost)}</TableCell>
                         <TableCell className="text-center">{getStockStatus(product)}</TableCell>
                       </TableRow>
                     );
@@ -225,7 +227,7 @@ export default function LowStockAlerts() {
                 <div>
                   <p className="text-sm font-medium">Total Items to Reorder: {products.length}</p>
                   <p className="text-sm text-muted-foreground">
-                    Estimated Total Cost: ${products.reduce((sum, p) => sum + getQuantityNeeded(p) * p.cost_price, 0).toFixed(2)}
+                    Estimated Total Cost: {formatCurrency(products.reduce((sum, p) => sum + getQuantityNeeded(p) * p.cost_price, 0))}
                   </p>
                 </div>
                 <Link to="/purchase">

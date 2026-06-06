@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface LowStockAlert {
   product_id: string;
@@ -61,6 +62,7 @@ export default function LowStockAlertTab({
   searchTerm,
   setSearchTerm,
 }: LowStockAlertTabProps) {
+  const { formatCurrency } = useCurrency();
   const getAlertColor = (level: string) => {
     switch (level) {
       case "critical":
@@ -185,7 +187,7 @@ export default function LowStockAlertTab({
               <div>
                 <p className="text-sm text-muted-foreground">Total Value</p>
                 <p className="text-2xl font-bold text-primary">
-                  ${stats.totalValue.toFixed(2)}
+                  {formatCurrency(stats.totalValue)}
                 </p>
               </div>
               <DollarSign className="w-8 h-8 text-primary opacity-20" />
@@ -318,7 +320,7 @@ export default function LowStockAlertTab({
                         </span>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ${alert.total_value.toFixed(2)}
+                        {formatCurrency(alert.total_value)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge

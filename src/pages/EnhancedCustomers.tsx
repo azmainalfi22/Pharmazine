@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Customer {
   id: string;
@@ -37,6 +38,7 @@ interface Customer {
 }
 
 export default function EnhancedCustomers() {
+  const { formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -256,7 +258,7 @@ export default function EnhancedCustomers() {
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">OUTSTANDING</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">${totalRevenue.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(totalRevenue)}</div>
               <div className="text-xs text-white/70">Total Balance</div>
             </div>
 
@@ -303,7 +305,7 @@ export default function EnhancedCustomers() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Credit</p>
-                <p className="text-2xl font-bold">${stats.totalCredit.toFixed(2)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.totalCredit)}</p>
               </div>
               <CreditCard className="w-8 h-8 text-blue-600 opacity-20" />
             </div>
@@ -315,7 +317,7 @@ export default function EnhancedCustomers() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Outstanding</p>
-                <p className="text-2xl font-bold text-red-600">${stats.totalOutstanding.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalOutstanding)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-red-600 opacity-20" />
             </div>
@@ -587,11 +589,11 @@ export default function EnhancedCustomers() {
                       </TableCell>
                       <TableCell>{customer.company || "-"}</TableCell>
                       <TableCell className="text-right">
-                        ${(customer.credit_limit || 0).toFixed(2)}
+                        {formatCurrency(customer.credit_limit || 0)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className={(customer.current_balance || 0) > 0 ? "text-red-600 font-medium" : "text-green-600"}>
-                          ${(customer.current_balance || 0).toFixed(2)}
+                          {formatCurrency(customer.current_balance || 0)}
                         </span>
                       </TableCell>
                       <TableCell className="text-center">

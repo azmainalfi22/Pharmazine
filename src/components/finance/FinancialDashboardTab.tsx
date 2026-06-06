@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { format, subDays } from "date-fns";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface FinancialDashboardData {
   cashInHand: number;
   bankBalance: number;
@@ -20,6 +21,7 @@ interface FinancialDashboardData {
 }
 
 export default function FinancialDashboardTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState<FinancialDashboardData>({
     cashInHand: 0,
@@ -123,7 +125,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Cash in Hand</p>
                     <p className="text-3xl font-bold text-green-600 mt-2">
-                      ${dashboardData.cashInHand.toFixed(2)}
+                      {formatCurrency(dashboardData.cashInHand)}
                     </p>
                   </div>
                   <Wallet className="w-12 h-12 text-green-600 opacity-20" />
@@ -137,7 +139,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Bank Balance</p>
                     <p className="text-3xl font-bold text-blue-600 mt-2">
-                      ${dashboardData.bankBalance.toFixed(2)}
+                      {formatCurrency(dashboardData.bankBalance)}
                     </p>
                   </div>
                   <CreditCard className="w-12 h-12 text-blue-600 opacity-20" />
@@ -151,7 +153,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Receivables</p>
                     <p className="text-3xl font-bold text-orange-600 mt-2">
-                      ${dashboardData.totalReceivables.toFixed(2)}
+                      {formatCurrency(dashboardData.totalReceivables)}
                     </p>
                   </div>
                   <ArrowUpCircle className="w-12 h-12 text-orange-600 opacity-20" />
@@ -165,7 +167,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Payables</p>
                     <p className="text-3xl font-bold text-red-600 mt-2">
-                      ${dashboardData.totalPayables.toFixed(2)}
+                      {formatCurrency(dashboardData.totalPayables)}
                     </p>
                   </div>
                   <ArrowDownCircle className="w-12 h-12 text-red-600 opacity-20" />
@@ -182,7 +184,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Today's Revenue</p>
                     <p className="text-2xl font-bold text-emerald-600 mt-1">
-                      ${dashboardData.todayRevenue.toFixed(2)}
+                      {formatCurrency(dashboardData.todayRevenue)}
                     </p>
                   </div>
                   <Calendar className="w-10 h-10 text-emerald-600 opacity-20" />
@@ -196,7 +198,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">This Week</p>
                     <p className="text-2xl font-bold text-teal-600 mt-1">
-                      ${dashboardData.weekRevenue.toFixed(2)}
+                      {formatCurrency(dashboardData.weekRevenue)}
                     </p>
                   </div>
                   <BarChart3 className="w-10 h-10 text-teal-600 opacity-20" />
@@ -210,7 +212,7 @@ export default function FinancialDashboardTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">This Month</p>
                     <p className="text-2xl font-bold text-cyan-600 mt-1">
-                      ${dashboardData.monthRevenue.toFixed(2)}
+                      {formatCurrency(dashboardData.monthRevenue)}
                     </p>
                   </div>
                   <TrendingUp className="w-10 h-10 text-cyan-600 opacity-20" />
@@ -229,7 +231,7 @@ export default function FinancialDashboardTab() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="text-3xl font-bold text-indigo-600">
-                    ${workingCapital.toFixed(2)}
+                    {formatCurrency(workingCapital)}
                   </div>
                   <div className={`text-sm ${workingCapital >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {workingCapital >= 0 ? 'Positive' : 'Negative'}
@@ -238,15 +240,15 @@ export default function FinancialDashboardTab() {
                 <div className="mt-4 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Cash + Bank:</span>
-                    <span className="font-medium">${(dashboardData.cashInHand + dashboardData.bankBalance).toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(dashboardData.cashInHand + dashboardData.bankBalance)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Receivables:</span>
-                    <span className="font-medium text-green-600">+${dashboardData.totalReceivables.toFixed(2)}</span>
+                    <span className="font-medium text-green-600">+{formatCurrency(dashboardData.totalReceivables)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payables:</span>
-                    <span className="font-medium text-red-600">-${dashboardData.totalPayables.toFixed(2)}</span>
+                    <span className="font-medium text-red-600">-{formatCurrency(dashboardData.totalPayables)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -268,8 +270,8 @@ export default function FinancialDashboardTab() {
                 </div>
                 <Progress value={dashboardData.profitMargin} className="h-3 mb-4" />
                 <div className="text-sm text-muted-foreground">
-                  Revenue: ${dashboardData.monthRevenue.toFixed(2)} | 
-                  Est. Profit: ${(dashboardData.monthRevenue * dashboardData.profitMargin / 100).toFixed(2)}
+                  Revenue: {formatCurrency(dashboardData.monthRevenue)} |
+                  Est. Profit: {formatCurrency(dashboardData.monthRevenue * dashboardData.profitMargin / 100)}
                 </div>
               </CardContent>
             </Card>

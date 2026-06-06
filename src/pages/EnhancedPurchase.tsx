@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
-
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { logger } from "@/utils/logger";
 interface PurchaseItem {
   id?: string;
@@ -67,7 +67,7 @@ interface Purchase {
 
 export default function EnhancedPurchase() {
   logger.debug("🛒 EnhancedPurchase component rendering");
-  
+  const { formatCurrency } = useCurrency();
   const [activeTab, setActiveTab] = useState("create");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -448,7 +448,7 @@ export default function EnhancedPurchase() {
               </div>
               <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
                 <div className="text-xs text-white/70 font-medium">TOTAL</div>
-                <div className="text-xl font-bold text-white">${totals.grandTotal.toFixed(0)}</div>
+                <div className="text-xl font-bold text-white">{formatCurrency(totals.grandTotal)}</div>
               </div>
             </div>
           </div>
@@ -595,10 +595,10 @@ export default function EnhancedPurchase() {
                               </TableCell>
                               <TableCell>{format(new Date(item.expiry_date), "dd MMM yyyy")}</TableCell>
                               <TableCell className="text-right">{item.qty}</TableCell>
-                              <TableCell className="text-right">${item.unit_price.toFixed(2)}</TableCell>
-                              <TableCell className="text-right">${item.mrp.toFixed(2)}</TableCell>
+                              <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
+                              <TableCell className="text-right">{formatCurrency(item.mrp)}</TableCell>
                               <TableCell className="text-right">{item.gst_percent}%</TableCell>
-                              <TableCell className="text-right font-medium">${item.total_price.toFixed(2)}</TableCell>
+                              <TableCell className="text-right font-medium">{formatCurrency(item.total_price)}</TableCell>
                               <TableCell>
                                 <div className="flex gap-2">
                                   <Button
@@ -641,7 +641,7 @@ export default function EnhancedPurchase() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Items Total:</span>
-                      <span className="font-medium">${totals.itemsTotal.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(totals.itemsTotal)}</span>
                     </div>
                     
                     <div>
@@ -656,7 +656,7 @@ export default function EnhancedPurchase() {
 
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">After Discount:</span>
-                      <span className="font-medium">${totals.afterDiscount.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(totals.afterDiscount)}</span>
                     </div>
 
                     <div className="border-t pt-2">
@@ -708,7 +708,7 @@ export default function EnhancedPurchase() {
                     <div className="border-t pt-2">
                       <div className="flex justify-between text-lg font-bold">
                         <span>Grand Total:</span>
-                        <span className="text-primary">${totals.grandTotal.toFixed(2)}</span>
+                        <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
                       </div>
                     </div>
 
@@ -725,7 +725,7 @@ export default function EnhancedPurchase() {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Balance:</span>
                       <span className="font-medium text-red-600">
-                        ${(totals.grandTotal - (purchaseForm.paid_amount || 0)).toFixed(2)}
+                        {formatCurrency(totals.grandTotal - (purchaseForm.paid_amount || 0))}
                       </span>
                     </div>
                   </div>
@@ -820,10 +820,10 @@ export default function EnhancedPurchase() {
                           </TableCell>
                           <TableCell>{purchase.supplier_name || "-"}</TableCell>
                           <TableCell>{format(new Date(purchase.date || purchase.created_at), "dd MMM yyyy")}</TableCell>
-                          <TableCell className="text-right">${purchase.total_amount.toFixed(2)}</TableCell>
-                          <TableCell className="text-right">${(purchase.paid_amount || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(purchase.total_amount)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(purchase.paid_amount || 0)}</TableCell>
                           <TableCell className="text-right text-red-600 font-medium">
-                            ${(purchase.balance_amount || (purchase.total_amount - (purchase.paid_amount || 0))).toFixed(2)}
+                            {formatCurrency(purchase.balance_amount || (purchase.total_amount - (purchase.paid_amount || 0)))}
                           </TableCell>
                           <TableCell>
                             <Badge variant={purchase.payment_status === "completed" ? "default" : "secondary"}>
@@ -1010,7 +1010,7 @@ export default function EnhancedPurchase() {
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Total:</span>
                       <span className="text-xl font-bold text-primary">
-                        ${calculateItemTotal(itemForm).total.toFixed(2)}
+                        {formatCurrency(calculateItemTotal(itemForm).total)}
                       </span>
                     </div>
                   </div>

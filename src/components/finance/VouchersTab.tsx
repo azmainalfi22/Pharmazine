@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface Voucher {
   id: string;
   voucher_number: string;
@@ -28,6 +29,7 @@ interface Voucher {
 }
 
 export default function VouchersTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,7 +116,7 @@ export default function VouchersTab() {
               <div>
                 <p className="text-sm text-muted-foreground">Payment Vouchers</p>
                 <p className="text-2xl font-bold text-red-600">{stats.payments}</p>
-                <p className="text-xs text-muted-foreground mt-1">${stats.totalPayments.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(stats.totalPayments)}</p>
               </div>
               <DollarSign className="w-10 h-10 text-red-600 opacity-20" />
             </div>
@@ -127,7 +129,7 @@ export default function VouchersTab() {
               <div>
                 <p className="text-sm text-muted-foreground">Receipt Vouchers</p>
                 <p className="text-2xl font-bold text-green-600">{stats.receipts}</p>
-                <p className="text-xs text-muted-foreground mt-1">${stats.totalReceipts.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(stats.totalReceipts)}</p>
               </div>
               <DollarSign className="w-10 h-10 text-green-600 opacity-20" />
             </div>
@@ -140,7 +142,7 @@ export default function VouchersTab() {
               <div>
                 <p className="text-sm text-muted-foreground">Net Cash Flow</p>
                 <p className={`text-2xl font-bold ${stats.totalReceipts - stats.totalPayments >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ${(stats.totalReceipts - stats.totalPayments).toFixed(2)}
+                  {formatCurrency(stats.totalReceipts - stats.totalPayments)}
                 </p>
               </div>
               <DollarSign className="w-10 h-10 text-purple-600 opacity-20" />
@@ -310,7 +312,7 @@ export default function VouchersTab() {
                           </TableCell>
                           <TableCell>{voucher.party_name}</TableCell>
                           <TableCell className="text-right font-bold">
-                            ${voucher.amount.toFixed(2)}
+                            {formatCurrency(voucher.amount)}
                           </TableCell>
                           <TableCell className="capitalize">{voucher.payment_mode}</TableCell>
                           <TableCell>

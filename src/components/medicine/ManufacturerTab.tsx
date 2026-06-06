@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { logger } from "@/utils/logger";
-const API_BASE = "http://localhost:8000/api/pharmacy";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 interface Manufacturer {
   id: string;
@@ -53,6 +54,7 @@ export default function ManufacturerTab({
   setSearchTerm,
   onRefresh
 }: ManufacturerTabProps) {
+  const { formatCurrency } = useCurrency();
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState<Manufacturer | null>(null);
   const [form, setForm] = useState({
@@ -74,11 +76,6 @@ export default function ManufacturerTab({
     is_active: true
   });
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error("Manufacturer name is required");
@@ -87,12 +84,12 @@ export default function ManufacturerTab({
 
     try {
       const url = editing
-        ? `${API_BASE}/manufacturers/${editing.id}`
-        : `${API_BASE}/manufacturers`;
-      
+        ? `${API_CONFIG.PHARMACY_BASE}/manufacturers/${editing.id}`
+        : `${API_CONFIG.PHARMACY_BASE}/manufacturers`;
+
       const response = await fetch(url, {
         method: editing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        headers: getAuthHeaders(),
         body: JSON.stringify(form)
       });
 
@@ -120,9 +117,9 @@ export default function ManufacturerTab({
     if (!confirm("Are you sure you want to delete this manufacturer?")) return;
     
     try {
-      const response = await fetch(`${API_BASE}/manufacturers/${id}`, {
+      const response = await fetch(`${API_CONFIG.PHARMACY_BASE}/manufacturers/${id}`, {
         method: "DELETE",
-        headers: getAuthHeader()
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         toast.success("Manufacturer deleted successfully");
@@ -477,12 +474,12 @@ export default function ManufacturerTab({
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <CreditCard className="w-3 h-3" />
-                        ${(manufacturer.credit_limit || 0).toFixed(2)}
+                        {formatCurrency(manufacturer.credit_limit || 0)}
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       <span className={(manufacturer.current_balance || 0) > 0 ? "text-red-600" : "text-green-600"}>
-                        ${(manufacturer.current_balance || 0).toFixed(2)}
+                        {formatCurrency(manufacturer.current_balance || 0)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">

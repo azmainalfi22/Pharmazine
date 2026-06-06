@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface ExpiryAlert {
   batch_id: string;
@@ -35,15 +36,16 @@ interface ExpiryAlertTabProps {
   setExpiryFilter: (filter: string) => void;
 }
 
-export default function ExpiryAlertTab({ 
-  alerts, 
-  loading, 
-  searchTerm, 
+export default function ExpiryAlertTab({
+  alerts,
+  loading,
+  searchTerm,
   setSearchTerm,
   expiryFilter,
   setExpiryFilter
 }: ExpiryAlertTabProps) {
-  
+  const { formatCurrency } = useCurrency();
+
   const getAlertColor = (level: string) => {
     switch (level) {
       case "expired": return "destructive";
@@ -168,7 +170,7 @@ export default function ExpiryAlertTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Value at Risk</p>
-                <p className="text-2xl font-bold text-primary">${stats.totalValue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(stats.totalValue)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-primary opacity-20" />
             </div>
@@ -299,10 +301,10 @@ export default function ExpiryAlertTab({
                         {alert.quantity_remaining}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${alert.purchase_price.toFixed(2)}
+                        {formatCurrency(alert.purchase_price)}
                       </TableCell>
                       <TableCell className="text-right font-bold text-red-600">
-                        ${alert.value_at_risk.toFixed(2)}
+                        {formatCurrency(alert.value_at_risk)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge 
@@ -324,7 +326,7 @@ export default function ExpiryAlertTab({
               <div className="flex justify-between items-center text-sm">
                 <span className="font-medium">Total Alerts: {filteredAlerts.length}</span>
                 <span className="font-bold text-red-600">
-                  Total Value at Risk: ${filteredAlerts.reduce((sum, a) => sum + a.value_at_risk, 0).toFixed(2)}
+                  Total Value at Risk: {formatCurrency(filteredAlerts.reduce((sum, a) => sum + a.value_at_risk, 0))}
                 </span>
               </div>
             </div>

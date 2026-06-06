@@ -38,6 +38,7 @@ import apiClient from '@/integrations/api/client';
 import { API_CONFIG, apiCall } from '@/config/api';
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 // Types
 interface FinancialDashboard {
   cash_in_hand: number;
@@ -104,6 +105,7 @@ interface CashFlowItem {
 }
 
 const PaymentsFinance = () => {
+  const { formatCurrency } = useCurrency();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -424,7 +426,7 @@ const PaymentsFinance = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">Cash in Hand</p>
                           <p className="text-2xl font-bold text-green-600">
-                            ${(dashboard?.cash_in_hand || 0).toFixed(2)}
+                            {formatCurrency(dashboard?.cash_in_hand || 0)}
                           </p>
                         </div>
                         <Wallet className="h-10 w-10 text-green-600 opacity-20" />
@@ -438,7 +440,7 @@ const PaymentsFinance = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">Bank Balance</p>
                           <p className="text-2xl font-bold text-blue-600">
-                            ${(dashboard?.bank_balance || 0).toFixed(2)}
+                            {formatCurrency(dashboard?.bank_balance || 0)}
                           </p>
                         </div>
                         <Building2 className="h-10 w-10 text-blue-600 opacity-20" />
@@ -452,7 +454,7 @@ const PaymentsFinance = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">Receivables</p>
                           <p className="text-2xl font-bold text-orange-600">
-                            ${(dashboard?.total_receivables || 0).toFixed(2)}
+                            {formatCurrency(dashboard?.total_receivables || 0)}
                           </p>
                         </div>
                         <ArrowUpRight className="h-10 w-10 text-orange-600 opacity-20" />
@@ -466,7 +468,7 @@ const PaymentsFinance = () => {
                         <div>
                           <p className="text-sm text-muted-foreground">Payables</p>
                           <p className="text-2xl font-bold text-red-600">
-                            ${(dashboard?.total_payables || 0).toFixed(2)}
+                            {formatCurrency(dashboard?.total_payables || 0)}
                           </p>
                         </div>
                         <ArrowDownRight className="h-10 w-10 text-red-600 opacity-20" />
@@ -481,8 +483,8 @@ const PaymentsFinance = () => {
                       <CardTitle className="text-sm">Today's Revenue</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">${(dashboard?.today_revenue || 0).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Expenses: ${(dashboard?.today_expenses || 0).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(dashboard?.today_revenue || 0)}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Expenses: {formatCurrency(dashboard?.today_expenses || 0)}</p>
                     </CardContent>
                   </Card>
 
@@ -491,7 +493,7 @@ const PaymentsFinance = () => {
                       <CardTitle className="text-sm">Week Revenue</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">${(dashboard?.week_revenue || 0).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(dashboard?.week_revenue || 0)}</p>
                     </CardContent>
                   </Card>
 
@@ -500,7 +502,7 @@ const PaymentsFinance = () => {
                       <CardTitle className="text-sm">Month Revenue</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">${(dashboard?.month_revenue || 0).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(dashboard?.month_revenue || 0)}</p>
                       <p className="text-xs text-muted-foreground mt-1">Profit Margin: {(dashboard?.profit_margin || 0).toFixed(1)}%</p>
                     </CardContent>
                   </Card>
@@ -656,7 +658,7 @@ const PaymentsFinance = () => {
                             ) : '-'}
                           </TableCell>
                           <TableCell className="text-right font-bold text-green-600">
-                            ${payment.amount.toFixed(2)}
+                            {formatCurrency(payment.amount)}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
@@ -786,7 +788,7 @@ const PaymentsFinance = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>{format(new Date(voucher.date), 'dd MMM yyyy')}</TableCell>
-                          <TableCell className="text-right font-bold">${voucher.amount.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency(voucher.amount)}</TableCell>
                           <TableCell className="max-w-xs truncate">{voucher.description}</TableCell>
                           <TableCell>
                             <Badge variant={voucher.status === 'approved' ? 'default' : 'secondary'}>
@@ -823,7 +825,7 @@ const PaymentsFinance = () => {
                   <div className="mb-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <p className="text-sm text-muted-foreground">Total Outstanding</p>
                     <p className="text-2xl font-bold text-orange-600">
-                      ${receivables.reduce((sum, r) => sum + r.balance, 0).toFixed(2)}
+                      {formatCurrency(receivables.reduce((sum, r) => sum + r.balance, 0))}
                     </p>
                   </div>
                   <div className="rounded-md border">
@@ -845,9 +847,9 @@ const PaymentsFinance = () => {
                             <TableCell className="font-mono">{receivable.invoice_no}</TableCell>
                             <TableCell>{receivable.customer_name}</TableCell>
                             <TableCell>{format(new Date(receivable.invoice_date), 'dd MMM yyyy')}</TableCell>
-                            <TableCell className="text-right">${receivable.amount.toFixed(2)}</TableCell>
-                            <TableCell className="text-right text-green-600">${receivable.paid_amount.toFixed(2)}</TableCell>
-                            <TableCell className="text-right font-bold text-orange-600">${receivable.balance.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(receivable.amount)}</TableCell>
+                            <TableCell className="text-right text-green-600">{formatCurrency(receivable.paid_amount)}</TableCell>
+                            <TableCell className="text-right font-bold text-orange-600">{formatCurrency(receivable.balance)}</TableCell>
                             <TableCell>
                               <Badge variant={receivable.status === 'partial' ? 'secondary' : 'outline'}>
                                 {receivable.status}
@@ -884,7 +886,7 @@ const PaymentsFinance = () => {
                   <div className="mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
                     <p className="text-sm text-muted-foreground">Total Outstanding</p>
                     <p className="text-2xl font-bold text-red-600">
-                      ${payables.reduce((sum, p) => sum + p.balance, 0).toFixed(2)}
+                      {formatCurrency(payables.reduce((sum, p) => sum + p.balance, 0))}
                     </p>
                   </div>
                   <div className="rounded-md border">
@@ -901,8 +903,8 @@ const PaymentsFinance = () => {
                         {payables.map((payable) => (
                           <TableRow key={payable.supplier_id}>
                             <TableCell className="font-medium">{payable.supplier_name}</TableCell>
-                            <TableCell className="text-right">${payable.credit_limit.toFixed(2)}</TableCell>
-                            <TableCell className="text-right font-bold text-red-600">${payable.balance.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(payable.credit_limit)}</TableCell>
+                            <TableCell className="text-right font-bold text-red-600">{formatCurrency(payable.balance)}</TableCell>
                             <TableCell>
                               <Badge variant={payable.status === 'exceeded' ? 'destructive' : 'default'}>
                                 {payable.status === 'exceeded' && <AlertCircle className="w-3 h-3 mr-1" />}
@@ -929,7 +931,7 @@ const PaymentsFinance = () => {
                   <CardTitle className="text-sm">Opening Balance</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xl font-bold">${cashFlowSummary.opening_balance.toFixed(2)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(cashFlowSummary.opening_balance)}</p>
                 </CardContent>
               </Card>
 
@@ -939,7 +941,7 @@ const PaymentsFinance = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xl font-bold text-green-600">
-                    +${cashFlowSummary.total_cash_in.toFixed(2)}
+                    +{formatCurrency(cashFlowSummary.total_cash_in)}
                   </p>
                 </CardContent>
               </Card>
@@ -950,7 +952,7 @@ const PaymentsFinance = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xl font-bold text-red-600">
-                    -${cashFlowSummary.total_cash_out.toFixed(2)}
+                    -{formatCurrency(cashFlowSummary.total_cash_out)}
                   </p>
                 </CardContent>
               </Card>
@@ -961,7 +963,7 @@ const PaymentsFinance = () => {
                 </CardHeader>
                 <CardContent>
                   <p className={`text-xl font-bold ${cashFlowSummary.net_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {cashFlowSummary.net_cash_flow >= 0 ? '+' : ''}${cashFlowSummary.net_cash_flow.toFixed(2)}
+                    {cashFlowSummary.net_cash_flow >= 0 ? '+' : ''}{formatCurrency(cashFlowSummary.net_cash_flow)}
                   </p>
                 </CardContent>
               </Card>
@@ -971,7 +973,7 @@ const PaymentsFinance = () => {
                   <CardTitle className="text-sm">Closing Balance</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xl font-bold">${cashFlowSummary.closing_balance.toFixed(2)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(cashFlowSummary.closing_balance)}</p>
                 </CardContent>
               </Card>
             </div>
@@ -1002,10 +1004,10 @@ const PaymentsFinance = () => {
                         {cashFlow.map((item, index) => (
                           <TableRow key={index}>
                             <TableCell>{format(new Date(item.date), 'dd MMM yyyy')}</TableCell>
-                            <TableCell className="text-right text-green-600">+${item.cash_in.toFixed(2)}</TableCell>
-                            <TableCell className="text-right text-red-600">-${item.cash_out.toFixed(2)}</TableCell>
+                            <TableCell className="text-right text-green-600">+{formatCurrency(item.cash_in)}</TableCell>
+                            <TableCell className="text-right text-red-600">-{formatCurrency(item.cash_out)}</TableCell>
                             <TableCell className={`text-right font-bold ${item.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {item.net_flow >= 0 ? '+' : ''}${item.net_flow.toFixed(2)}
+                              {item.net_flow >= 0 ? '+' : ''}{formatCurrency(item.net_flow)}
                             </TableCell>
                             <TableCell className="text-right">{item.transaction_count}</TableCell>
                           </TableRow>

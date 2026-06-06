@@ -457,17 +457,18 @@ def get_medicine_batches(
     query = db.query(MedicineBatch)
     
     if product_id:
-        query = query.filter(MedicineBatch.product_id == product_id)
-    
+        # product_id is uuid in live DB but String in model — use explicit text cast
+        query = query.filter(text("product_id::text = :pid")).params(pid=str(product_id))
+
     if batch_number:
         query = query.filter(MedicineBatch.batch_number.ilike(f"%{batch_number}%"))
-    
+
     if is_active is not None:
         query = query.filter(MedicineBatch.is_active == is_active)
-    
+
     if is_expired is not None:
         query = query.filter(MedicineBatch.is_expired == is_expired)
-    
+
     if store_id:
         query = query.filter(MedicineBatch.store_id == store_id)
     
@@ -478,7 +479,7 @@ def get_medicine_batches(
     for batch in batches:
         batch_dict = {
             "id": str(batch.id),
-            "product_id": batch.product_id,
+            "product_id": str(batch.product_id) if batch.product_id else "",
             "batch_number": batch.batch_number,
             "manufacture_date": batch.manufacture_date,
             "expiry_date": batch.expiry_date,
@@ -522,14 +523,10 @@ def create_medicine_batch(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new medicine batch"""
-    # Check if batch already exists
+    # Check if batch already exists (product_id is uuid in DB, use ::text cast)
     existing = db.query(MedicineBatch).filter(
-        and_(
-            MedicineBatch.product_id == batch.product_id,
-            MedicineBatch.batch_number == batch.batch_number,
-            MedicineBatch.store_id == batch.store_id
-        )
-    ).first()
+        text("product_id::text = :pid AND batch_number = :bn")
+    ).params(pid=str(batch.product_id), bn=batch.batch_number).first()
     
     if existing:
         raise HTTPException(status_code=400, detail="Batch already exists for this product and store")
@@ -558,7 +555,18 @@ def create_medicine_batch(
         notes=f"Initial stock for batch {batch.batch_number}"
     )
     db.add(transaction)
-    
+
+    # Also update product.stock_quantity so POS / reports reflect the new stock
+    try:
+        from main import Product
+        product = db.query(Product).filter(
+            text("id::text = :pid")
+        ).params(pid=str(batch.product_id)).first()
+        if product:
+            product.stock_quantity = (product.stock_quantity or 0) + int(batch.quantity_received)
+    except Exception:
+        pass  # Non-fatal
+
     db.commit()
     db.refresh(db_batch)
     return db_batch
@@ -626,11 +634,10 @@ def get_low_stock_alerts(db: Session = Depends(get_db)):
     
     results = []
     for product in query:
-        # Calculate current stock from batches
+        # Calculate current stock from batches (product_id is uuid in DB, use ::text cast)
         batches = db.query(MedicineBatch).filter(
-            MedicineBatch.product_id == product.id,
-            MedicineBatch.is_active == True
-        ).all()
+            text("product_id::text = :pid AND is_active = TRUE")
+        ).params(pid=str(product.id)).all()
         
         current_stock = sum(float(b.quantity_remaining or 0) for b in batches)
         reorder_level = float(product.reorder_level or 0)

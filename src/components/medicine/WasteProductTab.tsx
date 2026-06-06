@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
-
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { logger } from "@/utils/logger";
 interface WasteProduct {
   id: string;
@@ -35,6 +35,7 @@ interface WasteProductTabProps {
 }
 
 export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProductTabProps) {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [wasteProducts, setWasteProducts] = useState<WasteProduct[]>([]);
   const [dialog, setDialog] = useState(false);
@@ -175,7 +176,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Loss</p>
-                <p className="text-2xl font-bold text-red-600">${stats.totalLoss.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalLoss)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-red-600 opacity-20" />
             </div>
@@ -348,7 +349,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
                         {format(new Date(waste.created_at), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell className="text-right font-medium text-red-600">
-                        ${(waste.value_loss || 0).toFixed(2)}
+                        {formatCurrency(waste.value_loss || 0)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -362,7 +363,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
               <div className="flex justify-between items-center text-sm">
                 <span className="font-medium">Total Waste Items: {filteredWaste.length}</span>
                 <span className="font-bold text-red-600">
-                  Total Financial Loss: ${filteredWaste.reduce((sum, w) => sum + (w.value_loss || 0), 0).toFixed(2)}
+                  Total Financial Loss: {formatCurrency(filteredWaste.reduce((sum, w) => sum + (w.value_loss || 0), 0))}
                 </span>
               </div>
             </div>

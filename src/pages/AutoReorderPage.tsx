@@ -10,6 +10,7 @@ import { apiClient } from "@/integrations/api/client";
 import { useNavigate } from "react-router-dom";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface ReorderRecommendation {
   product_id: string;
   sku: string;
@@ -36,6 +37,7 @@ interface SupplierGroup {
 }
 
 export default function AutoReorderPage() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<ReorderRecommendation[]>([]);
   const [groupedBySupplier, setGroupedBySupplier] = useState<SupplierGroup[]>([]);
@@ -173,7 +175,7 @@ export default function AutoReorderPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Est. Cost</p>
-                <p className="text-2xl font-bold">${stats.totalCost.toFixed(0)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.totalCost)}</p>
                 <p className="text-xs text-muted-foreground">{recommendations.length} products</p>
               </div>
               <FileText className="h-8 w-8 text-green-600" />
@@ -277,7 +279,7 @@ export default function AutoReorderPage() {
                           {rec.recommended_order_qty}
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          ${rec.estimated_cost.toFixed(2)}
+                          {formatCurrency(rec.estimated_cost)}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{rec.abc_class}</Badge>
@@ -309,7 +311,7 @@ export default function AutoReorderPage() {
                     <div>
                       <CardTitle>{group.supplier_name || `Supplier ${group.supplier_id}`}</CardTitle>
                       <CardDescription>
-                        {group.product_count} products · Est. ${group.total_estimated_cost.toFixed(2)}
+                        {group.product_count} products · Est. {formatCurrency(group.total_estimated_cost)}
                       </CardDescription>
                     </div>
                     <Button
@@ -351,7 +353,7 @@ export default function AutoReorderPage() {
                             <TableCell className="text-right font-bold text-blue-600">
                               {rec.recommended_order_qty}
                             </TableCell>
-                            <TableCell className="text-right">${rec.estimated_cost.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(rec.estimated_cost)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

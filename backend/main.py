@@ -3332,7 +3332,20 @@ async def create_sale_item(item: SaleItemCreate, db: Session = Depends(get_db)):
                     )
         except Exception as e:
             print(f"[WARNING] Failed to log medication history: {e}")
-    
+
+    # ── Deduct from medicine_batches.quantity_remaining ───────────────────
+    if item.batch_no:
+        try:
+            db.execute(text("""
+                UPDATE medicine_batches
+                SET quantity_remaining = GREATEST(0, quantity_remaining - :qty),
+                    quantity_sold = COALESCE(quantity_sold, 0) + :qty,
+                    updated_at = now()
+                WHERE product_id::text = :pid AND batch_number = :bn
+            """), {"qty": item.quantity, "pid": str(item.product_id), "bn": item.batch_no})
+        except Exception:
+            pass  # Non-fatal
+
     db.commit()
     db.refresh(db_item)
     return db_item
@@ -3991,6 +4004,47 @@ async def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)
             mrp=it.mrp,
             gst_percent=it.gst_percent
         ))
+
+        # ── Auto-create medicine batch in the pharmacy system ─────────────
+        if it.batch_no and it.expiry_date and it.product_id:
+            try:
+                db.execute(text("""
+                    INSERT INTO medicine_batches
+                        (id, product_id, batch_number, expiry_date,
+                         quantity_received, quantity_remaining,
+                         purchase_price, mrp, selling_price,
+                         is_active, is_expired, created_at, updated_at)
+                    VALUES
+                        (:batch_id::uuid, :product_id::uuid, :batch_number,
+                         :expiry_date::date,
+                         :qty, :qty,
+                         :purchase_price, :mrp, :selling_price,
+                         TRUE, FALSE, now(), now())
+                    ON CONFLICT DO NOTHING
+                """), {
+                    "batch_id":       str(uuid.uuid4()),
+                    "product_id":     str(it.product_id),
+                    "batch_number":   it.batch_no,
+                    "expiry_date":    it.expiry_date,
+                    "qty":            float(it.qty),
+                    "purchase_price": float(it.unit_price),
+                    "mrp":            float(it.mrp or it.unit_price),
+                    "selling_price":  float(it.mrp or it.unit_price),
+                })
+            except Exception:
+                pass  # Non-fatal — batch will be visible after reload
+
+        # ── Update product stock_quantity ─────────────────────────────────
+        if it.product_id:
+            try:
+                db.execute(text("""
+                    UPDATE products
+                    SET stock_quantity = COALESCE(stock_quantity, 0) + :qty
+                    WHERE id::text = :pid
+                """), {"qty": int(it.qty), "pid": str(it.product_id)})
+            except Exception:
+                pass  # Non-fatal
+
     db.commit()
     db.refresh(purchase)
     items = db.query(PurchaseItem).filter(PurchaseItem.purchase_id == purchase_id).all()

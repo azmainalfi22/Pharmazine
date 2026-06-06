@@ -10,6 +10,7 @@ import { API_CONFIG, getAuthHeaders } from "@/config/api";
 import { apiClient } from "@/integrations/api/client";
 import { Link } from "react-router-dom";
 
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { logger } from "@/utils/logger";
 interface Product {
   id: string;
@@ -36,6 +37,7 @@ interface SalesAnalytics {
 }
 
 export default function StockManagement() {
+  const { formatCurrency } = useCurrency();
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -169,7 +171,7 @@ export default function StockManagement() {
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Total Inventory Value</p>
-              <p className="text-3xl font-bold text-white">${stats.totalValue.toFixed(0)}</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(stats.totalValue)}</p>
             </div>
           </div>
         </div>
@@ -298,8 +300,8 @@ export default function StockManagement() {
                             <span className="text-muted-foreground text-sm">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">${product.unit_price.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-medium">${stockValue.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(product.unit_price)}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(stockValue)}</TableCell>
                         <TableCell className="text-center">
                           <Badge variant={abcClass === 'A' ? 'default' : abcClass === 'B' ? 'secondary' : 'outline'} 
                                  className={abcClass === 'A' ? 'bg-purple-100 text-purple-800' : abcClass === 'B' ? 'bg-blue-100 text-blue-800' : ''}>

@@ -16,6 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Link } from "react-router-dom";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface DashboardStats {
   today_sales: number;
   today_transactions: number;
@@ -39,6 +40,7 @@ interface TopProduct {
 }
 
 export default function EnhancedDashboardV2() {
+  const { formatCurrency } = useCurrency();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [hourlySales, setHourlySales] = useState<any[]>([]);
@@ -98,7 +100,7 @@ export default function EnhancedDashboardV2() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.today_sales?.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.today_sales || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">{stats.today_transactions || 0} transactions</p>
           </CardContent>
         </Card>
@@ -124,7 +126,7 @@ export default function EnhancedDashboardV2() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.total_inventory_value?.toFixed(0) || '0'}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.total_inventory_value || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">current stock value</p>
           </CardContent>
         </Card>
@@ -137,7 +139,7 @@ export default function EnhancedDashboardV2() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.month_sales?.toFixed(0) || '0'}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.month_sales || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">monthly revenue</p>
           </CardContent>
         </Card>

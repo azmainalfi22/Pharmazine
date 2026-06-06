@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface CashFlowData {
   date: string;
   cashIn: number;
@@ -24,6 +25,7 @@ interface CashFlowSummary {
 }
 
 export default function CashFlowTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [cashFlow, setCashFlow] = useState<CashFlowData[]>([]);
   const [summary, setSummary] = useState<CashFlowSummary>({
@@ -111,7 +113,7 @@ export default function CashFlowTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Cash In</p>
                     <p className="text-3xl font-bold text-green-600 mt-2">
-                      ${summary.totalCashIn.toFixed(2)}
+                      {formatCurrency(summary.totalCashIn)}
                     </p>
                   </div>
                   <ArrowUpCircle className="w-12 h-12 text-green-600 opacity-20" />
@@ -125,7 +127,7 @@ export default function CashFlowTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Cash Out</p>
                     <p className="text-3xl font-bold text-red-600 mt-2">
-                      ${summary.totalCashOut.toFixed(2)}
+                      {formatCurrency(summary.totalCashOut)}
                     </p>
                   </div>
                   <ArrowDownCircle className="w-12 h-12 text-red-600 opacity-20" />
@@ -139,7 +141,7 @@ export default function CashFlowTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Net Cash Flow</p>
                     <p className={`text-3xl font-bold mt-2 ${summary.netCashFlow >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      ${summary.netCashFlow.toFixed(2)}
+                      {formatCurrency(summary.netCashFlow)}
                     </p>
                   </div>
                   <Activity className={`w-12 h-12 opacity-20 ${summary.netCashFlow >= 0 ? 'text-emerald-600' : 'text-rose-600'}`} />
@@ -153,7 +155,7 @@ export default function CashFlowTab() {
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Closing Balance</p>
                     <p className="text-3xl font-bold text-blue-600 mt-2">
-                      ${summary.closingBalance.toFixed(2)}
+                      {formatCurrency(summary.closingBalance)}
                     </p>
                   </div>
                   <DollarSign className="w-12 h-12 text-blue-600 opacity-20" />
@@ -188,14 +190,14 @@ export default function CashFlowTab() {
                         <div className="flex gap-4 text-sm">
                           <div className="flex items-center gap-1">
                             <ArrowUpCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-green-600 font-medium">${day.cashIn.toFixed(2)}</span>
+                            <span className="text-green-600 font-medium">{formatCurrency(day.cashIn)}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <ArrowDownCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-red-600 font-medium">${day.cashOut.toFixed(2)}</span>
+                            <span className="text-red-600 font-medium">{formatCurrency(day.cashOut)}</span>
                           </div>
                           <div className={`font-bold ${day.netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            Net: ${day.netFlow.toFixed(2)}
+                            Net: {formatCurrency(day.netFlow)}
                           </div>
                         </div>
                       </div>
@@ -232,26 +234,26 @@ export default function CashFlowTab() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-lg border-b pb-3">
                   <span className="text-muted-foreground">Opening Balance:</span>
-                  <span className="font-bold">${summary.openingBalance.toFixed(2)}</span>
+                  <span className="font-bold">{formatCurrency(summary.openingBalance)}</span>
                 </div>
                 <div className="flex justify-between items-center text-green-600 border-b pb-3">
                   <span className="flex items-center gap-2">
                     <ArrowUpCircle className="w-5 h-5" />
                     Total Cash Inflow:
                   </span>
-                  <span className="font-bold text-xl">+${summary.totalCashIn.toFixed(2)}</span>
+                  <span className="font-bold text-xl">+{formatCurrency(summary.totalCashIn)}</span>
                 </div>
                 <div className="flex justify-between items-center text-red-600 border-b pb-3">
                   <span className="flex items-center gap-2">
                     <ArrowDownCircle className="w-5 h-5" />
                     Total Cash Outflow:
                   </span>
-                  <span className="font-bold text-xl">-${summary.totalCashOut.toFixed(2)}</span>
+                  <span className="font-bold text-xl">-{formatCurrency(summary.totalCashOut)}</span>
                 </div>
                 <div className="flex justify-between items-center text-2xl font-bold border-t-2 border-primary pt-4">
                   <span>Closing Balance:</span>
                   <span className={summary.closingBalance >= 0 ? "text-primary" : "text-red-600"}>
-                    ${summary.closingBalance.toFixed(2)}
+                    {formatCurrency(summary.closingBalance)}
                   </span>
                 </div>
               </div>

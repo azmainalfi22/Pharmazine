@@ -10,6 +10,7 @@ import { format, differenceInDays } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface Receivable {
   customer_id: string;
   customer_name: string;
@@ -24,6 +25,7 @@ interface Receivable {
 }
 
 export default function AccountsReceivableTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [receivables, setReceivables] = useState<Receivable[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,7 +122,7 @@ export default function AccountsReceivableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Receivables</p>
-                <p className="text-2xl font-bold text-blue-600">${stats.total.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.total)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{stats.count} invoices</p>
               </div>
               <DollarSign className="w-10 h-10 text-blue-600 opacity-20" />
@@ -133,7 +135,7 @@ export default function AccountsReceivableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Current (Not Due)</p>
-                <p className="text-2xl font-bold text-green-600">${stats.current.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.current)}</p>
               </div>
               <CheckCircle className="w-10 h-10 text-green-600 opacity-20" />
             </div>
@@ -145,7 +147,7 @@ export default function AccountsReceivableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Overdue</p>
-                <p className="text-2xl font-bold text-orange-600">${stats.overdue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-orange-600">{formatCurrency(stats.overdue)}</p>
               </div>
               <AlertCircle className="w-10 h-10 text-orange-600 opacity-20" />
             </div>
@@ -157,7 +159,7 @@ export default function AccountsReceivableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Critical (&gt;30 days)</p>
-                <p className="text-2xl font-bold text-red-600">${stats.critical.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.critical)}</p>
               </div>
               <AlertCircle className="w-10 h-10 text-red-600 opacity-20" />
             </div>
@@ -230,9 +232,9 @@ export default function AccountsReceivableTab() {
                       <TableCell>
                         {receivable.due_date ? format(new Date(receivable.due_date), "dd MMM yyyy") : "-"}
                       </TableCell>
-                      <TableCell className="text-right">${receivable.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(receivable.amount)}</TableCell>
                       <TableCell className="text-right font-bold text-orange-600">
-                        ${receivable.balance.toFixed(2)}
+                        {formatCurrency(receivable.balance)}
                       </TableCell>
                       <TableCell className="text-center">
                         {receivable.days_overdue > 0 ? (

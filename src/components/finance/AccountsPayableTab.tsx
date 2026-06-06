@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { API_CONFIG, getAuthHeaders } from "@/config/api";
 
 import { logger } from "@/utils/logger";
+import { useCurrency } from "@/contexts/CurrencyContext";
 interface Payable {
   supplier_id: string;
   supplier_name: string;
@@ -21,6 +22,7 @@ interface Payable {
 }
 
 export default function AccountsPayableTab() {
+  const { formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [payables, setPayables] = useState<Payable[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,7 +103,7 @@ export default function AccountsPayableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Payables</p>
-                <p className="text-2xl font-bold text-red-600">${stats.total.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.total)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{stats.suppliers} suppliers</p>
               </div>
               <DollarSign className="w-10 h-10 text-red-600 opacity-20" />
@@ -114,7 +116,7 @@ export default function AccountsPayableTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Credit Limit</p>
-                <p className="text-2xl font-bold text-orange-600">${stats.totalCredit.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-orange-600">{formatCurrency(stats.totalCredit)}</p>
               </div>
               <Building2 className="w-10 h-10 text-orange-600 opacity-20" />
             </div>
@@ -214,13 +216,13 @@ export default function AccountsPayableTab() {
                         className={payable.status === "exceeded" ? "bg-red-50" : ""}
                       >
                         <TableCell className="font-medium">{payable.supplier_name}</TableCell>
-                        <TableCell className="text-right">${payable.total_credit.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(payable.total_credit)}</TableCell>
                         <TableCell className="text-right font-bold text-red-600">
-                          ${payable.balance.toFixed(2)}
+                          {formatCurrency(payable.balance)}
                         </TableCell>
                         <TableCell className="text-right">
                           <span className={availableCredit < 0 ? "text-red-600 font-bold" : "text-green-600"}>
-                            ${availableCredit.toFixed(2)}
+                            {formatCurrency(availableCredit)}
                           </span>
                         </TableCell>
                         <TableCell className="text-center">
@@ -251,7 +253,7 @@ export default function AccountsPayableTab() {
               <div className="flex justify-between items-center text-sm">
                 <span className="font-medium">Total Suppliers: {filteredPayables.length}</span>
                 <span className="font-bold text-red-600">
-                  Total Due: ${filteredPayables.reduce((sum, p) => sum + p.balance, 0).toFixed(2)}
+                  Total Due: {formatCurrency(filteredPayables.reduce((sum, p) => sum + p.balance, 0))}
                 </span>
               </div>
             </div>

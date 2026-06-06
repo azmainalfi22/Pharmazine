@@ -389,7 +389,7 @@ export default function EnhancedDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-primary">${sale.net_amount.toFixed(2)}</div>
+                      <div className="font-bold text-primary">{formatCurrency(sale.net_amount)}</div>
                       <Badge variant={sale.payment_status === "completed" ? "default" : "secondary"} className="pharmacy-badge text-xs">
                         {sale.payment_status}
                       </Badge>
@@ -425,7 +425,7 @@ export default function EnhancedDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-green-700">${item.revenue?.toFixed(2) || '0.00'}</p>
+                      <p className="font-semibold text-green-700">{formatCurrency(item.revenue || 0)}</p>
                       <p className="text-xs text-gray-600">{item.quantity_sold} units • {item.order_count} orders</p>
                     </div>
                   </div>
@@ -538,7 +538,7 @@ export default function EnhancedDashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-2xl text-green-600">${(stats.todayRevenue || 0).toFixed(2)}</div>
+                  <div className="font-bold text-2xl text-green-600">{formatCurrency(stats.todayRevenue || 0)}</div>
                   <div className="text-xs text-green-600/70">Revenue</div>
                 </div>
               </div>
@@ -554,7 +554,7 @@ export default function EnhancedDashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-2xl text-blue-600">${(stats.totalRevenue || 0).toFixed(2)}</div>
+                  <div className="font-bold text-2xl text-blue-600">{formatCurrency(stats.totalRevenue || 0)}</div>
                   <div className="text-xs text-blue-600/70">Accumulated</div>
                 </div>
               </div>
