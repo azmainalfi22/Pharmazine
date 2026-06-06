@@ -54,3 +54,6 @@ Thumbs.db
 
 # Build
 build/
+
+# Claude Code worktrees (local only)
+.claude/worktrees/
