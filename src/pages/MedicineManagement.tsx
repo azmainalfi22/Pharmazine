@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Plus, Search, Edit, Trash2, Package, AlertTriangle, BarChart3, QrCode, Printer, FileDown, Calendar, TrendingUp, DollarSign, Pill, Building2, Percent, ArrowRightLeft } from "lucide-react";
+import ProductsTab from "@/components/medicine/ProductsTab";
 import ManufacturerTab from "@/components/medicine/ManufacturerTab";
 import BatchTab from "@/components/medicine/BatchTab";
 import ExpiryAlertTab from "@/components/medicine/ExpiryAlertTab";
@@ -131,6 +132,7 @@ export default function MedicineManagement() {
   // Determine initial tab based on route
   const getInitialTab = () => {
     const path = location.pathname;
+    if (path === "/medicine-management/products") return "products";
     if (path === "/medicine-management/manufacturers") return "manufacturers";
     if (path === "/medicine-management/batches") return "batches";
     if (path === "/medicine-management/expiry-alerts") return "expiry";
@@ -143,7 +145,7 @@ export default function MedicineManagement() {
     if (path === "/medicine-management/types") return "types";
     if (path === "/medicine-management/units") return "units";
     if (path === "/medicine-management/categories") return "categories";
-    return "statistics"; // default - show statistics first
+    return "products"; // default — show products list first
   };
   
   const [activeTab, setActiveTab] = useState(getInitialTab());
@@ -711,6 +713,10 @@ export default function MedicineManagement() {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSearchTerm(""); }} className="space-y-4">
         <TabsList className="glass grid-cols-2 md:grid-cols-5 lg:grid-cols-10">
+          <TabsTrigger value="products">
+            <Pill className="w-4 h-4 mr-2" />
+            Products
+          </TabsTrigger>
           <TabsTrigger value="statistics">
             <BarChart3 className="w-4 h-4 mr-2" />
             Statistics
@@ -766,6 +772,11 @@ export default function MedicineManagement() {
             Discounts
           </TabsTrigger>
         </TabsList>
+
+        {/* PRODUCTS TAB */}
+        <TabsContent value="products" className="space-y-4">
+          <ProductsTab />
+        </TabsContent>
 
         {/* CATEGORIES TAB */}
         <TabsContent value="categories" className="space-y-4">

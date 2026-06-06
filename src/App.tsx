@@ -104,6 +104,16 @@ const App = () => (
                 }
               />
               <Route
+                path="/medicine-management/products"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MedicineManagement />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/medicine-management/categories"
                 element={
                   <ProtectedRoute>
