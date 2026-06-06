@@ -133,6 +133,39 @@ async function idbDelete(id: string): Promise<void> {
   });
 }
 
+// ─── HTTP error helper ───────────────────────────────────────────────────────
+// Extracts a human-readable message from a failed Response so the user (and we)
+// can see the real reason instead of a generic "Error processing sale".
+async function describeHttpError(res: Response, action: string): Promise<string> {
+  let detail = "";
+  try {
+    const data = await res.clone().json();
+    if (typeof data?.detail === "string") {
+      detail = data.detail;
+    } else if (Array.isArray(data?.detail)) {
+      // FastAPI/Pydantic validation errors: [{loc, msg, ...}]
+      detail = data.detail
+        .map((e: { loc?: (string | number)[]; msg?: string }) =>
+          `${(e.loc || []).slice(1).join(".")}: ${e.msg}`.trim()
+        )
+        .join("; ");
+    } else if (data?.message) {
+      detail = data.message;
+    }
+  } catch {
+    try {
+      detail = (await res.clone().text()).slice(0, 300);
+    } catch {
+      /* ignore */
+    }
+  }
+  const status = res.status;
+  if (status === 401) return `Could not ${action}: your session expired. Please log in again.`;
+  if (status === 403)
+    return `Could not ${action}: your account doesn't have permission to do this.${detail ? ` (${detail})` : ""}`;
+  return `Could not ${action}${detail ? `: ${detail}` : ` (HTTP ${status})`}`;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function POSSystem() {
@@ -518,11 +551,13 @@ export default function POSSystem() {
       headers: getAuthHeaders(),
       body: JSON.stringify(salePayload),
     });
-    if (!saleRes.ok) throw new Error("Failed to create sale");
+    if (!saleRes.ok) {
+      throw new Error(await describeHttpError(saleRes, "create sale"));
+    }
     const sale = await saleRes.json();
 
     for (const item of items) {
-      await fetch(`${API_CONFIG.API_ROOT}/sales/items`, {
+      const itemRes = await fetch(`${API_CONFIG.API_ROOT}/sales/items`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -536,6 +571,9 @@ export default function POSSystem() {
           gst_percent: item.gst_percent,
         }),
       });
+      if (!itemRes.ok) {
+        throw new Error(await describeHttpError(itemRes, `add "${item.product_name}"`));
+      }
     }
 
     // Record split payments
@@ -626,7 +664,8 @@ export default function POSSystem() {
       setLoyaltyRedeem(0);
       setCheckoutDialog(false);
     } catch (err) {
-      toast.error("Error processing sale");
+      const msg = err instanceof Error ? err.message : "Error processing sale";
+      toast.error(msg);
       logger.error(err);
     }
   };

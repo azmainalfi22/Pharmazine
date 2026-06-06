@@ -114,6 +114,19 @@ ROLE_PERMISSIONS: Dict[str, Set[Permission]] = {
         Permission.CREATE_SALE, Permission.VIEW_SALES,
         Permission.VIEW_CUSTOMERS, Permission.CREATE_CUSTOMERS,
     },
+
+    # Default operational role. get_roles_for_user() falls back to ["employee"]
+    # and require_staff() treats "employee" as valid staff, so without an entry
+    # here a default user would have ZERO permissions and every permission-gated
+    # write (e.g. CREATE_SALE) would 403. Give day-to-day POS operations.
+    "employee": {
+        Permission.VIEW_DASHBOARD,
+        Permission.VIEW_PRODUCTS,
+        Permission.VIEW_STOCK,
+        Permission.CREATE_SALE, Permission.VIEW_SALES, Permission.PROCESS_RETURN,
+        Permission.APPLY_DISCOUNT,
+        Permission.VIEW_CUSTOMERS, Permission.CREATE_CUSTOMERS, Permission.EDIT_CUSTOMERS,
+    },
     
     "stock_clerk": {
         Permission.VIEW_DASHBOARD,
