@@ -893,10 +893,14 @@ class SaleItem(Base):
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
     total_price = Column(Float, nullable=False)
-    # Pharmacy-specific fields
-    batch_no = Column(String)
-    expiry_date = Column(DateTime)
-    gst_percent = Column(Float)
+    # Pharmacy-specific fields — Python attr names kept (batch_no / gst_percent)
+    # but mapped to the ACTUAL DB column names. The DB columns are
+    # batch_number / vat_percentage and expiry_date is a DATE. The previous
+    # names (batch_no / gst_percent) do not exist in the table, so every
+    # INSERT raised 'column "batch_no" does not exist' → 500 on every sale.
+    batch_no = Column("batch_number", String)
+    expiry_date = Column(Date)
+    gst_percent = Column("vat_percentage", Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class SalePayment(Base):
@@ -1730,7 +1734,10 @@ class SaleCreate(BaseModel):
     discount: float = Field(0, ge=0)
     tax: float = Field(0, ge=0)
     net_amount: float = Field(..., ge=0)
-    payment_method: str = Field(..., pattern="^(cash|card|online|bank)$")
+    # Must match the Postgres enum `payment_method` in the sales table:
+    # cash | bkash | upay | visa | bank_transfer. Sending any other value
+    # (the old card/online/bank) raised 'invalid input value for enum' → 500.
+    payment_method: str = Field(..., pattern="^(cash|bkash|upay|visa|bank_transfer)$")
     payment_status: str = Field(..., pattern="^(pending|completed|failed)$")
     
     @validator('customer_name')
@@ -3327,10 +3334,11 @@ async def create_sale_item(item: SaleItemCreate, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if product.stock_quantity < item.quantity:
+    current_stock = product.stock_quantity or 0  # null-safe (avoid None < int)
+    if current_stock < item.quantity:
         raise HTTPException(status_code=400, detail="Insufficient stock quantity")
-    
-    product.stock_quantity -= item.quantity
+
+    product.stock_quantity = current_stock - item.quantity
     
     # Log medication history if this is a medicine product
     if product.generic_name or product.is_prescription_required:

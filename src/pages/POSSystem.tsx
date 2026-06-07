@@ -457,7 +457,7 @@ export default function POSSystem() {
   // ── C3: Split payment helpers ────────────────────────────────────────────
 
   const addSplit = () => {
-    setPaymentSplits([...paymentSplits, { method: "card", amount: 0 }]);
+    setPaymentSplits([...paymentSplits, { method: "bkash", amount: 0 }]);
   };
 
   const removeSplit = (i: number) => {
@@ -1054,10 +1054,12 @@ export default function POSSystem() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        {/* Values MUST match the DB payment_method enum */}
                         <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="card">Card</SelectItem>
-                        <SelectItem value="online">Online</SelectItem>
-                        <SelectItem value="bank">Bank</SelectItem>
+                        <SelectItem value="bkash">bKash</SelectItem>
+                        <SelectItem value="upay">Upay</SelectItem>
+                        <SelectItem value="visa">Card (Visa)</SelectItem>
+                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="relative flex-1">
