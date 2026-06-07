@@ -327,11 +327,11 @@ default_cors_origins = [
 
 raw_cors_origins = os.getenv("CORS_ORIGINS")
 if raw_cors_origins:
-    allow_origins = [
-        origin.strip()
-        for origin in raw_cors_origins.split(",")
-        if origin.strip()
-    ]
+    # Merge env-var origins WITH the hardcoded defaults so that
+    # pharmazine.netlify.app is always allowed even if CORS_ORIGINS is
+    # set on Render to something that omits it.
+    _extra = [o.strip() for o in raw_cors_origins.split(",") if o.strip()]
+    allow_origins = list(dict.fromkeys(default_cors_origins + _extra))
 else:
     allow_origins = default_cors_origins
 
