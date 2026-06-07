@@ -17,7 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.pool import NullPool
-from pydantic import BaseModel, EmailStr, validator, Field, field_validator
+from pydantic import BaseModel, EmailStr, validator, Field, field_validator, ConfigDict
 from typing import List, Optional, Any, Tuple
 from datetime import datetime, timedelta, date
 import os
@@ -1800,7 +1800,27 @@ class GRNCreate(BaseModel):
     created_by: Optional[str] = None
 
 # Pydantic models for API
-class ProfileResponse(BaseModel):
+
+class ORMResponse(BaseModel):
+    """
+    Shared base for all API response models.
+
+    - from_attributes=True so models can be built directly from SQLAlchemy ORM rows.
+    - A wildcard before-validator coerces any uuid.UUID value to str. The DB uses
+      `uuid` columns, and psycopg2 returns uuid.UUID objects which Pydantic v2 will
+      NOT auto-coerce into `str` fields — that raised ResponseValidationError (500)
+      AFTER the row was already committed. Coercing here fixes it for every endpoint
+      that returns an ORM object directly (sales, products, customers, suppliers, …).
+    """
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def _coerce_uuid_to_str(cls, v):
+        return str(v) if isinstance(v, UUID) else v
+
+
+class ProfileResponse(ORMResponse):
     id: UUID
     full_name: str
     email: str
@@ -1820,7 +1840,7 @@ class ProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CategoryResponse(BaseModel):
+class CategoryResponse(ORMResponse):
     id: str
     name: str
     description: Optional[str] = None
@@ -1830,7 +1850,7 @@ class CategoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class SubcategoryResponse(BaseModel):
+class SubcategoryResponse(ORMResponse):
     id: str
     name: str
     description: Optional[str] = None
@@ -1841,7 +1861,7 @@ class SubcategoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CountryResponse(BaseModel):
+class CountryResponse(ORMResponse):
     id: str
     name: str
     code: str
@@ -1851,7 +1871,7 @@ class CountryResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class SupplierResponse(BaseModel):
+class SupplierResponse(ORMResponse):
     id: str
     name: str
     contact_person: Optional[str] = None
@@ -1865,7 +1885,7 @@ class SupplierResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CustomerResponse(BaseModel):
+class CustomerResponse(ORMResponse):
     id: str
     name: str
     email: Optional[str] = None
@@ -1889,7 +1909,7 @@ class CustomerResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CompanyResponse(BaseModel):
+class CompanyResponse(ORMResponse):
     id: str
     name: str
     email: Optional[str] = None
@@ -1908,7 +1928,7 @@ class CompanyResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class ProductResponse(BaseModel):
+class ProductResponse(ORMResponse):
     id: str
     name: str
     sku: str
@@ -1985,7 +2005,7 @@ class ProductResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class StockTransactionResponse(BaseModel):
+class StockTransactionResponse(ORMResponse):
     id: str
     product_id: str
     transaction_type: str
@@ -2002,7 +2022,7 @@ class StockTransactionResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class SaleResponse(BaseModel):
+class SaleResponse(ORMResponse):
     id: str
     customer_name: str
     customer_phone: Optional[str] = None
@@ -2021,19 +2041,9 @@ class SaleResponse(BaseModel):
     created_by: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
+    # UUID->str coercion + from_attributes are inherited from ORMResponse.
 
-    class Config:
-        from_attributes = True
-
-    # DB id/created_by/customer_id are UUID columns; SQLAlchemy returns
-    # uuid.UUID objects which Pydantic v2 will NOT coerce to str, causing a
-    # ResponseValidationError (500) AFTER the row is committed. Coerce here.
-    @field_validator("id", "created_by", mode="before")
-    @classmethod
-    def _coerce_uuid_to_str(cls, v):
-        return str(v) if v is not None else v
-
-class SaleItemResponse(BaseModel):
+class SaleItemResponse(ORMResponse):
     id: str
     sale_id: str
     product_id: str
@@ -2045,16 +2055,7 @@ class SaleItemResponse(BaseModel):
     gst_percent: Optional[float] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-    # Same UUID→str coercion as SaleResponse (id/sale_id/product_id are UUID).
-    @field_validator("id", "sale_id", "product_id", mode="before")
-    @classmethod
-    def _coerce_uuid_to_str(cls, v):
-        return str(v) if v is not None else v
-
-class PurchaseItemResponse(BaseModel):
+class PurchaseItemResponse(ORMResponse):
     id: str
     purchase_id: str
     product_id: str
@@ -2070,7 +2071,7 @@ class PurchaseItemResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class PurchaseResponse(BaseModel):
+class PurchaseResponse(ORMResponse):
     id: str
     supplier_id: Optional[str] = None
     invoice_no: Optional[str] = None
@@ -2085,7 +2086,7 @@ class PurchaseResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class GRNResponse(BaseModel):
+class GRNResponse(ORMResponse):
     id: str
     purchase_id: str
     date: Optional[str] = None
@@ -2102,7 +2103,7 @@ class ElcReceiveMasterCreate(BaseModel):
     receive_type: str
     au_entry_by: int
 
-class ElcReceiveMasterResponse(BaseModel):
+class ElcReceiveMasterResponse(ORMResponse):
     receive_pk_no: int
     chalan_date: datetime
     chalan_no: Optional[str] = None
@@ -2132,7 +2133,7 @@ class ElcReceiveDetailsCreate(BaseModel):
     remarks: Optional[str] = None
     au_entry_by: int
 
-class ElcReceiveDetailsResponse(BaseModel):
+class ElcReceiveDetailsResponse(ORMResponse):
     receivedtl_pk_no: int
     receive_pk_no: Optional[int] = None
     chalan_no: Optional[str] = None
@@ -2160,7 +2161,7 @@ class ElcIssueMasterCreate(BaseModel):
     issue_type: str
     au_entry_by: int
 
-class ElcIssueMasterResponse(BaseModel):
+class ElcIssueMasterResponse(ORMResponse):
     issue_pk_no: int
     chalan_date: datetime
     chalan_no: Optional[str] = None
@@ -2190,7 +2191,7 @@ class ElcIssueDetailsCreate(BaseModel):
     remarks: Optional[str] = None
     au_entry_by: int
 
-class ElcIssueDetailsResponse(BaseModel):
+class ElcIssueDetailsResponse(ORMResponse):
     issuedtl_pk_no: int
     issue_pk_no: Optional[int] = None
     chalan_no: Optional[str] = None
@@ -2221,7 +2222,7 @@ class RequisitionCreate(BaseModel):
     store_id: Optional[str] = None
     items: List[RequisitionItemCreate]
 
-class RequisitionResponse(BaseModel):
+class RequisitionResponse(ORMResponse):
     id: str
     store_id: Optional[str] = None
     requested_by: str
