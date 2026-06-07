@@ -592,8 +592,8 @@ export default function POSSystem() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) { toast.error("Cart is empty"); return; }
-    const { grandTotal } = calculateCartTotal();
     const totals = calculateCartTotal();
+    const { grandTotal } = totals;
 
     // Validate splits
     const mainMethod = paymentSplits[0]?.method || "cash";
@@ -1313,6 +1313,7 @@ export default function POSSystem() {
 // ─── Sales Return Panel (C5) ─────────────────────────────────────────────────
 
 function SalesReturnPanel({ onClose }: { onClose: () => void }) {
+  const { formatCurrency } = useCurrency();
   const [invoiceId, setInvoiceId] = useState("");
   const [sale, setSale] = useState<{ id: string; net_amount: number; customer_name: string; items?: unknown[] } | null>(null);
   const [reason, setReason] = useState("");

@@ -14,10 +14,8 @@ import {
   ChevronDown,
   ChevronRight,
   ArrowDownCircle,
-  ArrowUpCircle,
   FolderTree,
   Layers,
-  Globe,
   Truck,
   Building2,
   CreditCard,
@@ -29,8 +27,6 @@ import {
   TrendingUp,
   AlertTriangle,
   BarChart3,
-  PieChart,
-  LineChart,
   FileText,
   DollarSign,
   Pill,
@@ -41,7 +37,6 @@ import {
   MessageSquare,
   Heart,
   Shield,
-  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -56,12 +51,32 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { currency, setCurrency } = useCurrency();
   const { lang, setLang, t } = useLanguage();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([
-    "inventory",
-    "purchase",
-  ]);
+  // Auto-expand the sidebar section that contains the current route.
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(() => {
+    const p = location.pathname;
+    if (p.startsWith("/sales")) return ["sales"];
+    if (p.startsWith("/inventory")) return ["inventory"];
+    if (p.startsWith("/purchase") || p.startsWith("/procurement") || p.startsWith("/setup/suppliers")) return ["purchase"];
+    if (p.startsWith("/medicine-management")) return ["medicine-management"];
+    if (
+      p.startsWith("/pharmacy-care") || p.startsWith("/prescriptions") ||
+      p.startsWith("/drug-interactions") || p.startsWith("/refill-reminders") ||
+      p.startsWith("/allergy-management") || p.startsWith("/insurance-claims") ||
+      p.startsWith("/patients") || p.startsWith("/patient-history")
+    ) return ["pharmacy-care"];
+    if (p.startsWith("/reports")) return ["reports"];
+    if (p.startsWith("/payments")) return ["payments"];
+    if (p.startsWith("/multi-branch") || p.startsWith("/branch")) return ["multi-branch"];
+    if (
+      (p.startsWith("/setup") && !p.startsWith("/setup/suppliers")) ||
+      p.startsWith("/settings") || p.startsWith("/import") || p.startsWith("/audit-logs")
+    ) return ["setup"];
+    return [];
+  });
 
-  const isAdmin = (user?.roles || []).some((r) => r.role === "admin");
+  const isAdmin = (user?.roles || []).some((r) =>
+    r.role === "admin" || r.role === "super_admin"
+  );
 
   const navItems = [
     { path: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
@@ -190,34 +205,18 @@ const Layout = ({ children }: LayoutProps) => {
       ],
     },
     { path: "/customers", label: t("nav.customers"), icon: Users },
-    { path: "/patients/crm", label: t("nav.patients"), icon: Heart },
-    { path: "/patient-history", label: t("nav.patientHistory"), icon: FileText },
     {
       path: "/pharmacy-care",
       label: t("nav.pharmacyCare"),
       icon: Heart,
       submenu: [
-        {
-          path: "/prescriptions",
-          label: t("nav.prescriptionMgmt"),
-          icon: FileText,
-        },
-        {
-          path: "/drug-interactions",
-          label: t("nav.drugInteractions"),
-          icon: Shield,
-        },
+        { path: "/patients/crm", label: t("nav.patients"), icon: Users },
+        { path: "/patient-history", label: t("nav.patientHistory"), icon: FileText },
+        { path: "/prescriptions", label: t("nav.prescriptionMgmt"), icon: FileText },
+        { path: "/drug-interactions", label: t("nav.drugInteractions"), icon: Shield },
         { path: "/refill-reminders", label: t("nav.refillReminders"), icon: Bell },
-        {
-          path: "/allergy-management",
-          label: t("nav.allergyMgmt"),
-          icon: AlertTriangle,
-        },
-        {
-          path: "/insurance-claims",
-          label: t("nav.insuranceClaims"),
-          icon: CreditCard,
-        },
+        { path: "/allergy-management", label: t("nav.allergyMgmt"), icon: AlertTriangle },
+        { path: "/insurance-claims", label: t("nav.insuranceClaims"), icon: CreditCard },
       ],
     },
     { path: "/messages", label: t("nav.internalMessages"), icon: MessageSquare },
@@ -284,9 +283,16 @@ const Layout = ({ children }: LayoutProps) => {
       : []),
     ...(isAdmin
       ? [
-          { path: "/multi-branch", label: t("nav.multiBranch"), icon: Building2 },
-          { path: "/multi-branch/dashboard", label: t("nav.multiBranchDashboard"), icon: Building2 },
-          { path: "/branch/transfers", label: t("nav.interBranchTransfers"), icon: ArrowRightLeft },
+          {
+            path: "/multi-branch",
+            label: t("nav.multiBranch"),
+            icon: Building2,
+            submenu: [
+              { path: "/multi-branch", label: t("nav.multiBranch"), icon: Building2 },
+              { path: "/multi-branch/dashboard", label: t("nav.multiBranchDashboard"), icon: BarChart3 },
+              { path: "/branch/transfers", label: t("nav.interBranchTransfers"), icon: ArrowRightLeft },
+            ],
+          },
         ]
       : []),
     ...(isAdmin

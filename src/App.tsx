@@ -10,6 +10,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Layout from "@/components/Layout";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+
 import Auth from "./pages/Auth";
 import EnhancedDashboard from "./pages/EnhancedDashboard";
 import Users from "./pages/Users";
@@ -61,12 +62,18 @@ import SecuritySettingsPage from "./pages/SecuritySettingsPage";
 
 const queryClient = new QueryClient();
 
-function HomeRoute() {
-  // Every user, regardless of role, lands on the dashboard.
-  return <EnhancedDashboard />;
+/**
+ * Wraps a page component in ProtectedRoute + Layout.
+ * Reduces 60+ identical repetitions to a single wrapper.
+ */
+function PL({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <Layout>{children}</Layout>
+    </ProtectedRoute>
+  );
 }
 
-// Global keyboard shortcuts wrapper
 function AppWithShortcuts({ children }: { children: React.ReactNode }) {
   useKeyboardShortcuts();
   return <>{children}</>;
@@ -81,887 +88,128 @@ const App = () => (
         <AuthProvider>
           <CurrencyProvider>
             <LanguageProvider>
-          <AppWithShortcuts>
-            <ErrorBoundary>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <HomeRoute />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/products"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/categories"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/types"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/units"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/manufacturers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/batches"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/expiry-alerts"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/low-stock"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/waste"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/statistics"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/barcode"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/discounts"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/medicine-management/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MedicineManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <StockManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/movements"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <StockMovements />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/low-stock"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <LowStockAlerts />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/analytics"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <InventoryAnalytics />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/auto-reorder"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <AutoReorderPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/notifications"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <NotificationsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/notifications"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <NotificationsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/backups"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <BackupManagementPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/security"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SecuritySettingsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/system"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SystemSettingsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/performance"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PerformanceDashboard />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              {/* Stock IN Activity Routes - Removed duplicate purchase route */}
-              <Route
-                path="/inventory/stock-in/sales-return"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SalesReturnPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/stock-in/opening-stock"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <OpeningStockPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/stock-in/stock-adjustment"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <StockAdjustmentPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              {/* Stock OUT Activity Routes */}
-              <Route
-                path="/inventory/stock-out/supplier-return"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SupplierReturnPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <POSSystem />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales/pos"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <POSSystem />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales/history"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SalesHistory />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/users"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Users />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Settings />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Setup />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup/subcategories"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Setup />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup/countries"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Setup />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup/customers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedCustomers />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/customers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedCustomers />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup/suppliers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Setup />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/setup/companies"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Setup />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/bi-dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <BiDashboard />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/procurement/module"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ProcurementModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/procurement"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ProcurementModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patients/crm"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PatientCRMModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patient-crm"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PatientCRMModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/medicine"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/inventory"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/sales"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/stock"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/financial"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/profit-loss"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/customer"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/purchase"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              {/* Legacy routes - redirect to appropriate tabs */}
-              <Route
-                path="/reports/stock-movement"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/low-stock"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/category-analysis"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/trend-analysis"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports/inventory"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedReports />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/purchase"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EnhancedPurchase />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/requisitions"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <RequisitionsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/collection"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/vouchers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/receivables"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/payables"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payments/cashflow"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PaymentsFinance />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/finance"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <AccountsVouchers />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/import"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ImportPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/audit-logs"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <AuditLogsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/services"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ServiceModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/prescriptions"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PrescriptionManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/drug-interactions"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <DrugInteractionChecker />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/refill-reminders"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <RefillReminders />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/insurance-claims"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <InsuranceClaims />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/allergy-management"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <AllergyManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/hrm"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <HRMModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/crm"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CRMModule />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/patient-history"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <PatientHistory />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/messages"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <InternalMessages />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings/configuration"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SystemConfiguration />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/branch/transfers"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <InterBranchTransfer />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/multi-branch"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MultiBranchManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/multi-branch/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MultiBranchDashboard />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </ErrorBoundary>
-          </AppWithShortcuts>
+              <AppWithShortcuts>
+                <ErrorBoundary>
+                  <Routes>
+                    {/* Public */}
+                    <Route path="/auth" element={<Auth />} />
+
+                    {/* Dashboard */}
+                    <Route path="/" element={<PL><EnhancedDashboard /></PL>} />
+
+                    {/* Medicine Management — all sub-paths delegate tab selection to the page */}
+                    <Route path="/medicine-management" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/products" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/categories" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/types" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/units" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/manufacturers" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/batches" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/expiry-alerts" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/low-stock" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/waste" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/statistics" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/barcode" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/discounts" element={<PL><MedicineManagement /></PL>} />
+                    <Route path="/medicine-management/transactions" element={<PL><MedicineManagement /></PL>} />
+
+                    {/* Inventory */}
+                    <Route path="/inventory" element={<PL><StockManagement /></PL>} />
+                    <Route path="/inventory/movements" element={<PL><StockMovements /></PL>} />
+                    <Route path="/inventory/low-stock" element={<PL><LowStockAlerts /></PL>} />
+                    <Route path="/inventory/analytics" element={<PL><InventoryAnalytics /></PL>} />
+                    <Route path="/inventory/auto-reorder" element={<PL><AutoReorderPage /></PL>} />
+                    <Route path="/inventory/stock-in/sales-return" element={<PL><SalesReturnPage /></PL>} />
+                    <Route path="/inventory/stock-in/opening-stock" element={<PL><OpeningStockPage /></PL>} />
+                    <Route path="/inventory/stock-in/stock-adjustment" element={<PL><StockAdjustmentPage /></PL>} />
+                    <Route path="/inventory/stock-out/supplier-return" element={<PL><SupplierReturnPage /></PL>} />
+
+                    {/* Sales / POS */}
+                    <Route path="/sales" element={<PL><POSSystem /></PL>} />
+                    <Route path="/sales/pos" element={<PL><POSSystem /></PL>} />
+                    <Route path="/sales/history" element={<PL><SalesHistory /></PL>} />
+
+                    {/* Customers */}
+                    <Route path="/customers" element={<PL><EnhancedCustomers /></PL>} />
+                    <Route path="/setup/customers" element={<PL><EnhancedCustomers /></PL>} />
+
+                    {/* Purchase / Procurement */}
+                    <Route path="/purchase" element={<PL><EnhancedPurchase /></PL>} />
+                    <Route path="/procurement" element={<PL><ProcurementModule /></PL>} />
+                    <Route path="/procurement/module" element={<PL><ProcurementModule /></PL>} />
+                    <Route path="/requisitions" element={<PL><RequisitionsPage /></PL>} />
+
+                    {/* Payments / Finance */}
+                    <Route path="/payments" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/dashboard" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/collection" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/vouchers" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/receivables" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/payables" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/payments/cashflow" element={<PL><PaymentsFinance /></PL>} />
+                    <Route path="/finance" element={<PL><AccountsVouchers /></PL>} />
+
+                    {/* Reports */}
+                    <Route path="/reports" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/bi-dashboard" element={<PL><BiDashboard /></PL>} />
+                    <Route path="/reports/medicine" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/sales" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/stock" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/financial" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/profit-loss" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/customer" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/purchase" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/inventory" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/stock-movement" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/low-stock" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/category-analysis" element={<PL><EnhancedReports /></PL>} />
+                    <Route path="/reports/trend-analysis" element={<PL><EnhancedReports /></PL>} />
+
+                    {/* Pharmacy Care */}
+                    <Route path="/patients/crm" element={<PL><PatientCRMModule /></PL>} />
+                    <Route path="/patient-crm" element={<PL><PatientCRMModule /></PL>} />
+                    <Route path="/patient-history" element={<PL><PatientHistory /></PL>} />
+                    <Route path="/prescriptions" element={<PL><PrescriptionManagement /></PL>} />
+                    <Route path="/drug-interactions" element={<PL><DrugInteractionChecker /></PL>} />
+                    <Route path="/refill-reminders" element={<PL><RefillReminders /></PL>} />
+                    <Route path="/insurance-claims" element={<PL><InsuranceClaims /></PL>} />
+                    <Route path="/allergy-management" element={<PL><AllergyManagement /></PL>} />
+
+                    {/* Setup / System */}
+                    <Route path="/setup" element={<PL><Setup /></PL>} />
+                    <Route path="/setup/subcategories" element={<PL><Setup /></PL>} />
+                    <Route path="/setup/countries" element={<PL><Setup /></PL>} />
+                    <Route path="/setup/suppliers" element={<PL><Setup /></PL>} />
+                    <Route path="/setup/companies" element={<PL><Setup /></PL>} />
+
+                    {/* Settings */}
+                    <Route path="/settings" element={<PL><Settings /></PL>} />
+                    <Route path="/settings/notifications" element={<PL><NotificationsPage /></PL>} />
+                    <Route path="/notifications" element={<PL><NotificationsPage /></PL>} />
+                    <Route path="/settings/backups" element={<PL><BackupManagementPage /></PL>} />
+                    <Route path="/settings/security" element={<PL><SecuritySettingsPage /></PL>} />
+                    <Route path="/settings/system" element={<PL><SystemSettingsPage /></PL>} />
+                    <Route path="/settings/performance" element={<PL><PerformanceDashboard /></PL>} />
+                    <Route path="/settings/configuration" element={<PL><SystemConfiguration /></PL>} />
+
+                    {/* Admin */}
+                    <Route path="/users" element={<PL><Users /></PL>} />
+                    <Route path="/multi-branch" element={<PL><MultiBranchManagement /></PL>} />
+                    <Route path="/multi-branch/dashboard" element={<PL><MultiBranchDashboard /></PL>} />
+                    <Route path="/branch/transfers" element={<PL><InterBranchTransfer /></PL>} />
+                    <Route path="/import" element={<PL><ImportPage /></PL>} />
+                    <Route path="/audit-logs" element={<PL><AuditLogsPage /></PL>} />
+
+                    {/* Other Modules */}
+                    <Route path="/services" element={<PL><ServiceModule /></PL>} />
+                    <Route path="/hrm" element={<PL><HRMModule /></PL>} />
+                    <Route path="/crm" element={<PL><CRMModule /></PL>} />
+                    <Route path="/messages" element={<PL><InternalMessages /></PL>} />
+
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </ErrorBoundary>
+              </AppWithShortcuts>
             </LanguageProvider>
           </CurrencyProvider>
         </AuthProvider>
