@@ -604,24 +604,35 @@ def get_expiry_alerts(
     db: Session = Depends(get_db)
 ):
     """Get medicines expiring within specified days"""
-    # Use parameterized query to prevent SQL injection
+    # Cast UUID columns → text and Numeric → float so SQLAlchemy 2.0 returns
+    # native Python types that Pydantic v2 accepts without coercion errors.
+    select = """
+        SELECT
+            batch_id::text          AS batch_id,
+            batch_number,
+            product_id::text        AS product_id,
+            product_name,
+            generic_name,
+            brand_name,
+            expiry_date,
+            quantity_remaining::float AS quantity_remaining,
+            purchase_price::float   AS purchase_price,
+            value_at_risk::float    AS value_at_risk,
+            manufacturer,
+            store,
+            days_to_expiry,
+            alert_level
+        FROM v_expiring_medicines
+        WHERE days_to_expiry <= :days
+    """
     if alert_level:
-        query = text("""
-            SELECT * FROM v_expiring_medicines 
-            WHERE days_to_expiry <= :days
-            AND alert_level = :alert_level
-            ORDER BY expiry_date ASC
-        """)
-        results = db.execute(query, {"days": days, "alert_level": alert_level}).fetchall()
+        select += " AND alert_level = :alert_level"
+        params: dict = {"days": days, "alert_level": alert_level}
     else:
-        query = text("""
-            SELECT * FROM v_expiring_medicines 
-            WHERE days_to_expiry <= :days
-            ORDER BY expiry_date ASC
-        """)
-        results = db.execute(query, {"days": days}).fetchall()
-    
-    # SQLAlchemy 2.0: Row objects require ._mapping for dict conversion
+        params = {"days": days}
+    select += " ORDER BY expiry_date ASC"
+
+    results = db.execute(text(select), params).fetchall()
     return [dict(row._mapping) for row in results]
 
 
