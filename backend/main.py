@@ -2025,6 +2025,14 @@ class SaleResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    # DB id/created_by/customer_id are UUID columns; SQLAlchemy returns
+    # uuid.UUID objects which Pydantic v2 will NOT coerce to str, causing a
+    # ResponseValidationError (500) AFTER the row is committed. Coerce here.
+    @field_validator("id", "created_by", mode="before")
+    @classmethod
+    def _coerce_uuid_to_str(cls, v):
+        return str(v) if v is not None else v
+
 class SaleItemResponse(BaseModel):
     id: str
     sale_id: str
@@ -2033,12 +2041,18 @@ class SaleItemResponse(BaseModel):
     unit_price: float
     total_price: float
     batch_no: Optional[str] = None
-    expiry_date: Optional[datetime] = None
+    expiry_date: Optional[date] = None  # DB column is DATE, not timestamp
     gst_percent: Optional[float] = None
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+    # Same UUID→str coercion as SaleResponse (id/sale_id/product_id are UUID).
+    @field_validator("id", "sale_id", "product_id", mode="before")
+    @classmethod
+    def _coerce_uuid_to_str(cls, v):
+        return str(v) if v is not None else v
 
 class PurchaseItemResponse(BaseModel):
     id: str
