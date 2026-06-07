@@ -138,12 +138,16 @@ export default function EnhancedDashboard() {
       }
 
       // Load recent sales
-      const salesResponse = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
-        headers: getAuthHeaders()
-      });
-      if (salesResponse.ok) {
-        const salesData = await salesResponse.json();
-        setRecentSales(salesData.slice(0, 5));
+      try {
+        const salesResponse = await fetch(`${API_CONFIG.API_ROOT}/sales`, {
+          headers: getAuthHeaders()
+        });
+        if (salesResponse.ok) {
+          const salesData = await salesResponse.json();
+          setRecentSales(Array.isArray(salesData) ? salesData.slice(0, 5) : []);
+        }
+      } catch (error) {
+        logger.error("Error loading recent sales:", error);
       }
 
       // Load expiry alerts
@@ -178,15 +182,21 @@ export default function EnhancedDashboard() {
       }
 
       // Load low stock items
-      const productsResponse = await fetch(`${API_CONFIG.API_ROOT}/products`, {
-        headers: getAuthHeaders()
-      });
-      if (productsResponse.ok) {
-        const productsData = await productsResponse.json();
-        const lowStockItems = productsData.filter(
-          (p: any) => p.stock_quantity <= p.min_stock_level
-        );
-        setLowStock(lowStockItems.slice(0, 5));
+      try {
+        const productsResponse = await fetch(`${API_CONFIG.API_ROOT}/products`, {
+          headers: getAuthHeaders()
+        });
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          if (Array.isArray(productsData)) {
+            const lowStockItems = productsData.filter(
+              (p: any) => p.stock_quantity <= (p.min_stock_level ?? p.min_stock_threshold ?? 0)
+            );
+            setLowStock(lowStockItems.slice(0, 5));
+          }
+        }
+      } catch (error) {
+        logger.error("Error loading low stock items:", error);
       }
     } catch (error) {
       toast.error("Error loading dashboard data");

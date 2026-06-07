@@ -1078,15 +1078,15 @@ export class ApiClient {
   }
 
   async getRealtimeDashboard(): Promise<any> {
-    return this.fetch<any>("/api/dashboard/stats");
+    return this.fetch<any>("/api/dashboard/realtime");
   }
 
   async getTopProductsToday(): Promise<any> {
-    return this.fetch<any>("/api/dashboard/stats");
+    return this.fetch<any>("/api/dashboard/top-products-today");
   }
 
   async getHourlySales(): Promise<any> {
-    return this.fetch<any>("/api/dashboard/stats");
+    return this.fetch<any>("/api/dashboard/hourly-sales");
   }
 
   // Health check
