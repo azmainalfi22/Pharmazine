@@ -17,26 +17,29 @@ const sanitizeBaseUrl = (raw: string): string => {
 
 /**
  * Determine the base URL based on environment.
- * Priority: ENV variable > Auto-detect > Fallback.
+ *
+ * Production (Netlify):
+ *   Always return "" so every fetch goes to a relative path like /api/sales.
+ *   Netlify's [[redirects]] proxy rule (netlify.toml) forwards /api/* to the
+ *   Render backend transparently.  The browser never makes a cross-origin
+ *   request, so CORS headers are irrelevant and Render cold-start "no CORS"
+ *   responses can never block the UI.
+ *
+ * Development (Vite dev server):
+ *   Use VITE_API_BASE_URL if set, otherwise fall back to same-origin
+ *   (vite.config.ts already proxies /api → localhost:8000).
  */
 const getBaseUrl = (): string => {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (fromEnv) {
-    return sanitizeBaseUrl(fromEnv);
-  }
-
-  // In production the env var must be set — surface a clear error rather than
-  // silently sending API requests to the Netlify domain (which has no backend).
+  // Production: always use relative URLs — let Netlify proxy handle Render.
   if (import.meta.env.PROD) {
-    console.error(
-      "[Pharmazine] VITE_API_BASE_URL is not set. " +
-      "Add it in Netlify → Site configuration → Environment variables " +
-      "pointing to your Render backend URL (e.g. https://pharmazine-api.onrender.com)."
-    );
+    return "";
   }
 
-  // Dev fallback: Vite proxy forwards /api → 127.0.0.1:8000 transparently,
-  // so same-origin requests work in development even without the env var.
+  // Development: honour the env var so the dev server can point at a remote
+  // backend if needed, otherwise fall back to same-origin + Vite proxy.
+  const fromEnv = import.meta.env.VITE_API_BASE_URL;
+  if (fromEnv) return sanitizeBaseUrl(fromEnv);
+
   if (typeof window !== "undefined") {
     const { protocol, host } = window.location;
     return sanitizeBaseUrl(`${protocol}//${host}`);

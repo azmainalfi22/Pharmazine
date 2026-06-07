@@ -621,7 +621,8 @@ def get_expiry_alerts(
         """)
         results = db.execute(query, {"days": days}).fetchall()
     
-    return [dict(row) for row in results]
+    # SQLAlchemy 2.0: Row objects require ._mapping for dict conversion
+    return [dict(row._mapping) for row in results]
 
 
 @router.get("/low-stock-alerts", response_model=List[LowStockAlertResponse])

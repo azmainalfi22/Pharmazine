@@ -359,22 +359,29 @@ async def sanitize_http_exception(request: Request, exc: HTTPException):
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
     """
-    Safety-net for any exception that escapes route handlers without being
-    converted to an HTTPException.
+    Safety-net for unhandled exceptions.
 
-    Without this, Starlette's ServerErrorMiddleware (outermost layer) catches
-    the exception OUTSIDE the CORS middleware, so the 500 response has no
-    Access-Control-Allow-Origin header and the browser blocks the response —
-    making the error look like a CORS problem instead of a server bug.
+    IMPORTANT — middleware ordering:
+    FastAPI routes @app.exception_handler(Exception) to ServerErrorMiddleware,
+    which is the OUTERMOST layer — outside the CORSMiddleware.  That means the
+    response produced here bypasses CORSMiddleware and the browser sees a
+    response with no Access-Control-Allow-Origin, which it blocks as a CORS
+    violation even though the real problem is a server crash.
 
-    By catching it here (inside ExceptionMiddleware, which is inside the CORS
-    middleware), the JSONResponse flows back through the CORS layer and gets
-    the correct Allow-Origin header attached.
+    Fix: manually add the CORS headers here so the browser can read the error.
     """
     print(f"[ERROR] Unhandled {type(exc).__name__} on {request.method} {request.url.path}: {exc}")
+    origin = request.headers.get("origin", "")
+    cors_headers: dict = {}
+    if origin and origin in allow_origins:
+        cors_headers = {
+            "access-control-allow-origin": origin,
+            "access-control-allow-credentials": "true",
+        }
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
+        headers=cors_headers,
     )
 
 # Include pharmacy routes
