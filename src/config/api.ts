@@ -30,9 +30,13 @@ const sanitizeBaseUrl = (raw: string): string => {
  *   (vite.config.ts already proxies /api → localhost:8000).
  */
 const getBaseUrl = (): string => {
-  // Production: always use relative URLs — let Netlify proxy handle Render.
-  if (import.meta.env.PROD) {
-    return "";
+  // Production (Netlify): use the page's own origin so all API calls go to
+  // pharmazine.netlify.app/api/*, which Netlify's [[redirects]] proxy forwards
+  // to Render.  The browser sees same-origin requests — no CORS checks at all.
+  // We must use the origin (not "") because new URL(path, base) requires base
+  // to be an absolute URL; an empty string throws "Invalid base URL".
+  if (import.meta.env.PROD && typeof window !== "undefined") {
+    return window.location.origin;
   }
 
   // Development: honour the env var so the dev server can point at a remote
