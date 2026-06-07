@@ -541,6 +541,35 @@ export default function POSSystem() {
 
   // ── Checkout ──────────────────────────────────────────────────────────────
 
+  /**
+   * Render's free tier spins the backend down after ~15 min of idle.
+   * The first POST fails instantly with "Failed to fetch" (network error,
+   * not an HTTP error).  This helper pings the health endpoint and waits
+   * up to 45 s for the backend to wake before we submit the real sale.
+   */
+  const ensureBackendAwake = async (): Promise<void> => {
+    const healthUrl = `${API_CONFIG.API_ROOT}/health`;
+    try {
+      const res = await fetch(healthUrl, { headers: getAuthHeaders() });
+      if (res.ok) return; // already up
+    } catch {
+      // backend sleeping — show a toast and poll
+    }
+    const tid = toast.loading("Server is starting up, please wait…");
+    try {
+      for (let i = 0; i < 15; i++) {
+        await new Promise<void>((r) => setTimeout(r, 3000));
+        try {
+          const res = await fetch(healthUrl, { headers: getAuthHeaders() });
+          if (res.ok) return; // awake!
+        } catch { /* still sleeping */ }
+      }
+      // After 45 s still not responding — let the actual sale attempt surface the error
+    } finally {
+      toast.dismiss(tid);
+    }
+  };
+
   const submitSaleToServer = async (
     salePayload: Record<string, unknown>,
     items: CartItem[],
@@ -634,6 +663,8 @@ export default function POSSystem() {
         // Still print receipt with a temp ID
         printReceipt({ id: queueItem.id }, cart, totals);
       } else {
+        // Wake backend if it's sleeping on Render's free tier
+        await ensureBackendAwake();
         const sale = await submitSaleToServer(salePayload, cart, paymentSplits);
 
         // C4: Loyalty earn/redeem
