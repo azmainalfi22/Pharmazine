@@ -356,6 +356,27 @@ async def sanitize_http_exception(request: Request, exc: HTTPException):
         headers=exc.headers,
     )
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """
+    Safety-net for any exception that escapes route handlers without being
+    converted to an HTTPException.
+
+    Without this, Starlette's ServerErrorMiddleware (outermost layer) catches
+    the exception OUTSIDE the CORS middleware, so the 500 response has no
+    Access-Control-Allow-Origin header and the browser blocks the response —
+    making the error look like a CORS problem instead of a server bug.
+
+    By catching it here (inside ExceptionMiddleware, which is inside the CORS
+    middleware), the JSONResponse flows back through the CORS layer and gets
+    the correct Allow-Origin header attached.
+    """
+    print(f"[ERROR] Unhandled {type(exc).__name__} on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+
 # Include pharmacy routes
 try:
     from pharmacy_routes import router as pharmacy_router
@@ -3200,16 +3221,20 @@ async def get_realtime_dashboard(db: Session = Depends(get_db)):
         Product.stock_quantity == 0
     ).scalar() or 0
     
-    # Expiring products
+    # Expiring products — query medicine_batches (expiry_date was moved
+    # there from the products table; Product.expiry_date no longer exists).
     from datetime import timedelta
-    expiry_date = datetime.utcnow() + timedelta(days=30)
-    expiring_count = db.query(func.count(Product.id)).filter(
-        and_(
-            Product.expiry_date.isnot(None),
-            Product.expiry_date <= expiry_date,
-            Product.stock_quantity > 0
-        )
-    ).scalar() or 0
+    expiry_cutoff = (datetime.utcnow() + timedelta(days=30)).date()
+    try:
+        expiring_count = db.execute(text("""
+            SELECT COUNT(DISTINCT product_id)
+            FROM medicine_batches
+            WHERE expiry_date IS NOT NULL
+              AND expiry_date <= :cutoff
+              AND quantity_remaining > 0
+        """), {"cutoff": expiry_cutoff}).scalar() or 0
+    except Exception:
+        expiring_count = 0
     
     # Inventory value
     inventory_value = db.query(func.sum(Product.stock_quantity * Product.cost_price)).scalar() or 0
