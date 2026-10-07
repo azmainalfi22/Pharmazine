@@ -119,7 +119,7 @@ export default function AccountsReceivableTab() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-blue-200 bg-blue-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Receivables</p>
                 <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.total)}</p>
@@ -132,7 +132,7 @@ export default function AccountsReceivableTab() {
 
         <Card className="border-green-200 bg-green-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Current (Not Due)</p>
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.current)}</p>
@@ -144,7 +144,7 @@ export default function AccountsReceivableTab() {
 
         <Card className="border-orange-200 bg-orange-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Overdue</p>
                 <p className="text-2xl font-bold text-orange-600">{formatCurrency(stats.overdue)}</p>
@@ -156,7 +156,7 @@ export default function AccountsReceivableTab() {
 
         <Card className="border-red-200 bg-red-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Critical (&gt;30 days)</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.critical)}</p>

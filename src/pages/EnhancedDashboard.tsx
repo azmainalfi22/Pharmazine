@@ -208,21 +208,21 @@ export default function EnhancedDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Big Real-Time Header with Auto-Refresh */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
           {/* Top Row: Title and Controls */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <Calendar className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Dashboard Overview
                 </h1>
                 <p className="text-white/90 text-base">
@@ -248,44 +248,44 @@ export default function EnhancedDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Link to="/inventory" className="block">
               <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg hover:bg-white/25 hover:shadow-xl transition-all cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <Package className="h-5 w-5 text-white/80" />
                   <span className="text-xs text-white/70 font-medium">PRODUCTS</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">{stats.totalProducts}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stats.totalProducts}</div>
                 <div className="text-xs text-white/70">Total Items</div>
               </div>
             </Link>
 
             <Link to="/sales/history" className="block">
               <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg hover:bg-white/25 hover:shadow-xl transition-all cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <ShoppingCart className="h-5 w-5 text-white/80" />
                   <span className="text-xs text-white/70 font-medium">SALES</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">{stats.totalSales}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stats.totalSales}</div>
                 <div className="text-xs text-white/70">Total Transactions</div>
               </div>
             </Link>
 
             <Link to="/customers" className="block">
               <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg hover:bg-white/25 hover:shadow-xl transition-all cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <Users className="h-5 w-5 text-white/80" />
                   <span className="text-xs text-white/70 font-medium">CUSTOMERS</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">{stats.totalCustomers}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stats.totalCustomers}</div>
                 <div className="text-xs text-white/70">Registered</div>
               </div>
             </Link>
 
             <Link to="/inventory/low-stock" className="block">
               <div className="bg-red-500/30 backdrop-blur-md rounded-xl p-4 border border-red-300/30 shadow-lg hover:bg-red-500/40 hover:shadow-xl transition-all cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <AlertTriangle className="h-5 w-5 text-white/90" />
                   <span className="text-xs text-white/70 font-medium">ALERTS</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">{stats.lowStockProducts}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stats.lowStockProducts}</div>
                 <div className="text-xs text-white/70">Low Stock Items</div>
               </div>
             </Link>
@@ -374,7 +374,7 @@ export default function EnhancedDashboard() {
         {/* Recent Sales */}
         <Card className="pharmacy-card">
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <CardTitle>Recent Sales</CardTitle>
               <Link to="/sales/history">
                 <Button variant="link" className="text-primary">View All</Button>
@@ -391,7 +391,7 @@ export default function EnhancedDashboard() {
             ) : (
               <div className="space-y-3">
                 {recentSales.map((sale) => (
-                  <div key={sale.id} className="flex items-center justify-between p-3 rounded-lg glass-subtle">
+                  <div key={sale.id} className="flex items-center justify-between p-3 rounded-lg glass-subtle flex-wrap gap-2">
                     <div>
                       <div className="font-medium">{sale.customer_name}</div>
                       <div className="text-sm text-muted-foreground">
@@ -424,7 +424,7 @@ export default function EnhancedDashboard() {
             <CardContent>
               <div className="space-y-2">
                 {topProducts.slice(0, 5).map((item: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-green-300 transition-colors">
+                  <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-green-300 transition-colors flex-wrap gap-2">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-bold text-sm">
                         #{index + 1}
@@ -448,7 +448,7 @@ export default function EnhancedDashboard() {
         {/* Expiry Alerts */}
         <Card className="pharmacy-card border-red-200">
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
                 Expiry Alerts
@@ -468,7 +468,7 @@ export default function EnhancedDashboard() {
             ) : (
               <div className="space-y-3">
                 {expiryAlerts.map((alert, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200">
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200 flex-wrap gap-2">
                     <div>
                       <div className="font-medium">{alert.product_name}</div>
                       <div className="text-sm text-muted-foreground">
@@ -488,7 +488,7 @@ export default function EnhancedDashboard() {
         {/* Low Stock Items */}
         <Card className="pharmacy-card border-orange-200">
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <CardTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-orange-600" />
                 Low Stock Alerts
@@ -508,7 +508,7 @@ export default function EnhancedDashboard() {
             ) : (
               <div className="space-y-3">
                 {lowStock.map((product) => (
-                  <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-50 border border-orange-200">
+                  <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-50 border border-orange-200 flex-wrap gap-2">
                     <div>
                       <div className="font-medium">{product.name}</div>
                       <div className="text-sm text-muted-foreground">
@@ -537,7 +537,7 @@ export default function EnhancedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 shadow-sm">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 shadow-sm flex-wrap gap-2">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-green-500 shadow-lg flex items-center justify-center">
                     <ShoppingCart className="w-6 h-6 text-white" />
@@ -553,7 +553,7 @@ export default function EnhancedDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 shadow-sm">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 shadow-sm flex-wrap gap-2">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-blue-500 shadow-lg flex items-center justify-center">
                     <DollarSign className="w-6 h-6 text-white" />

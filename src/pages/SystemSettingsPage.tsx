@@ -56,16 +56,16 @@ export default function SystemSettingsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 p-8 rounded-2xl border-2 border-gray-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 p-4 sm:p-8 rounded-2xl border-2 border-gray-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/5 opacity-50" />
         <div className="relative z-10 flex items-center gap-4">
           <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
             <Settings className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">System Settings</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">System Settings</h1>
             <p className="text-white/90 text-base">Configure notifications, backups, and system preferences</p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function SystemSettingsPage() {
               <CardDescription>Configure automated inventory and sales alerts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Low Stock Alerts</Label>
                   <p className="text-sm text-muted-foreground">Send emails when products reach reorder point</p>
@@ -114,7 +114,7 @@ export default function SystemSettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Expiry Alerts</Label>
                   <p className="text-sm text-muted-foreground">Alert for products expiring within</p>
@@ -130,7 +130,7 @@ export default function SystemSettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Daily Summary Report</Label>
                   <p className="text-sm text-muted-foreground">End-of-day sales and inventory summary</p>
@@ -141,7 +141,7 @@ export default function SystemSettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Auto-Reorder Recommendations</Label>
                   <p className="text-sm text-muted-foreground">Weekly smart reorder suggestions</p>
@@ -163,7 +163,7 @@ export default function SystemSettingsPage() {
               <CardDescription>Configure automated database backups</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Automated Backups</Label>
                   <p className="text-sm text-muted-foreground">Daily automatic database backups</p>
@@ -283,7 +283,7 @@ export default function SystemSettingsPage() {
               <CardDescription>SMS notifications for customer refill reminders</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Enable SMS Notifications</Label>
                   <p className="text-sm text-muted-foreground">Requires Twilio account</p>
@@ -347,7 +347,7 @@ export default function SystemSettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Require Strong Passwords</Label>
                   <p className="text-sm text-muted-foreground">Min 8 chars with uppercase, lowercase, number</p>
@@ -358,7 +358,7 @@ export default function SystemSettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <Label className="text-base">Two-Factor Authentication (2FA)</Label>
                   <p className="text-sm text-muted-foreground">Require OTP for admin users</p>

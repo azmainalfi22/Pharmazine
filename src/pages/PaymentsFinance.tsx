@@ -372,10 +372,10 @@ const PaymentsFinance = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 sm:p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative">
-          <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2 flex items-center gap-3">
             <DollarSign className="h-8 w-8" />
             Payments & Finance Management
           </h1>
@@ -385,7 +385,7 @@ const PaymentsFinance = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="flex sm:grid w-full sm:grid-cols-6">
           <TabsTrigger value="dashboard" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
@@ -421,8 +421,8 @@ const PaymentsFinance = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Card className="border-green-200 bg-green-50/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <p className="text-sm text-muted-foreground">Cash in Hand</p>
                           <p className="text-2xl font-bold text-green-600">
@@ -435,8 +435,8 @@ const PaymentsFinance = () => {
                   </Card>
 
                   <Card className="border-blue-200 bg-blue-50/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <p className="text-sm text-muted-foreground">Bank Balance</p>
                           <p className="text-2xl font-bold text-blue-600">
@@ -449,8 +449,8 @@ const PaymentsFinance = () => {
                   </Card>
 
                   <Card className="border-orange-200 bg-orange-50/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <p className="text-sm text-muted-foreground">Receivables</p>
                           <p className="text-2xl font-bold text-orange-600">
@@ -463,8 +463,8 @@ const PaymentsFinance = () => {
                   </Card>
 
                   <Card className="border-red-200 bg-red-50/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <p className="text-sm text-muted-foreground">Payables</p>
                           <p className="text-2xl font-bold text-red-600">
@@ -516,7 +516,7 @@ const PaymentsFinance = () => {
         <TabsContent value="collection">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Receipt className="h-5 w-5" />
@@ -686,7 +686,7 @@ const PaymentsFinance = () => {
         <TabsContent value="vouchers">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />

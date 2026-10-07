@@ -147,9 +147,9 @@ export default function DrugInteractionChecker() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white shadow-lg">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/20 rounded-lg">
             <Shield className="w-6 h-6" />
@@ -161,7 +161,7 @@ export default function DrugInteractionChecker() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-3 text-center">
             <p className="text-2xl font-bold">{selectedMedicines.length}</p>
             <p className="text-xs text-blue-200">Medicines selected</p>
@@ -209,7 +209,7 @@ export default function DrugInteractionChecker() {
                 {filteredProducts.map((p) => (
                   <button
                     key={p.id}
-                    className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center justify-between group"
+                    className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center justify-between group flex-wrap gap-2"
                     onMouseDown={() => addMedicine(p)}
                   >
                     <div>
@@ -324,7 +324,7 @@ export default function DrugInteractionChecker() {
                     key={i}
                     className={`p-4 rounded-lg border-2 ${cfg.bg}`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-gray-900">
                           {resolveName(interaction.medicine_a)}

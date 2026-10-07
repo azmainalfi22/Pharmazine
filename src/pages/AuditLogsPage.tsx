@@ -204,7 +204,7 @@ const AuditLogsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -212,7 +212,7 @@ const AuditLogsPage = () => {
               <Shield className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">Audit Logs</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">Audit Logs</h1>
               <p className="text-white/90 text-base">Track all system activities and changes</p>
             </div>
           </div>

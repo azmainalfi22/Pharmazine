@@ -93,11 +93,11 @@ export default function RefillReminders() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Refill Reminders</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Refill Reminders</h1>
           <p className="text-gray-600 mt-1">
             Manage and send medication refill reminders
           </p>
@@ -115,7 +115,7 @@ export default function RefillReminders() {
             <CardDescription>Total Due</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{reminders.length}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{reminders.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -123,7 +123,7 @@ export default function RefillReminders() {
             <CardDescription>Overdue</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">
+            <div className="text-2xl sm:text-3xl font-bold text-red-600">
               {
                 reminders.filter((r) =>
                   isBefore(new Date(r.refill_date), new Date())
@@ -137,7 +137,7 @@ export default function RefillReminders() {
             <CardDescription>Due Today</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">
+            <div className="text-2xl sm:text-3xl font-bold text-orange-600">
               {
                 reminders.filter(
                   (r) =>
@@ -153,7 +153,7 @@ export default function RefillReminders() {
             <CardDescription>Next 7 Days</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-2xl sm:text-3xl font-bold text-blue-600">
               {
                 reminders.filter((r) =>
                   isBefore(new Date(r.refill_date), addDays(new Date(), 7))

@@ -73,15 +73,15 @@ export default function EnhancedDashboardV2() {
   };
 
   if (loading || !stats) {
-    return <div className="p-6">Loading dashboard...</div>;
+    return <div className="p-4 sm:p-6">Loading dashboard...</div>;
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header with Live Indicator */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Real-time pharmacy operations overview</p>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg">
@@ -91,10 +91,10 @@ export default function EnhancedDashboardV2() {
       </div>
 
       {/* Today's Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Today's Sales</CardTitle>
               <DollarSign className="h-4 w-4 text-green-600" />
             </div>
@@ -107,7 +107,7 @@ export default function EnhancedDashboardV2() {
 
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Customers Today</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </div>
@@ -120,7 +120,7 @@ export default function EnhancedDashboardV2() {
 
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Inventory Value</CardTitle>
               <Package className="h-4 w-4 text-purple-600" />
             </div>
@@ -133,7 +133,7 @@ export default function EnhancedDashboardV2() {
 
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">This Month</CardTitle>
               <Calendar className="h-4 w-4 text-indigo-600" />
             </div>
@@ -146,14 +146,14 @@ export default function EnhancedDashboardV2() {
       </div>
 
       {/* Alerts Section */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link to="/inventory/low-stock">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Low Stock</p>
-                  <p className="text-3xl font-bold text-orange-600">{stats.low_stock_count || 0}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-orange-600">{stats.low_stock_count || 0}</p>
                   <p className="text-xs text-orange-600 mt-1">Needs reordering</p>
                 </div>
                 <AlertTriangle className="h-10 w-10 text-orange-600" />
@@ -165,10 +165,10 @@ export default function EnhancedDashboardV2() {
         <Link to="/medicine-management/expiry-alerts">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-red-200">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Expiring Soon</p>
-                  <p className="text-3xl font-bold text-red-600">{stats.expiring_soon_count || 0}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-red-600">{stats.expiring_soon_count || 0}</p>
                   <p className="text-xs text-red-600 mt-1">Within 30 days</p>
                 </div>
                 <Clock className="h-10 w-10 text-red-600" />
@@ -180,10 +180,10 @@ export default function EnhancedDashboardV2() {
         <Link to="/inventory/auto-reorder">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Auto-Reorder</p>
-                  <p className="text-3xl font-bold text-blue-600">{(stats.low_stock_count || 0)}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">{(stats.low_stock_count || 0)}</p>
                   <p className="text-xs text-blue-600 mt-1">Smart suggestions</p>
                 </div>
                 <ShoppingCart className="h-10 w-10 text-blue-600" />
@@ -194,7 +194,7 @@ export default function EnhancedDashboardV2() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <Link to="/sales">
           <Card className="hover:bg-primary/5 transition-colors cursor-pointer">
             <CardContent className="pt-6 text-center">

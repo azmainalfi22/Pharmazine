@@ -151,8 +151,8 @@ export default function StatisticsTab() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-2xl sm:text-4xl font-bold">
                     <span className={getHealthColor(score)}>{score}</span>
                     <span className="text-muted-foreground text-2xl">/100</span>
                   </span>
@@ -202,11 +202,11 @@ export default function StatisticsTab() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="pharmacy-stat-card border-blue-200 bg-blue-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Total Products</p>
-                      <p className="text-3xl font-bold text-blue-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">
                         {medicineStats.total_products}
                       </p>
                     </div>
@@ -216,11 +216,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-purple-200 bg-purple-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Total Batches</p>
-                      <p className="text-3xl font-bold text-purple-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">
                         {medicineStats.total_batches}
                       </p>
                     </div>
@@ -230,11 +230,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-green-200 bg-green-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Stock Value</p>
-                      <p className="text-3xl font-bold text-green-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">
                         {formatCurrency(medicineStats.total_stock_value)}
                       </p>
                     </div>
@@ -244,11 +244,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-indigo-200 bg-indigo-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">At-Risk Value</p>
-                      <p className="text-3xl font-bold text-indigo-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">
                         {formatCurrency(medicineStats.expiring_value)}
                       </p>
                     </div>
@@ -267,11 +267,11 @@ export default function StatisticsTab() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="pharmacy-stat-card border-cyan-200 bg-cyan-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Total Manufacturers</p>
-                      <p className="text-3xl font-bold text-cyan-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-cyan-600 mt-2">
                         {manufacturerStats.total_manufacturers}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
@@ -284,11 +284,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-pink-200 bg-pink-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Products Supplied</p>
-                      <p className="text-3xl font-bold text-pink-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-pink-600 mt-2">
                         {manufacturerStats.total_products_supplied ?? 0}
                       </p>
                     </div>
@@ -298,11 +298,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-emerald-200 bg-emerald-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Credit Limit</p>
-                      <p className="text-3xl font-bold text-emerald-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">
                         {formatCurrency(manufacturerStats.total_credit_limit ?? 0)}
                       </p>
                     </div>
@@ -312,11 +312,11 @@ export default function StatisticsTab() {
               </Card>
 
               <Card className="pharmacy-stat-card border-amber-200 bg-amber-50/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground font-medium">Outstanding Balance</p>
-                      <p className="text-3xl font-bold text-amber-600 mt-2">
+                      <p className="text-2xl sm:text-3xl font-bold text-amber-600 mt-2">
                         {formatCurrency(manufacturerStats.total_outstanding ?? manufacturerStats.total_outstanding_balance ?? 0)}
                       </p>
                     </div>

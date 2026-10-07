@@ -206,7 +206,7 @@ export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabPr
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Discounts</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
@@ -218,7 +218,7 @@ export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabPr
 
         <Card className="pharmacy-stat-card border-green-200 bg-green-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold text-green-600">{stats.active}</p>
@@ -230,7 +230,7 @@ export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabPr
 
         <Card className="pharmacy-stat-card border-blue-200 bg-blue-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Percentage</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.percentage}</p>
@@ -242,7 +242,7 @@ export default function DiscountTab({ searchTerm, setSearchTerm }: DiscountTabPr
 
         <Card className="pharmacy-stat-card border-purple-200 bg-purple-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Fixed Amount</p>
                 <p className="text-2xl font-bold text-purple-600">{stats.fixed}</p>

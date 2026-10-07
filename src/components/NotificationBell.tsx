@@ -35,7 +35,12 @@ const TYPE_COLOR: Record<string, string> = {
   info: "text-blue-500",
 };
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  /** "up" opens above the bell (sidebar footer); "down" opens below it (mobile top bar). */
+  placement?: "up" | "down";
+}
+
+export default function NotificationBell({ placement = "up" }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -121,9 +126,18 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute bottom-12 left-0 z-50 w-80 rounded-2xl bg-white/95 dark:bg-gray-900/95 shadow-2xl border border-white/40 dark:border-gray-700/50 backdrop-blur-xl overflow-hidden">
+        <div
+          className={cn(
+            "z-50 rounded-2xl shadow-2xl border border-white/40 dark:border-gray-700/50 overflow-hidden",
+            placement === "up"
+              ? "absolute bottom-12 left-0 w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl"
+              : // Mobile top bar: span the screen just below the bar. Solid, because
+                // the bar's own backdrop blur would show through a translucent panel.
+                "fixed inset-x-3 top-16 bg-white dark:bg-gray-900"
+          )}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-primary" />
               <span className="font-semibold text-sm">Notifications</span>

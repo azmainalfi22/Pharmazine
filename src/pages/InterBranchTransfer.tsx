@@ -193,10 +193,10 @@ export default function InterBranchTransfer() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <ArrowRightLeft className="w-8 h-8" />
@@ -218,7 +218,7 @@ export default function InterBranchTransfer() {
           </div>
         </div>
         {/* KPI strip */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {[
             { label: "Branches",        value: branches.length,                                    icon: Building2 },
             { label: "Pending Transfers",value: transfers.filter(t => t.status === "pending").length, icon: Clock },
@@ -235,7 +235,7 @@ export default function InterBranchTransfer() {
       </div>
 
       <Tabs defaultValue="transfers">
-        <TabsList className="grid grid-cols-3 w-full max-w-lg">
+        <TabsList className="flex sm:grid sm:grid-cols-3 w-full max-w-lg">
           <TabsTrigger value="transfers" className="gap-1">
             <ArrowRightLeft className="w-4 h-4" /> Transfers
           </TabsTrigger>
@@ -340,7 +340,7 @@ export default function InterBranchTransfer() {
         {/* ── Consolidated P&L tab ──────────────────────────────────────────── */}
         <TabsContent value="pl" className="space-y-4 mt-4">
           {/* Summary cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: "Total Revenue",    value: fmt(totalRevenue),                                       color: "from-teal-500 to-cyan-500" },
               { label: "Total COGS",       value: fmt(consolidatedPL.reduce((s, b) => s + b.total_cogs, 0)), color: "from-amber-500 to-orange-500" },

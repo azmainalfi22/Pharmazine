@@ -769,20 +769,20 @@ export default function POSSystem() {
   return (
     <div className="flex flex-col h-screen">
       {/* Gradient Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-teal-600 to-green-700 p-6 border-b-2 border-green-200/20 shadow-xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-teal-600 to-green-700 p-4 sm:p-6 border-b-2 border-green-200/20 shadow-xl">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <ShoppingCart className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white drop-shadow-lg">Point of Sale</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">Point of Sale</h1>
               <p className="text-white/90 text-sm mt-0.5">Quick sales and invoice generation</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {/* C6: Online/Offline indicator */}
             <div className={`bg-white/15 backdrop-blur-md rounded-xl px-3 py-2 border flex items-center gap-2 ${isOnline ? "border-green-300/40" : "border-red-300/40"}`}>
               {isOnline ? (
@@ -870,7 +870,7 @@ export default function POSSystem() {
                           className="p-3 hover:bg-accent rounded-lg cursor-pointer transition-colors"
                           onClick={() => handleProductSelect(product)}
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-start flex-wrap gap-2">
                             <div>
                               <div className="font-medium">{product.name}</div>
                               {product.generic_name && (
@@ -901,7 +901,7 @@ export default function POSSystem() {
           {/* Shopping Cart */}
           <Card className="pharmacy-card flex-1">
             <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
                   Cart ({cart.length} items)
@@ -937,7 +937,7 @@ export default function POSSystem() {
                   <div className="space-y-2">
                     {cart.map((item, index) => (
                       <div key={index} className="p-3 border rounded-lg glass-subtle">
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                           <div className="flex-1">
                             <div className="font-medium">{item.product_name}</div>
                             <div className="text-xs text-muted-foreground">
@@ -983,7 +983,7 @@ export default function POSSystem() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm flex-wrap gap-2">
                   <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-medium">{formatCurrency(totals.itemsTotal)}</span>
                 </div>
@@ -1025,14 +1025,14 @@ export default function POSSystem() {
                 </div>
 
                 {loyaltyRedeem > 0 && (
-                  <div className="flex justify-between text-sm text-amber-600">
+                  <div className="flex justify-between text-sm text-amber-600 flex-wrap gap-2">
                     <span>Loyalty Redeem:</span>
                     <span>-{formatCurrency(loyaltyRedeem)}</span>
                   </div>
                 )}
 
                 <div className="border-t pt-2">
-                  <div className="flex justify-between text-lg font-bold">
+                  <div className="flex justify-between text-lg font-bold flex-wrap gap-2">
                     <span>Total:</span>
                     <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
                   </div>
@@ -1114,7 +1114,7 @@ export default function POSSystem() {
                   </div>
                 )}
                 {totalPaid > totals.grandTotal && totals.grandTotal > 0 && (
-                  <div className="text-sm text-green-600 flex justify-between">
+                  <div className="text-sm text-green-600 flex justify-between flex-wrap gap-2">
                     <span>Change:</span>
                     <span>{formatCurrency((totalPaid - totals.grandTotal))}</span>
                   </div>
@@ -1164,7 +1164,7 @@ export default function POSSystem() {
                   className="p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
                   onClick={() => handleAddToCart(batch)}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start flex-wrap gap-2">
                     <div>
                       <div className="font-medium">Batch: {batch.batch_number}</div>
                       <div className="text-sm text-muted-foreground">
@@ -1269,23 +1269,23 @@ export default function POSSystem() {
 
             {/* Order Summary */}
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm flex-wrap gap-2">
                 <span>Subtotal:</span>
                 <span>{formatCurrency(totals.itemsTotal)}</span>
               </div>
               {totals.discount > 0 && (
-                <div className="flex justify-between text-sm text-red-600">
+                <div className="flex justify-between text-sm text-red-600 flex-wrap gap-2">
                   <span>Discount{loyaltyRedeem > 0 ? ` (incl. ${loyaltyRedeem} pts)` : ""}:</span>
                   <span>-{formatCurrency(totals.discount)}</span>
                 </div>
               )}
               {totals.tax > 0 && (
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm flex-wrap gap-2">
                   <span>Tax:</span>
                   <span>{formatCurrency(totals.tax)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-lg font-bold border-t pt-2">
+              <div className="flex justify-between text-lg font-bold border-t pt-2 flex-wrap gap-2">
                 <span>Grand Total:</span>
                 <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
               </div>
@@ -1294,13 +1294,13 @@ export default function POSSystem() {
               <Separator />
               <div className="text-sm font-medium">Payment Methods:</div>
               {paymentSplits.filter((s) => s.amount > 0).map((s, i) => (
-                <div key={i} className="flex justify-between text-sm">
+                <div key={i} className="flex justify-between text-sm flex-wrap gap-2">
                   <span className="capitalize">{s.method}:</span>
                   <Badge variant="outline" className="capitalize">{formatCurrency(s.amount)}</Badge>
                 </div>
               ))}
               {totalPaid > totals.grandTotal && (
-                <div className="flex justify-between text-green-600 text-sm font-medium">
+                <div className="flex justify-between text-green-600 text-sm font-medium flex-wrap gap-2">
                   <span>Change:</span>
                   <span>{formatCurrency((totalPaid - totals.grandTotal))}</span>
                 </div>

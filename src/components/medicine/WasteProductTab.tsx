@@ -137,7 +137,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Waste Items</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
@@ -149,7 +149,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
 
         <Card className="pharmacy-stat-card border-red-200 bg-red-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Expired</p>
                 <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
@@ -161,7 +161,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
 
         <Card className="pharmacy-stat-card border-orange-200 bg-orange-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Damaged</p>
                 <p className="text-2xl font-bold text-orange-600">{stats.damaged}</p>
@@ -173,7 +173,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
 
         <Card className="pharmacy-stat-card border-primary/20 bg-primary/5">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Loss</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalLoss)}</p>
@@ -360,7 +360,7 @@ export default function WasteProductTab({ searchTerm, setSearchTerm }: WasteProd
 
           {filteredWaste.length > 0 && (
             <div className="mt-4 p-4 bg-muted rounded-lg">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm flex-wrap gap-2">
                 <span className="font-medium">Total Waste Items: {filteredWaste.length}</span>
                 <span className="font-bold text-red-600">
                   Total Financial Loss: {formatCurrency(filteredWaste.reduce((sum, w) => sum + (w.value_loss || 0), 0))}

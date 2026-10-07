@@ -205,10 +205,10 @@ export default function MultiBranchDashboard() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Building2 className="w-8 h-8" />
@@ -230,7 +230,7 @@ export default function MultiBranchDashboard() {
           </div>
         </div>
         {/* KPI strip */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {[
             { label: "Active Branches",  value: branches.filter(b => b.is_active).length },
             { label: "Pending Transfers", value: transfers.filter(t => t.status === "pending").length },
@@ -246,7 +246,7 @@ export default function MultiBranchDashboard() {
       </div>
 
       <Tabs defaultValue="transfers">
-        <TabsList className="grid grid-cols-3 w-full max-w-lg">
+        <TabsList className="flex sm:grid sm:grid-cols-3 w-full max-w-lg">
           <TabsTrigger value="transfers" className="gap-1">
             <ArrowRightLeft className="w-4 h-4" /> Transfers
           </TabsTrigger>
@@ -270,7 +270,7 @@ export default function MultiBranchDashboard() {
                 className="pl-9"
               />
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {["all", "pending", "approved", "dispatched", "received", "rejected"].map(s => (
                 <Button
                   key={s}
@@ -350,8 +350,8 @@ export default function MultiBranchDashboard() {
 
         {/* ── Consolidated P&L tab ──────────────────────────────────────────── */}
         <TabsContent value="pl" className="space-y-4 mt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-1.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {[
                 { v: "7",   l: "7 days" },
                 { v: "30",  l: "30 days" },
@@ -461,7 +461,7 @@ export default function MultiBranchDashboard() {
               branches.map(b => (
                 <Card key={b.id} className={`pharmacy-card ${!b.is_active ? "opacity-60" : ""}`}>
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
                           <Building2 className="w-5 h-5 text-teal-700" />

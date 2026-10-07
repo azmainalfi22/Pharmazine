@@ -133,9 +133,9 @@ export default function PatientHistory() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Gradient Header */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 rounded-xl p-6 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 rounded-xl p-4 sm:p-6 text-white shadow-lg">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/20 rounded-lg">
             <Users className="w-6 h-6" />
@@ -147,7 +147,7 @@ export default function PatientHistory() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-3 text-center">
             <p className="text-2xl font-bold">{customers.length}</p>
             <p className="text-xs text-teal-200">Total Patients</p>
@@ -180,7 +180,7 @@ export default function PatientHistory() {
               {refillReminders.slice(0, 5).map((reminder) => (
                 <div
                   key={`${reminder.customer_id}-${reminder.product_name}`}
-                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-orange-100"
+                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-orange-100 flex-wrap gap-2"
                 >
                   <div>
                     <p className="font-medium text-gray-900">{reminder.customer_name}</p>
@@ -256,7 +256,7 @@ export default function PatientHistory() {
             <>
               {/* Stats Row */}
               {stats && (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Card className="pharmacy-card">
                     <CardContent className="pt-5">
                       <div className="flex items-center gap-3">
@@ -323,7 +323,7 @@ export default function PatientHistory() {
                     <div className="space-y-3">
                       {history.map((item) => (
                         <div key={item.id} className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition">
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-start flex-wrap gap-2">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="font-semibold text-gray-900">{item.product_name}</h3>

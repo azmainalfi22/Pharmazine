@@ -243,17 +243,17 @@ export default function AllergyManagement() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Gradient Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-rose-600 to-red-700 p-8 rounded-2xl border-2 border-red-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-red-600 via-rose-600 to-red-700 p-4 sm:p-8 rounded-2xl border-2 border-red-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <AlertTriangle className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Allergy Management</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Allergy Management</h1>
               <p className="text-white/90 text-base">Track patient medicine allergies for safe dispensing</p>
             </div>
           </div>
@@ -285,7 +285,7 @@ export default function AllergyManagement() {
             <CardDescription>Total Allergies</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{statistics.total}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{statistics.total}</div>
             <p className="text-xs text-muted-foreground">{statistics.activePatients} patients</p>
           </CardContent>
         </Card>
@@ -294,7 +294,7 @@ export default function AllergyManagement() {
             <CardDescription>Life-Threatening</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">{statistics.lifeThreatening}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-red-600">{statistics.lifeThreatening}</div>
           </CardContent>
         </Card>
         <Card className="pharmacy-card">
@@ -302,7 +302,7 @@ export default function AllergyManagement() {
             <CardDescription>Severe</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">{statistics.severe}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-orange-600">{statistics.severe}</div>
           </CardContent>
         </Card>
         <Card className="pharmacy-card">
@@ -310,7 +310,7 @@ export default function AllergyManagement() {
             <CardDescription>Moderate</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-yellow-600">{statistics.moderate}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{statistics.moderate}</div>
           </CardContent>
         </Card>
         <Card className="pharmacy-card">
@@ -318,7 +318,7 @@ export default function AllergyManagement() {
             <CardDescription>Mild</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{statistics.mild}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-blue-600">{statistics.mild}</div>
           </CardContent>
         </Card>
       </div>
@@ -326,7 +326,7 @@ export default function AllergyManagement() {
       {/* Allergies Table */}
       <Card className="pharmacy-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <CardTitle>Patient Allergy Records</CardTitle>
               <CardDescription>Active allergy records for patient safety</CardDescription>

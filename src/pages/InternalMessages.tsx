@@ -118,10 +118,10 @@ export default function InternalMessages() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold">Internal Messages</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Internal Messages</h1>
           <p className="text-gray-500 mt-1">Employee communication system</p>
         </div>
         {unreadCount > 0 && (
@@ -132,7 +132,7 @@ export default function InternalMessages() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b">
+      <div className="flex flex-wrap gap-2 border-b">
         <button
           onClick={() => setActiveTab('inbox')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
@@ -193,7 +193,7 @@ export default function InternalMessages() {
                       !msg.is_read ? 'bg-blue-50 border-blue-200 font-medium' : 'bg-white'
                     }`}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold">{msg.subject}</h3>
@@ -247,7 +247,7 @@ export default function InternalMessages() {
               <div className="space-y-2">
                 {sent.map((msg) => (
                   <div key={msg.id} className="p-4 border rounded-lg bg-white">
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start flex-wrap gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold">{msg.subject}</h3>

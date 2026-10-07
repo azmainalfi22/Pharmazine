@@ -243,11 +243,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
           {/* Summary Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-blue-200 bg-blue-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Products</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-2">{medicineStats.totalProducts}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">{medicineStats.totalProducts}</p>
                   </div>
                   <Pill className="w-12 h-12 text-blue-600 opacity-20" />
                 </div>
@@ -255,11 +255,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-purple-200 bg-purple-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Batches</p>
-                    <p className="text-3xl font-bold text-purple-600 mt-2">{medicineStats.totalBatches}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">{medicineStats.totalBatches}</p>
                   </div>
                   <Package className="w-12 h-12 text-purple-600 opacity-20" />
                 </div>
@@ -267,11 +267,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-green-200 bg-green-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Stock Value</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{formatCurrency(medicineStats.totalStockValue)}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{formatCurrency(medicineStats.totalStockValue)}</p>
                   </div>
                   <DollarSign className="w-12 h-12 text-green-600 opacity-20" />
                 </div>
@@ -279,11 +279,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-orange-200 bg-orange-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Expiring Soon</p>
-                    <p className="text-3xl font-bold text-orange-600 mt-2">{medicineStats.expiringSoon}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-orange-600 mt-2">{medicineStats.expiringSoon}</p>
                   </div>
                   <AlertTriangle className="w-12 h-12 text-orange-600 opacity-20" />
                 </div>
@@ -291,11 +291,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-yellow-200 bg-yellow-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Low Stock Items</p>
-                    <p className="text-3xl font-bold text-yellow-600 mt-2">{medicineStats.lowStockItems}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-yellow-600 mt-2">{medicineStats.lowStockItems}</p>
                   </div>
                   <TrendingUp className="w-12 h-12 text-yellow-600 opacity-20" />
                 </div>
@@ -303,11 +303,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-red-200 bg-red-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Out of Stock</p>
-                    <p className="text-3xl font-bold text-red-600 mt-2">{medicineStats.outOfStock}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-2">{medicineStats.outOfStock}</p>
                   </div>
                   <Package className="w-12 h-12 text-red-600 opacity-20" />
                 </div>
@@ -315,11 +315,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-rose-200 bg-rose-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Waste Loss</p>
-                    <p className="text-3xl font-bold text-rose-600 mt-2">{formatCurrency(medicineStats.totalWasteValue)}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-2">{formatCurrency(medicineStats.totalWasteValue)}</p>
                   </div>
                   <AlertTriangle className="w-12 h-12 text-rose-600 opacity-20" />
                 </div>
@@ -327,11 +327,11 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
             </Card>
 
             <Card className="border-indigo-200 bg-indigo-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Avg Stock Level</p>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{medicineStats.averageStockLevel.toFixed(1)}%</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">{medicineStats.averageStockLevel.toFixed(1)}%</p>
                   </div>
                   <BarChart3 className="w-12 h-12 text-indigo-600 opacity-20" />
                 </div>
@@ -342,7 +342,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
           {/* Expiry Breakdown */}
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-primary" />
@@ -418,7 +418,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
           {/* Waste Analysis */}
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-primary" />
@@ -435,7 +435,7 @@ export default function MedicineReportsTab({ dateRange }: MedicineReportsTabProp
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <Card className="border-red-200 bg-red-50/50">
                       <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Total Waste Items</p>

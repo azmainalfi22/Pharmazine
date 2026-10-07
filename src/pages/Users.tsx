@@ -179,17 +179,17 @@ const Users = () => {
   }, {});
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-700 via-gray-700 to-slate-800 p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-700 via-gray-700 to-slate-800 p-4 sm:p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <UsersIcon className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">User Management</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">User Management</h1>
               <p className="text-white/90 text-base">
                 {users.length} system user{users.length !== 1 ? 's' : ''} — manage accounts and roles
               </p>
@@ -302,7 +302,7 @@ const Users = () => {
       {/* Users Table */}
       <Card className="pharmacy-card">
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <CardTitle>System Users</CardTitle>
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -310,7 +310,7 @@ const Users = () => {
                 placeholder="Search by name, email or role…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-[300px]"
+                className="pl-10 w-full sm:w-[300px]"
               />
             </div>
           </div>

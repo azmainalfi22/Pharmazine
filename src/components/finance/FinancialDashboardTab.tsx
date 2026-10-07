@@ -120,11 +120,11 @@ export default function FinancialDashboardTab() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-green-200 bg-green-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Cash in Hand</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">
                       {formatCurrency(dashboardData.cashInHand)}
                     </p>
                   </div>
@@ -134,11 +134,11 @@ export default function FinancialDashboardTab() {
             </Card>
 
             <Card className="border-blue-200 bg-blue-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Bank Balance</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">
                       {formatCurrency(dashboardData.bankBalance)}
                     </p>
                   </div>
@@ -148,11 +148,11 @@ export default function FinancialDashboardTab() {
             </Card>
 
             <Card className="border-orange-200 bg-orange-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Receivables</p>
-                    <p className="text-3xl font-bold text-orange-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-orange-600 mt-2">
                       {formatCurrency(dashboardData.totalReceivables)}
                     </p>
                   </div>
@@ -162,11 +162,11 @@ export default function FinancialDashboardTab() {
             </Card>
 
             <Card className="border-red-200 bg-red-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Payables</p>
-                    <p className="text-3xl font-bold text-red-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-2">
                       {formatCurrency(dashboardData.totalPayables)}
                     </p>
                   </div>
@@ -179,8 +179,8 @@ export default function FinancialDashboardTab() {
           {/* Revenue Trend */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="border-emerald-200 bg-emerald-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Today's Revenue</p>
                     <p className="text-2xl font-bold text-emerald-600 mt-1">
@@ -193,8 +193,8 @@ export default function FinancialDashboardTab() {
             </Card>
 
             <Card className="border-teal-200 bg-teal-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">This Week</p>
                     <p className="text-2xl font-bold text-teal-600 mt-1">
@@ -207,8 +207,8 @@ export default function FinancialDashboardTab() {
             </Card>
 
             <Card className="border-cyan-200 bg-cyan-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">This Month</p>
                     <p className="text-2xl font-bold text-cyan-600 mt-1">
@@ -229,8 +229,8 @@ export default function FinancialDashboardTab() {
                 <CardDescription>Available funds for operations</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="text-3xl font-bold text-indigo-600">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="text-2xl sm:text-3xl font-bold text-indigo-600">
                     {formatCurrency(workingCapital)}
                   </div>
                   <div className={`text-sm ${workingCapital >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -238,15 +238,15 @@ export default function FinancialDashboardTab() {
                   </div>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between flex-wrap gap-2">
                     <span className="text-muted-foreground">Cash + Bank:</span>
                     <span className="font-medium">{formatCurrency(dashboardData.cashInHand + dashboardData.bankBalance)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between flex-wrap gap-2">
                     <span className="text-muted-foreground">Receivables:</span>
                     <span className="font-medium text-green-600">+{formatCurrency(dashboardData.totalReceivables)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between flex-wrap gap-2">
                     <span className="text-muted-foreground">Payables:</span>
                     <span className="font-medium text-red-600">-{formatCurrency(dashboardData.totalPayables)}</span>
                   </div>
@@ -260,8 +260,8 @@ export default function FinancialDashboardTab() {
                 <CardDescription>Estimated gross profit (30 days)</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-3xl font-bold text-purple-600">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600">
                     {dashboardData.profitMargin.toFixed(1)}%
                   </div>
                   <div className={`text-sm ${dashboardData.profitMargin >= 30 ? 'text-green-600' : 'text-orange-600'}`}>

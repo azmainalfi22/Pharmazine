@@ -119,7 +119,7 @@ export default function ExpiryAlertTab({
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="pharmacy-stat-card border-red-200 bg-red-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Expired</p>
                 <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
@@ -131,7 +131,7 @@ export default function ExpiryAlertTab({
 
         <Card className="pharmacy-stat-card border-orange-200 bg-orange-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Critical</p>
                 <p className="text-2xl font-bold text-orange-600">{stats.critical}</p>
@@ -143,7 +143,7 @@ export default function ExpiryAlertTab({
 
         <Card className="pharmacy-stat-card border-yellow-200 bg-yellow-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Warning</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.warning}</p>
@@ -155,7 +155,7 @@ export default function ExpiryAlertTab({
 
         <Card className="pharmacy-stat-card border-blue-200 bg-blue-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Info</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.info}</p>
@@ -167,7 +167,7 @@ export default function ExpiryAlertTab({
 
         <Card className="pharmacy-stat-card border-primary/20 bg-primary/5">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Value at Risk</p>
                 <p className="text-2xl font-bold text-primary">{formatCurrency(stats.totalValue)}</p>
@@ -323,7 +323,7 @@ export default function ExpiryAlertTab({
 
           {filteredAlerts.length > 0 && (
             <div className="mt-4 p-4 bg-muted rounded-lg">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm flex-wrap gap-2">
                 <span className="font-medium">Total Alerts: {filteredAlerts.length}</span>
                 <span className="font-bold text-red-600">
                   Total Value at Risk: {formatCurrency(filteredAlerts.reduce((sum, a) => sum + a.value_at_risk, 0))}

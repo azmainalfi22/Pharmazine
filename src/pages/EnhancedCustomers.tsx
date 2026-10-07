@@ -200,19 +200,19 @@ export default function EnhancedCustomers() {
   const totalRevenue = customers.reduce((sum, c) => sum + (c.current_balance || 0), 0);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 p-4 sm:p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <Users className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Customer Management
                 </h1>
                 <p className="text-white/90 text-base">
@@ -236,34 +236,34 @@ export default function EnhancedCustomers() {
           {/* Quick Stats Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <Users className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">TOTAL</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{customers.length}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{customers.length}</div>
               <div className="text-xs text-white/70">All Customers</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <TrendingUp className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">ACTIVE</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{activeCustomers}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{activeCustomers}</div>
               <div className="text-xs text-white/70">Active</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">OUTSTANDING</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(totalRevenue)}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{formatCurrency(totalRevenue)}</div>
               <div className="text-xs text-white/70">Total Balance</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <Calendar className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">DATE</span>
               </div>
@@ -278,7 +278,7 @@ export default function EnhancedCustomers() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Customers</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
@@ -290,7 +290,7 @@ export default function EnhancedCustomers() {
 
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold text-green-600">{stats.active}</p>
@@ -302,7 +302,7 @@ export default function EnhancedCustomers() {
 
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Credit</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.totalCredit)}</p>
@@ -314,7 +314,7 @@ export default function EnhancedCustomers() {
 
         <Card className="pharmacy-stat-card">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Outstanding</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalOutstanding)}</p>

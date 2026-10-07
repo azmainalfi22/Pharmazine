@@ -33,8 +33,8 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-background">
-          <div className="max-w-md w-full rounded-xl border border-red-200 bg-red-50 p-8 shadow-sm">
+        <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 text-center bg-background">
+          <div className="max-w-md w-full rounded-xl border border-red-200 bg-red-50 p-4 sm:p-8 shadow-sm">
             <h1 className="text-xl font-bold text-red-700">Something went wrong</h1>
             <p className="mt-2 text-sm text-red-600">
               An unexpected error occurred while rendering this page. Your data is safe.

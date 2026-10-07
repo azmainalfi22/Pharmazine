@@ -170,15 +170,15 @@ const SalesReturnPage = () => {
   };
 
   return (
-    <div className="space-y-8 p-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+    <div className="space-y-8 p-4 sm:p-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex flex-wrap items-center gap-4">
           <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
             <RotateCcw className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">Sales Return Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">Sales Return Management</h1>
             <p className="text-white/90 text-base">
               Manage returned items from customers and update inventory
             </p>
@@ -200,7 +200,7 @@ const SalesReturnPage = () => {
         <div className="bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950/20 dark:to-emerald-950/20 p-4 border-b-2 border-teal-200 dark:border-teal-800">
           <h2 className="text-lg font-bold text-teal-900 dark:text-teal-100">Return Information</h2>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sale">Original Sale (Optional)</Label>
@@ -376,7 +376,7 @@ const SalesReturnPage = () => {
         </div>
 
         {/* Items List Area */}
-        <div className="bg-gray-50 p-6">
+        <div className="bg-gray-50 p-4 sm:p-6">
           {returnItems.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               <RotateCcw className="h-12 w-12 mx-auto mb-2 opacity-50" />

@@ -185,10 +185,10 @@ export default function NotificationsPage() {
 
   // ─── Render ──────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Bell className="w-8 h-8" />
@@ -203,7 +203,7 @@ export default function NotificationsPage() {
           </div>
         </div>
         {/* KPI strip */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {[
             { label: "Total",   value: notifications.length,                        color: "bg-white/15" },
             { label: "Unread",  value: unreadCount,                                 color: "bg-red-500/30" },
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Quick triggers */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { type: "low_stock" as const, label: "Low Stock Alert", icon: TrendingDown, color: "bg-red-600 hover:bg-red-700" },
           { type: "expiry" as const, label: "Expiry Alert", icon: Clock, color: "bg-orange-600 hover:bg-orange-700" },
@@ -243,7 +243,7 @@ export default function NotificationsPage() {
       </div>
 
       <Tabs defaultValue="inbox">
-        <TabsList className="grid grid-cols-3 w-full max-w-lg">
+        <TabsList className="flex sm:grid sm:grid-cols-3 w-full max-w-lg">
           <TabsTrigger value="inbox" className="gap-1">
             <Bell className="w-4 h-4" /> Inbox {unreadCount > 0 && <Badge className="bg-red-500 text-white text-xs px-1.5 py-0 ml-1">{unreadCount}</Badge>}
           </TabsTrigger>
@@ -258,7 +258,7 @@ export default function NotificationsPage() {
         {/* ── Inbox tab ─────────────────────────────────────────────────────── */}
         <TabsContent value="inbox" className="space-y-3 mt-4">
           <div className="flex items-center gap-3">
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {["all", "unread", "expiry", "low_stock", "order", "system"].map(f => (
                 <Button
                   key={f}
@@ -354,7 +354,7 @@ export default function NotificationsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs">Phone Number</Label>
                   <Input
@@ -438,7 +438,7 @@ export default function NotificationsPage() {
                 { key: "email_enabled", label: "Email Notifications", desc: "Send alerts via email (requires SMTP config)" },
                 { key: "sms_enabled", label: "SMS Notifications", desc: "Send alerts via SMS (requires Twilio config)" },
               ].map(({ key, label, desc }) => (
-                <div key={key} className="flex items-center justify-between">
+                <div key={key} className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm font-medium">{label}</p>
                     <p className="text-xs text-muted-foreground">{desc}</p>

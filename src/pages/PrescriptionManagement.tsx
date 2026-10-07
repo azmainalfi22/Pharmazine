@@ -184,21 +184,21 @@ export default function PrescriptionManagement() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Gradient Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 p-8 rounded-2xl border-2 border-violet-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 p-4 sm:p-8 rounded-2xl border-2 border-violet-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <FileText className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Prescription Management</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Prescription Management</h1>
               <p className="text-white/90 text-base">Digital prescription records with refill tracking</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               variant="outline"
               onClick={loadPrescriptions}
@@ -226,7 +226,7 @@ export default function PrescriptionManagement() {
             <CardDescription>Total Prescriptions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.total}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card className="pharmacy-card">
@@ -234,7 +234,7 @@ export default function PrescriptionManagement() {
             <CardDescription>Active</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{stats.active}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-green-600">{stats.active}</div>
           </CardContent>
         </Card>
         <Card className="pharmacy-card">
@@ -242,7 +242,7 @@ export default function PrescriptionManagement() {
             <CardDescription>Expiring in 30 Days</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">{stats.expiring}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-orange-600">{stats.expiring}</div>
           </CardContent>
         </Card>
       </div>
@@ -250,7 +250,7 @@ export default function PrescriptionManagement() {
       {/* Prescriptions Table */}
       <Card className="pharmacy-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <CardTitle>Prescription Records</CardTitle>
               <CardDescription>All digital prescription records with refill tracking</CardDescription>
@@ -394,7 +394,7 @@ export default function PrescriptionManagement() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label>Prescription Date *</Label>
                 <Input

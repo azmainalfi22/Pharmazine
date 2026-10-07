@@ -294,7 +294,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess, product }: Pr
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="flex sm:grid w-full sm:grid-cols-5">
                 <TabsTrigger value="basic">Basic</TabsTrigger>
                 <TabsTrigger value="manufacturer">Manufacturer</TabsTrigger>
                 <TabsTrigger value="pricing">Pricing</TabsTrigger>
@@ -505,7 +505,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess, product }: Pr
                 {/* Unit Management Section */}
                 <div className="p-4 bg-teal-50 dark:bg-teal-950/20 rounded-lg border-2 border-teal-200 dark:border-teal-800">
                   <h3 className="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-3">Unit Information</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="unit_type"
@@ -850,7 +850,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess, product }: Pr
               </TabsContent>
 
               <TabsContent value="stock" className="space-y-4 mt-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="stock_quantity"

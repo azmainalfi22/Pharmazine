@@ -158,15 +158,15 @@ const StockAdjustmentPage = () => {
   };
 
   return (
-    <div className="space-y-8 p-8">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+    <div className="space-y-8 p-4 sm:p-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex flex-wrap items-center gap-4">
           <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
             <Settings className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">Stock Adjustment Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">Stock Adjustment Management</h1>
             <p className="text-white/90 text-base">
               Adjust stock quantities based on physical count or other reasons
             </p>
@@ -352,7 +352,7 @@ const StockAdjustmentPage = () => {
         </div>
 
         {/* Items List Area */}
-        <div className="bg-gray-50 p-6">
+        <div className="bg-gray-50 p-4 sm:p-6">
           {adjustmentItems.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               <Settings className="h-12 w-12 mx-auto mb-2 opacity-50" />

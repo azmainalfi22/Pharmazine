@@ -128,18 +128,18 @@ export default function CRMModule() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 p-8 rounded-2xl border-2 border-violet-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-violet-700 p-4 sm:p-8 rounded-2xl border-2 border-violet-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <Users className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                 CRM & Loyalty Program
               </h1>
               <p className="text-white/90 text-base">
@@ -172,7 +172,7 @@ export default function CRMModule() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {loading ? (
-                  <div className="flex items-center justify-center p-8">
+                  <div className="flex items-center justify-center p-4 sm:p-8">
                     <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : campaigns.length === 0 ? (
@@ -182,7 +182,7 @@ export default function CRMModule() {
                 ) : (
                   campaigns.map(campaign => (
                     <div key={campaign.id} className="p-4 rounded-lg glass-subtle">
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                         <div>
                           <h3 className="font-medium">{campaign.name}</h3>
                           <div className="flex gap-2 mt-1">
@@ -276,7 +276,7 @@ export default function CRMModule() {
               <CardContent>
                 <div className="space-y-3">
                   {loading ? (
-                    <div className="flex items-center justify-center p-8">
+                    <div className="flex items-center justify-center p-4 sm:p-8">
                       <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
                     </div>
                   ) : loyaltyMembers.length === 0 ? (
@@ -285,7 +285,7 @@ export default function CRMModule() {
                     </div>
                   ) : (
                     loyaltyMembers.map(member => (
-                      <div key={member.customer_id} className="p-4 rounded-lg glass-subtle flex justify-between items-center">
+                      <div key={member.customer_id} className="p-4 rounded-lg glass-subtle flex justify-between items-center flex-wrap gap-2">
                         <div>
                           <h3 className="font-medium">{member.customer_name}</h3>
                           <div className="text-sm text-muted-foreground">
@@ -317,7 +317,7 @@ export default function CRMModule() {
         <TabsContent value="rewards">
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Tags className="w-5 h-5" />
@@ -334,7 +334,7 @@ export default function CRMModule() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
-                  <div className="col-span-3 flex items-center justify-center p-8">
+                  <div className="col-span-3 flex items-center justify-center p-4 sm:p-8">
                     <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : rewards.length === 0 ? (
@@ -359,7 +359,7 @@ export default function CRMModule() {
                       <p className="text-sm text-muted-foreground mb-2">
                         {reward.description || `${reward.reward_type} - EGP ${reward.reward_value}`}
                       </p>
-                      <div className="flex justify-between items-center mt-3">
+                      <div className="flex justify-between items-center mt-3 flex-wrap gap-2">
                         <div className="text-sm">
                           <span className="font-medium">{reward.points_required}</span> points
                         </div>

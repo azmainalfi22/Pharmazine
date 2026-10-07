@@ -74,21 +74,21 @@ export default function PerformanceDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600 via-orange-600 to-yellow-700 p-8 rounded-2xl border-2 border-yellow-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600 via-orange-600 to-yellow-700 p-4 sm:p-8 rounded-2xl border-2 border-yellow-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <Zap className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Performance Monitor</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Performance Monitor</h1>
               <p className="text-white/90 text-base">System performance metrics and optimization</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button
               onClick={optimizeDatabase}
               disabled={optimizing}
