@@ -4,8 +4,9 @@ HR Management Models and Schemas
 
 from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, Text, ForeignKey, Date, Numeric, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-from pydantic import BaseModel, EmailStr
+from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator, model_serializer
 from typing import Optional, List
+from uuid import UUID as PyUUID
 from datetime import datetime, date
 from decimal import Decimal
 
@@ -206,6 +207,30 @@ class PayrollDetail(Base):
 # PYDANTIC SCHEMAS
 # ============================================
 
+class _HRMResponse(BaseModel):
+    """Response mixin for HRM rows.
+
+    - uuid columns come back as uuid.UUID, which Pydantic v2 won't accept for
+      the `str` id fields (ResponseValidationError -> 500). Same coercion as
+      main.ORMResponse.
+    - Numeric columns (salaries, amounts) are Decimal, which Pydantic v2 emits as
+      JSON strings; the HRM page does arithmetic on them, so emit numbers.
+    """
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def _coerce_uuid_to_str(cls, v):
+        return str(v) if isinstance(v, PyUUID) else v
+
+    @model_serializer(mode="wrap", when_used="json")
+    def _decimals_as_numbers(self, handler):
+        data = handler(self)
+        for name, value in self:
+            if isinstance(value, Decimal) and name in data:
+                data[name] = float(value)
+        return data
+
+
 class EmployeeBase(BaseModel):
     employee_code: str
     full_name: str
@@ -230,6 +255,13 @@ class EmployeeBase(BaseModel):
     emergency_contact_phone: Optional[str] = None
     is_active: bool = True
 
+    @field_validator("email", mode="before")
+    @classmethod
+    def _blank_email_is_none(cls, v):
+        # The HRM form sends "" when the optional email is left empty.
+        return None if isinstance(v, str) and not v.strip() else v
+
+
 class EmployeeCreate(EmployeeBase):
     pass
 
@@ -244,7 +276,7 @@ class EmployeeUpdate(BaseModel):
     allowances: Optional[Decimal] = None
     is_active: Optional[bool] = None
 
-class EmployeeResponse(EmployeeBase):
+class EmployeeResponse(_HRMResponse, EmployeeBase):
     id: str
     leaving_date: Optional[date]
     photo_url: Optional[str]
@@ -268,7 +300,7 @@ class AttendanceBase(BaseModel):
 class AttendanceCreate(AttendanceBase):
     pass
 
-class AttendanceResponse(AttendanceBase):
+class AttendanceResponse(_HRMResponse, AttendanceBase):
     id: str
     created_at: datetime
     updated_at: datetime
@@ -281,8 +313,9 @@ class LeaveBase(BaseModel):
     employee_id: str
     leave_type_id: Optional[str] = None
     leave_type: Optional[str] = None  # For backward compatibility
-    from_date: date
-    to_date: date
+    # The HRM page sends start_date/end_date; accept either name.
+    from_date: date = Field(validation_alias=AliasChoices("from_date", "start_date"))
+    to_date: date = Field(validation_alias=AliasChoices("to_date", "end_date"))
     total_days: float
     reason: str
     contact_during_leave: Optional[str] = None
@@ -298,8 +331,10 @@ class LeaveUpdate(BaseModel):
     rejection_reason: Optional[str] = None
 
 
-class LeaveResponse(LeaveBase):
+class LeaveResponse(_HRMResponse, LeaveBase):
     id: str
+    start_date: Optional[date] = None  # aliases read by the HRM page
+    end_date: Optional[date] = None
     application_number: Optional[str]
     status: str
     approved_by: Optional[str]
@@ -327,7 +362,7 @@ class PayrollBase(BaseModel):
 class PayrollCreate(PayrollBase):
     pass
 
-class PayrollResponse(PayrollBase):
+class PayrollResponse(_HRMResponse, PayrollBase):
     id: str
     gross_salary: Decimal
     net_salary: Decimal
@@ -354,7 +389,7 @@ class LeaveTypeCreate(LeaveTypeBase):
     pass
 
 
-class LeaveTypeResponse(LeaveTypeBase):
+class LeaveTypeResponse(_HRMResponse, LeaveTypeBase):
     id: str
     created_at: datetime
     
@@ -376,7 +411,7 @@ class EmployeeDocumentCreate(EmployeeDocumentBase):
     pass
 
 
-class EmployeeDocumentResponse(EmployeeDocumentBase):
+class EmployeeDocumentResponse(_HRMResponse, EmployeeDocumentBase):
     id: str
     uploaded_at: datetime
     
@@ -406,7 +441,7 @@ class EmployeeLoanUpdate(BaseModel):
     status: Optional[str] = None
 
 
-class EmployeeLoanResponse(EmployeeLoanBase):
+class EmployeeLoanResponse(_HRMResponse, EmployeeLoanBase):
     id: str
     loan_number: str
     paid_installments: int
@@ -434,7 +469,7 @@ class SalaryComponentCreate(SalaryComponentBase):
     pass
 
 
-class SalaryComponentResponse(SalaryComponentBase):
+class SalaryComponentResponse(_HRMResponse, SalaryComponentBase):
     id: str
     created_at: datetime
     
@@ -455,7 +490,7 @@ class PayrollDetailCreate(PayrollDetailBase):
     pass
 
 
-class PayrollDetailResponse(PayrollDetailBase):
+class PayrollDetailResponse(_HRMResponse, PayrollDetailBase):
     id: str
     
     class Config:

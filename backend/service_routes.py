@@ -102,15 +102,6 @@ def get_services(
     return services
 
 
-@router.get("/{service_id}", response_model=ServiceResponse)
-def get_service(service_id: str, db: Session = Depends(get_db)):
-    """Get service by ID"""
-    service = db.query(Service).filter(Service.id == service_id).first()
-    if not service:
-        raise HTTPException(status_code=404, detail="Service not found")
-    return service
-
-
 @router.post("", response_model=ServiceResponse, status_code=status.HTTP_201_CREATED)
 def create_service(
     service: ServiceCreate,
@@ -498,3 +489,13 @@ def get_service_average_rating(
         "average_value": round(avg_value, 2) if avg_value else 0
     }
 
+
+# Declared last: "/{service_id}" would otherwise capture "/packages" and
+# "/reviews" (routes match in declaration order).
+@router.get("/{service_id}", response_model=ServiceResponse)
+def get_service(service_id: str, db: Session = Depends(get_db)):
+    """Get service by ID"""
+    service = db.query(Service).filter(Service.id == service_id).first()
+    if not service:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return service

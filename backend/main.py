@@ -579,7 +579,7 @@ try:
                 amount FLOAT NOT NULL,
                 description TEXT,
                 status VARCHAR DEFAULT 'pending',
-                created_by VARCHAR REFERENCES profiles(id),
+                created_by UUID REFERENCES profiles(id),
                 created_at TIMESTAMP DEFAULT NOW()
             )
         """))

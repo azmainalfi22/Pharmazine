@@ -186,7 +186,8 @@ export default function HRMModule() {
         toast.success("Employee deleted successfully");
         loadData();
       } else {
-        toast.error("Failed to delete employee");
+        const error = await response.json().catch(() => ({}));
+        toast.error(error.detail || "Failed to delete employee");
       }
     } catch (error) {
       toast.error("Error deleting employee");
