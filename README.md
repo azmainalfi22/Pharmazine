@@ -1,6 +1,10 @@
-# Pharmazine 2
+# Pharmazine
 
-Clean copy of the Pharmazine pharmacy stack: **React (Vite) frontend** + **FastAPI backend** + **PostgreSQL** (intended: **Supabase**). No Docker requirement, no one-off fix scripts in this tree.
+**Pharmazine** is a pharmacy management system — point of sale, inventory and batch/expiry tracking, purchasing, customers, reports, finance, HRM, services and CRM — built with a **React (Vite) frontend**, a **FastAPI backend** and **PostgreSQL** on **Supabase**.
+
+Live demo: **[pharmazine.netlify.app](https://pharmazine.netlify.app)** — open it and use the whole app as a guest, no account needed.
+
+Created and maintained by **Mohammad Azmain Hossain Alfi** ([@azmainalfi22](https://github.com/azmainalfi22)).
 
 ## How this app talks to the database
 
@@ -27,7 +31,7 @@ Each account has its own **workspace** — its own products, sales, customers, u
 - **New sign-ups** get a fresh, empty workspace (seeded with the standard medicine categories, unit types and medicine types) and are its **admin**.
 - **Accounts that existed before this feature** all share the **Original workspace**, which holds all pre-existing data. To move an account elsewhere, change its `profiles.tenant_id` (and its `user_roles.tenant_id`) in Supabase.
 - **How it's enforced:** `supabase/migrations/20261007120000_per_account_workspaces.sql` adds `tenant_id` to every table plus Postgres row-level security for a `pharmazine_app` role. `backend/tenancy.py` switches each API request's transaction to that role with the caller's workspace (from the login token), so every query — ORM or raw SQL — only touches that workspace. Requests without a valid token see no data.
-- **Rollout:** apply the migrations in Supabase (SQL editor or `supabase db push`) and deploy the backend, in either order. Apply them in filename order: `20261007110000_add_missing_model_columns.sql`, `20261007120000_per_account_workspaces.sql`, then `20261007130000_create_missing_module_tables.sql` (creates the HRM, Services, CRM, stock receive/issue, companies and vouchers tables, which never existed in the production database). Until the migration is applied the backend logs `Per-account workspaces: DISABLED` and behaves as before; it re-checks every minute and switches to `ENABLED` on its own.
+- **Rollout:** apply the migrations in Supabase (SQL editor or `supabase db push`) and deploy the backend, in either order. Apply them in filename order: `20261007110000_add_missing_model_columns.sql`, `20261007120000_per_account_workspaces.sql`, `20261007120500_drop_global_unique_constraints.sql` (removes the old database-wide unique rules; kept separate because it is the only step that removes anything), then `20261007130000_create_missing_module_tables.sql` (creates the HRM, Services, CRM, stock receive/issue, companies and vouchers tables, which never existed in the production database). Until the migration is applied the backend logs `Per-account workspaces: DISABLED` and behaves as before; it re-checks every minute and switches to `ENABLED` on its own.
 - Background jobs (`scheduler.py`) run outside requests and are not workspace-scoped.
 
 ## Why login / sign-up can fail (typical causes)
@@ -86,7 +90,7 @@ After Netlify deploy, add the site URL to backend `CORS_ORIGINS` on Render and r
 ## Repository layout
 
 ```
-pharmazine-2/
+pharmazine/
   src/                 # React app
   public/
   backend/             # FastAPI (main.py, routes, models)
@@ -101,3 +105,7 @@ pharmazine-2/
 
 - Never commit `.env` files.
 - This tree has **no** hardcoded Supabase URLs or keys in `main.py` / `client.ts` — configure everything via environment variables.
+
+## License
+
+Copyright © 2025–2026 Mohammad Azmain Hossain Alfi. Released under the [MIT License](LICENSE).

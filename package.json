@@ -1,5 +1,7 @@
 {
   "name": "pharmazine",
+  "author": "Mohammad Azmain Hossain Alfi",
+  "license": "MIT",
   "private": true,
   "version": "1.0.0",
   "type": "module",
