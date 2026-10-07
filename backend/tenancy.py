@@ -73,9 +73,12 @@ def _check(log_disabled: bool) -> bool:
         return False
     try:
         with engine.begin() as conn:
+            # The connecting role must be allowed to SET ROLE pharmazine_app,
+            # otherwise every request would fail — stay in shared mode instead.
             ready = conn.execute(text(
                 "SELECT to_regrole('pharmazine_app') IS NOT NULL "
-                "AND to_regprocedure('public.pharmazine_tenantize_all(boolean)') IS NOT NULL"
+                "AND to_regprocedure('public.pharmazine_tenantize_all(boolean)') IS NOT NULL "
+                "AND pg_has_role(current_user, 'pharmazine_app', 'MEMBER')"
             )).scalar()
             if ready:
                 # Cover tables created at runtime since the migration ran.
