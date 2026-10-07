@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Lock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Auth = () => {
   const { signIn, signUp } = useAuth();
@@ -166,6 +167,18 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          <div className="mt-6 border-t pt-4 text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Continue as guest
+            </Link>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Explore every feature on a fresh pharmacy — no account needed.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

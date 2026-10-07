@@ -51,8 +51,10 @@ export default function RefillReminders() {
 
       if (response.ok) {
         const data = await response.json();
-        setReminders(data);
-        toast.success(`Found ${data.length} due refill reminders`);
+        // The API returns { reminders, count }; accept a bare array too.
+        const list = Array.isArray(data) ? data : data?.reminders ?? [];
+        setReminders(list);
+        toast.success(`Found ${list.length} due refill reminders`);
       }
     } catch (error) {
       logger.error("Error loading reminders:", error);

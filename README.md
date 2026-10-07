@@ -11,6 +11,15 @@ Clean copy of the Pharmazine pharmacy stack: **React (Vite) frontend** + **FastA
 
 You are **not** choosing “Docker *or* Supabase” as two databases. Older confusion usually came from: mixing a **local Docker Postgres** connection string with **Supabase** credentials, or pointing the app at one DB while migrations ran on another.
 
+## Guest mode (no login required)
+
+Opening the site never forces a login. Visitors land on the dashboard in **guest mode**: every page works on a fresh, empty pharmacy, and whatever they add (products, sales, customers, …) is saved in **their browser's localStorage only** — nothing reaches the backend or your database.
+
+- Implemented in `src/guest/`: while no API token is stored, `installGuestFetch.ts` routes every `/api/*` request to `guestApi.ts`, an in-browser stand-in that mirrors the backend's response shapes. `/api/auth/login` and `/api/auth/register` always go to the real backend.
+- **Sign In / Sign Up** (sidebar, banner, or `/auth`) switches to the real backend and loads that account's data. Signing out returns to guest mode.
+- Guests can wipe their sandbox with **Reset guest data** in the sidebar.
+- Not available to guests: CSV import, backups, 2FA/password changes (these need a real account).
+
 ## Why login / sign-up can fail (typical causes)
 
 1. **`DATABASE_URL` does not match the same Supabase project** as `SUPABASE_URL` / keys — the API writes sessions/profiles in Postgres; Auth is Supabase.
