@@ -16,9 +16,19 @@ You are **not** choosing “Docker *or* Supabase” as two databases. Older conf
 Opening the site never forces a login. Visitors land on the dashboard in **guest mode**: every page works on a fresh, empty pharmacy, and whatever they add (products, sales, customers, …) is saved in **their browser's localStorage only** — nothing reaches the backend or your database.
 
 - Implemented in `src/guest/`: while no API token is stored, `installGuestFetch.ts` routes every `/api/*` request to `guestApi.ts`, an in-browser stand-in that mirrors the backend's response shapes. `/api/auth/login` and `/api/auth/register` always go to the real backend.
-- **Sign In / Sign Up** (sidebar, banner, or `/auth`) switches to the real backend and loads that account's data. Signing out returns to guest mode.
+- **Sign In / Sign Up** (sidebar, banner, or `/auth`) switches to the real backend and loads that account's own workspace (see below). Signing out returns to guest mode.
 - Guests can wipe their sandbox with **Reset guest data** in the sidebar.
 - Not available to guests: CSV import, backups, 2FA/password changes (these need a real account).
+
+## Per-account workspaces
+
+Each account has its own **workspace** — its own products, sales, customers, users list, etc. Nobody can see or change another workspace's data.
+
+- **New sign-ups** get a fresh, empty workspace (seeded with the standard medicine categories, unit types and medicine types) and are its **admin**.
+- **Accounts that existed before this feature** all share the **Original workspace**, which holds all pre-existing data. To move an account elsewhere, change its `profiles.tenant_id` (and its `user_roles.tenant_id`) in Supabase.
+- **How it's enforced:** `supabase/migrations/20261007120000_per_account_workspaces.sql` adds `tenant_id` to every table plus Postgres row-level security for a `pharmazine_app` role. `backend/tenancy.py` switches each API request's transaction to that role with the caller's workspace (from the login token), so every query — ORM or raw SQL — only touches that workspace. Requests without a valid token see no data.
+- **Rollout:** apply the migration in Supabase (SQL editor or `supabase db push`) and deploy the backend, in either order. Until the migration is applied the backend logs `Per-account workspaces: DISABLED` and behaves as before; it re-checks every minute and switches to `ENABLED` on its own.
+- Background jobs (`scheduler.py`) run outside requests and are not workspace-scoped.
 
 ## Why login / sign-up can fail (typical causes)
 
