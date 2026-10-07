@@ -4,6 +4,8 @@ import { Profile, UserRole, apiClient } from "@/integrations/api/client";
 import { supabase } from "@/integrations/supabase/client";
 
 import { logger } from "@/utils/logger";
+import { GUEST_PROFILE } from "@/guest/guestMode";
+
 interface User {
   id: string;
   email: string;
@@ -13,7 +15,10 @@ interface User {
 }
 
 interface AuthContextType {
+  /** Signed-in user, or the local guest user when nobody is signed in. */
   user: User | null;
+  /** True when browsing without an account (data lives in this browser only). */
+  isGuest: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (
@@ -27,18 +32,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Visitors get full access to their own in-browser sandbox (see src/guest).
+const GUEST_USER: User = {
+  id: GUEST_PROFILE.id,
+  email: GUEST_PROFILE.email,
+  full_name: GUEST_PROFILE.full_name,
+  roles: [{ role: "admin" } as UserRole],
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [authUser, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const isGuest = !authUser;
+  const user = authUser ?? GUEST_USER;
+
+  const clearSession = () => {
+    apiClient.setToken(null);
+    localStorage.removeItem("pharmazine_user");
+    setUser(null);
+  };
 
   useEffect(() => {
     const restoreSession = async () => {
       const savedUser = localStorage.getItem("pharmazine_user");
       const token = localStorage.getItem("token");
       if (!savedUser || !token) {
+        // A half-saved session would mix guest UI with real API calls.
+        if (savedUser || token) clearSession();
         setLoading(false);
         return;
       }
@@ -47,10 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(cached); // optimistic render while validating
         const freshProfile = await apiClient.getCurrentUser();
         if (!freshProfile) {
-          // Token expired or invalid
-          setUser(null);
-          localStorage.removeItem("pharmazine_user");
-          localStorage.removeItem("token");
+          // Token expired or invalid — fall back to guest mode
+          clearSession();
         } else {
           const permsPayload = await apiClient.getUserPermissions().catch(() => null);
           const roles = permsPayload?.roles?.map((r: string) => ({ role: r })) || cached.roles;
@@ -59,9 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           localStorage.setItem("pharmazine_user", JSON.stringify(updated));
         }
       } catch {
-        localStorage.removeItem("pharmazine_user");
-        localStorage.removeItem("token");
-        setUser(null);
+        clearSession();
       } finally {
         setLoading(false);
       }
@@ -150,18 +169,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = async () => {
     await apiClient.logout();
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        logger.error("Failed to sign out from Supabase:", error);
+      }
+    } catch (error) {
       logger.error("Failed to sign out from Supabase:", error);
     }
-    setUser(null);
-    localStorage.removeItem("pharmazine_user");
-    localStorage.removeItem("token");
-    navigate("/auth");
+    clearSession();
+    // Back to the dashboard in guest mode rather than a login wall. A full
+    // reload guarantees no signed-in data stays in any page's state.
+    window.location.replace("/");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, isGuest, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

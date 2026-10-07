@@ -129,7 +129,18 @@ def delete_employee(
     db_employee = db.query(Employee).filter(Employee.id == employee_id).first()
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
-    
+
+    has_history = any(
+        db.query(model.id).filter(model.employee_id == db_employee.id).first()
+        for model in (Attendance, Leave, Payroll, EmployeeLoan, EmployeeDocument)
+    )
+    if has_history:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This employee has attendance, leave or payroll records, so they can't be deleted. "
+                   "Mark them inactive instead.",
+        )
+
     db.delete(db_employee)
     db.commit()
     return None

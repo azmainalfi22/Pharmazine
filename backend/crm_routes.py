@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, text
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import List, Optional
 from datetime import datetime, timedelta, date
@@ -206,49 +206,46 @@ async def get_loyalty_members(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    """Get all loyalty program members with stats"""
-    sample_members = [
-        {
-            "customer_id": 1,
-            "customer_name": "Ahmed Hassan",
-            "total_points": 450,
-            "points_earned": 650,
-            "points_redeemed": 200,
-            "tier": "Gold",
-            "lifetime_value": Decimal("12500.50"),
-            "total_purchases": 45,
-            "last_purchase_date": datetime.now() - timedelta(days=2)
-        },
-        {
-            "customer_id": 2,
-            "customer_name": "Fatima Ali",
-            "total_points": 280,
-            "points_earned": 380,
-            "points_redeemed": 100,
-            "tier": "Silver",
-            "lifetime_value": Decimal("8300.00"),
-            "total_purchases": 32,
-            "last_purchase_date": datetime.now() - timedelta(days=5)
-        },
-        {
-            "customer_id": 3,
-            "customer_name": "Mohammed Khan",
-            "total_points": 150,
-            "points_earned": 200,
-            "points_redeemed": 50,
-            "tier": "Bronze",
-            "lifetime_value": Decimal("4500.75"),
-            "total_purchases": 18,
-            "last_purchase_date": datetime.now() - timedelta(days=10)
-        }
-    ]
-    
+    """Get all loyalty program members with stats.
+
+    Members are customers with a points balance (customers.loyalty_points, kept
+    by the POS) or any loyalty_transactions history.
+    """
+    rows = db.execute(text("""
+        SELECT c.id, c.name, COALESCE(c.loyalty_points, 0) AS balance, c.loyalty_tier,
+               COALESCE(c.total_purchases, 0) AS lifetime_value, c.last_purchase_date,
+               COALESCE(SUM(lt.points) FILTER (WHERE lt.points > 0), 0) AS earned,
+               COALESCE(-SUM(lt.points) FILTER (WHERE lt.points < 0), 0) AS redeemed,
+               COUNT(lt.id) FILTER (WHERE lt.transaction_type = 'earn') AS purchases
+        FROM customers c
+        LEFT JOIN loyalty_transactions lt ON lt.customer_id = c.id
+        GROUP BY c.id
+        HAVING COALESCE(c.loyalty_points, 0) > 0 OR COUNT(lt.id) > 0
+        ORDER BY balance DESC
+    """)).fetchall()
+
+    members = []
+    for r in rows:
+        last = r.last_purchase_date
+        if isinstance(last, date) and not isinstance(last, datetime):
+            last = datetime.combine(last, datetime.min.time())
+        members.append({
+            "customer_id": str(r.id),
+            "customer_name": r.name,
+            "total_points": int(r.balance),
+            "points_earned": int(r.earned),
+            "points_redeemed": int(r.redeemed),
+            "tier": r.loyalty_tier or "Bronze",
+            "lifetime_value": Decimal(str(r.lifetime_value)),
+            "total_purchases": int(r.purchases),
+            "last_purchase_date": last,
+        })
+
     if tier:
-        sample_members = [m for m in sample_members if m["tier"] == tier]
+        members = [m for m in members if m["tier"] == tier]
     if min_points is not None:
-        sample_members = [m for m in sample_members if m["total_points"] >= min_points]
-    
-    return sample_members
+        members = [m for m in members if m["total_points"] >= min_points]
+    return members
 
 @router.post("/loyalty/points", response_model=LoyaltyPointsResponse)
 async def add_loyalty_points(

@@ -116,7 +116,7 @@ export default function AccountsVouchers() {
           
           <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
             <div className="text-xs text-white/70 font-medium">VOUCHERS</div>
-            <div className="text-2xl font-bold text-white">{vouchers.length}</div>
+            <div className="text-2xl font-bold text-white">{transactions.length}</div>
           </div>
         </div>
       </div>

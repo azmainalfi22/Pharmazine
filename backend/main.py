@@ -573,19 +573,25 @@ try:
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS vouchers (
                 id VARCHAR PRIMARY KEY,
-                voucher_no VARCHAR UNIQUE NOT NULL,
+                voucher_no VARCHAR NOT NULL,
                 voucher_type VARCHAR NOT NULL,
                 date TIMESTAMP DEFAULT NOW(),
                 amount FLOAT NOT NULL,
                 description TEXT,
                 status VARCHAR DEFAULT 'pending',
-                created_by VARCHAR REFERENCES profiles(id),
+                created_by UUID REFERENCES profiles(id),
                 created_at TIMESTAMP DEFAULT NOW()
             )
         """))
         conn.commit()
 except Exception as _v_err:
     print(f"[WARN] Could not ensure vouchers table: {_v_err}")
+
+# Per-account workspaces: every API request only sees its account's data.
+import tenancy
+
+tenancy.init(engine)
+app.add_middleware(tenancy.TenantScopeMiddleware, secret_key=SECRET_KEY, algorithm=ALGORITHM)
 
 # Database Models
 class Profile(Base):
@@ -2313,9 +2319,18 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
             profile_data = _rest_get_profile(user_id=user_id)
             profile_id = (profile_data or {}).get("id", user_id)
 
+    token_claims = {"sub": profile_id}
+    try:
+        tenant_id = tenancy.ensure_workspace(str(profile_id))
+        if tenant_id:
+            token_claims["tid"] = tenant_id
+    except Exception as ws_err:
+        # Resolved per request instead (TenantScopeMiddleware).
+        print(f"[WARN] Could not resolve workspace at login: {ws_err}")
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": profile_id}, expires_delta=access_token_expires
+        data=token_claims, expires_delta=access_token_expires
     )
     response_payload = {
         "access_token": access_token,
@@ -2451,6 +2466,11 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
         )
 
     db.refresh(profile)
+    try:
+        tenancy.ensure_workspace(str(profile.id), f"{profile.full_name}'s pharmacy" if profile.full_name else None)
+    except Exception as ws_err:
+        # Created on first login instead.
+        print(f"[WARN] Could not create workspace at registration: {ws_err}")
     return profile
 
 @app.get("/api/auth/me", response_model=ProfileResponse)
@@ -2515,11 +2535,17 @@ async def list_all_users(db: Session = Depends(get_db)):
             })
         return result
     else:
+        rest_params = {"select": "id,full_name,email,phone,role,created_at", "order": "created_at.desc"}
+        if tenancy.is_enabled():
+            # The REST API uses the service role (bypasses RLS) — filter explicitly.
+            if not tenancy.current_tenant():
+                raise HTTPException(status_code=503, detail="Database temporarily unavailable")
+            rest_params["tenant_id"] = f"eq.{tenancy.current_tenant()}"
         try:
             resp = requests.get(
                 f"{SUPABASE_URL}/rest/v1/profiles",
                 headers=_rest_headers(),
-                params={"select": "id,full_name,email,phone,role,created_at", "order": "created_at.desc"},
+                params=rest_params,
             )
             if resp.status_code == 200:
                 profiles_data = resp.json() or []
@@ -2562,6 +2588,9 @@ async def update_user_role(user_id: str, req: RoleUpdateRequest, db: Session = D
             db.add(UserRole(id=str(uuid.uuid4()), user_id=user_id, role=req.role))
         db.commit()
         return {"success": True, "user_id": user_id, "role": req.role}
+    elif tenancy.is_enabled():
+        # The REST fallback bypasses workspace isolation; don't allow writes through it.
+        raise HTTPException(status_code=503, detail="Database temporarily unavailable")
     else:
         try:
             requests.patch(

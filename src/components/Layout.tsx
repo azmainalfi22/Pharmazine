@@ -10,6 +10,9 @@ import {
   Users,
   Settings,
   LogOut,
+  LogIn,
+  Info,
+  X,
   ShoppingBag,
   ChevronDown,
   ChevronRight,
@@ -41,14 +44,39 @@ import {
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  GUEST_BANNER_DISMISSED_KEY,
+  resetGuestData,
+} from "@/guest/guestMode";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, isGuest } = useAuth();
   const location = useLocation();
+  const [guestBannerHidden, setGuestBannerHidden] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(GUEST_BANNER_DISMISSED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const dismissGuestBanner = () => {
+    setGuestBannerHidden(true);
+    try {
+      sessionStorage.setItem(GUEST_BANNER_DISMISSED_KEY, "1");
+    } catch {
+      /* storage unavailable — banner just reappears next visit */
+    }
+  };
+  const handleResetGuestData = () => {
+    if (window.confirm("Clear everything you added in guest mode? This cannot be undone.")) {
+      resetGuestData();
+      window.location.reload();
+    }
+  };
   const { currency, setCurrency } = useCurrency();
   const { lang, setLang, t } = useLanguage();
   // Auto-expand the sidebar section that contains the current route.
@@ -637,35 +665,62 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
               <NotificationBell />
             </div>
-            <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center gap-2.5">
-                <div className="relative">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary to-emerald-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white/50 dark:ring-primary/30">
-                    {user?.full_name
-                      ? user.full_name.charAt(0).toUpperCase()
-                      : user?.email?.charAt(0).toUpperCase() || "U"}
+            {isGuest ? (
+              <>
+                <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-amber-50/80 to-white/40 dark:from-amber-900/20 dark:to-gray-800/30 backdrop-blur-xl border border-amber-200/60 dark:border-amber-700/40 shadow-lg">
+                  <p className="font-bold text-sm text-gray-800 dark:text-gray-100 leading-tight">
+                    Guest mode
+                  </p>
+                  <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-snug mt-1">
+                    Exploring with a fresh pharmacy. Changes stay in this browser.
+                  </p>
+                  <button
+                    onClick={handleResetGuestData}
+                    className="mt-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400 hover:underline"
+                  >
+                    Reset guest data
+                  </button>
+                </div>
+                <Link to="/auth">
+                  <Button className="w-full justify-start gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shadow-md">
+                    <LogIn className="h-4 w-4" />
+                    <span>Sign In / Sign Up</span>
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary to-emerald-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white/50 dark:ring-primary/30">
+                        {user?.full_name
+                          ? user.full_name.charAt(0).toUpperCase()
+                          : user?.email?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-gray-800 dark:text-gray-100 truncate leading-tight">
+                        {user?.full_name || user?.email || "User"}
+                      </p>
+                      <p className="text-[10px] font-semibold text-primary/80 uppercase tracking-wide truncate">
+                        {(user?.roles || []).map((r) => r.role).join(", ") ||
+                          "Role"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-gray-800 dark:text-gray-100 truncate leading-tight">
-                    {user?.full_name || user?.email || "User"}
-                  </p>
-                  <p className="text-[10px] font-semibold text-primary/80 uppercase tracking-wide truncate">
-                    {(user?.roles || []).map((r) => r.role).join(", ") ||
-                      "Role"}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-500/10 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 border border-transparent hover:border-red-500/30 backdrop-blur-sm hover:shadow-md transition-all duration-300 group"
-              onClick={signOut}
-            >
-              <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
-              <span>Sign Out</span>
-            </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-500/10 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 border border-transparent hover:border-red-500/30 backdrop-blur-sm hover:shadow-md transition-all duration-300 group"
+                  onClick={signOut}
+                >
+                  <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span>Sign Out</span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </aside>
@@ -695,6 +750,27 @@ const Layout = ({ children }: LayoutProps) => {
               background: hsl(var(--muted-foreground) / 0.5);
             }
           `}</style>
+          {isGuest && !guestBannerHidden && (
+            <div className="mx-6 mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p className="flex-1">
+                You're exploring Pharmazine as a guest — everything works on a
+                fresh, empty pharmacy and your changes are saved in this browser
+                only.{" "}
+                <Link to="/auth" className="font-semibold underline underline-offset-2">
+                  Sign in
+                </Link>{" "}
+                to load your own pharmacy data.
+              </p>
+              <button
+                onClick={dismissGuestBanner}
+                className="rounded p-0.5 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
           {children}
         </div>
       </main>

@@ -1,5 +1,4 @@
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -7,15 +6,13 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
+/**
+ * Waits for the saved session to be restored, then renders the page.
+ * Visitors who are not signed in are NOT redirected to /auth — they use the
+ * app in guest mode (see src/guest) and can sign in later from the sidebar.
+ */
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -27,10 +24,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   return <>{children}</>;
