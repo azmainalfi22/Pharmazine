@@ -494,35 +494,20 @@ BEGIN
     IF to_regprocedure('public.pharmazine_tenantize_all(boolean)') IS NOT NULL THEN
         -- tenant_id + row-level security for the new tables
         PERFORM public.pharmazine_tenantize_all(true);
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_employees_employee_code';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_employees_tenant_employee_code ON public.employees (tenant_id, employee_code)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_employees_email';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_employees_tenant_email ON public.employees (tenant_id, email)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_leave_types_name';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_leave_types_tenant_name ON public.leave_types (tenant_id, name)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_leave_types_code';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_leave_types_tenant_code ON public.leave_types (tenant_id, code)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_leave_applications_application_number';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_leave_applications_tenant_application_number ON public.leave_applications (tenant_id, application_number)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_employee_loans_loan_number';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_employee_loans_tenant_loan_number ON public.employee_loans (tenant_id, loan_number)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_salary_components_component_name';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_salary_components_tenant_component_name ON public.salary_components (tenant_id, component_name)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_payroll_payroll_number';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_payroll_tenant_payroll_number ON public.payroll (tenant_id, payroll_number)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_service_categories_name';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_service_categories_tenant_name ON public.service_categories (tenant_id, name)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_services_service_code';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_services_tenant_service_code ON public.services (tenant_id, service_code)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_service_bookings_booking_number';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_service_bookings_tenant_booking_number ON public.service_bookings (tenant_id, booking_number)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_service_invoices_invoice_number';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_service_invoices_tenant_invoice_number ON public.service_invoices (tenant_id, invoice_number)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_service_packages_package_code';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_service_packages_tenant_package_code ON public.service_packages (tenant_id, package_code)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_reward_redemptions_redemption_code';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_reward_redemptions_tenant_redemption_code ON public.reward_redemptions (tenant_id, redemption_code)';
-        EXECUTE 'DROP INDEX IF EXISTS public.ux_vouchers_voucher_no';
         EXECUTE 'CREATE UNIQUE INDEX IF NOT EXISTS ux_vouchers_tenant_voucher_no ON public.vouchers (tenant_id, voucher_no)';
     ELSE
         -- Per-account workspaces not installed: plain unique keys.

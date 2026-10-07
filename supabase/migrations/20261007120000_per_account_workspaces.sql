@@ -15,6 +15,11 @@
 -- backend version, schedulers) keep working and write into the original
 -- workspace, so this can be applied before or after deploying the backend.
 --
+-- This file only adds things (nothing is removed), so it can be applied with any tool.
+-- 20261007120500_drop_global_unique_constraints.sql then removes the old
+-- database-wide unique rules (SKU, names, codes) that the per-workspace ones
+-- below replace.
+--
 -- Existing data and existing accounts -> "Original workspace".
 -- New sign-ups -> their own empty workspace (created by the API on first
 -- login/registration via pharmazine_create_workspace()).
@@ -64,10 +69,17 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO pharmazi
 
 -- A workspace can read only its own tenants row.
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS pharmazine_tenant_self ON public.tenants;
-CREATE POLICY pharmazine_tenant_self ON public.tenants
-    FOR SELECT TO pharmazine_app
-    USING (id = public.current_tenant_id());
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies
+                   WHERE schemaname = 'public' AND tablename = 'tenants'
+                     AND policyname = 'pharmazine_tenant_self') THEN
+        CREATE POLICY pharmazine_tenant_self ON public.tenants
+            FOR SELECT TO pharmazine_app
+            USING (id = public.current_tenant_id());
+    END IF;
+END
+$$;
 
 -- ---------------------------------------------------------------------------
 -- Make one table workspace-scoped. Idempotent; the API also calls
@@ -116,13 +128,17 @@ BEGIN
 
     -- Existing policies include some granted TO public; the restrictive policy
     -- is ANDed with all of them, so pharmazine_app can never escape it.
-    EXECUTE format('DROP POLICY IF EXISTS pharmazine_app_access ON %s', tbl);
-    EXECUTE format('CREATE POLICY pharmazine_app_access ON %s AS PERMISSIVE FOR ALL TO pharmazine_app '
-                   'USING (true) WITH CHECK (true)', tbl);
-    EXECUTE format('DROP POLICY IF EXISTS pharmazine_tenant_isolation ON %s', tbl);
-    EXECUTE format('CREATE POLICY pharmazine_tenant_isolation ON %s AS RESTRICTIVE FOR ALL TO pharmazine_app '
-                   'USING (tenant_id = public.current_tenant_id()) '
-                   'WITH CHECK (tenant_id = public.current_tenant_id())', tbl);
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = tname
+                   AND policyname = 'pharmazine_app_access') THEN
+        EXECUTE format('CREATE POLICY pharmazine_app_access ON %s AS PERMISSIVE FOR ALL TO pharmazine_app '
+                       'USING (true) WITH CHECK (true)', tbl);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = tname
+                   AND policyname = 'pharmazine_tenant_isolation') THEN
+        EXECUTE format('CREATE POLICY pharmazine_tenant_isolation ON %s AS RESTRICTIVE FOR ALL TO pharmazine_app '
+                       'USING (tenant_id = public.current_tenant_id()) '
+                       'WITH CHECK (tenant_id = public.current_tenant_id())', tbl);
+    END IF;
 END
 $$;
 
@@ -169,11 +185,12 @@ WHERE tenant_id IS NULL;
 
 -- ---------------------------------------------------------------------------
 -- Uniqueness is per workspace (two pharmacies may both have SKU "PARA-500").
+-- The old database-wide unique constraints are removed separately by
+-- 20261007120500_drop_global_unique_constraints.sql.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
     spec record;
-    con record;
 BEGIN
     FOR spec IN
         SELECT * FROM (VALUES
@@ -188,36 +205,18 @@ BEGIN
             ('customers',            ARRAY['customer_code']),
             ('prescription_records', ARRAY['prescription_number']),
             ('insurance_claims',     ARRAY['claim_number']),
-            ('vouchers',             ARRAY['voucher_no'])
+            ('vouchers',             ARRAY['voucher_no']),
+            ('branches',             ARRAY['code'])
         ) AS s(tbl, cols)
     LOOP
         IF to_regclass('public.' || spec.tbl) IS NULL THEN
             CONTINUE;
         END IF;
-        FOR con IN
-            SELECT k.conname
-            FROM pg_constraint k
-            WHERE k.conrelid = ('public.' || spec.tbl)::regclass
-              AND k.contype = 'u'
-              AND (SELECT array_agg(a.attname::text ORDER BY a.attname)
-                   FROM pg_attribute a
-                   WHERE a.attrelid = k.conrelid AND a.attnum = ANY (k.conkey))
-                  = (SELECT array_agg(x ORDER BY x) FROM unnest(spec.cols) x)
-        LOOP
-            EXECUTE format('ALTER TABLE public.%I DROP CONSTRAINT %I', spec.tbl, con.conname);
-        END LOOP;
         EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS %I ON public.%I (tenant_id, %s)',
                        'ux_' || spec.tbl || '_tenant_' || array_to_string(spec.cols, '_'),
                        spec.tbl,
                        (SELECT string_agg(quote_ident(x), ', ') FROM unnest(spec.cols) x));
     END LOOP;
-
-    IF to_regclass('public.ix_branches_code') IS NOT NULL THEN
-        DROP INDEX public.ix_branches_code;
-    END IF;
-    IF to_regclass('public.branches') IS NOT NULL THEN
-        CREATE UNIQUE INDEX IF NOT EXISTS ux_branches_tenant_code ON public.branches (tenant_id, code);
-    END IF;
 END
 $$;
 
@@ -241,9 +240,11 @@ BEGIN
     VALUES (coalesce(nullif(p_name, ''), 'My pharmacy'), p_user_id)
     RETURNING id INTO t;
 
+    -- profiles.role is what the API reads; user_roles is kept consistent.
     UPDATE public.profiles SET tenant_id = t, role = 'admin' WHERE id = p_user_id;
-    DELETE FROM public.user_roles WHERE user_id = p_user_id;
-    INSERT INTO public.user_roles (user_id, role, tenant_id) VALUES (p_user_id, 'admin', t);
+    UPDATE public.user_roles SET tenant_id = t WHERE user_id = p_user_id;
+    INSERT INTO public.user_roles (user_id, role, tenant_id) VALUES (p_user_id, 'admin', t)
+    ON CONFLICT (user_id, role) DO UPDATE SET tenant_id = EXCLUDED.tenant_id;
 
     INSERT INTO public.medicine_categories (name, description, display_order, tenant_id)
     SELECT v.*, t FROM (VALUES
@@ -262,7 +263,8 @@ BEGIN
         ('Spray', 'Spray medications', 13),
         ('Solution', 'Solution form', 14),
         ('Other', 'Other forms', 99)
-    ) AS v(name, description, display_order);
+    ) AS v(name, description, display_order)
+    ON CONFLICT DO NOTHING;
 
     INSERT INTO public.unit_types (name, abbreviation, category, display_order, tenant_id)
     SELECT v.*, t FROM (VALUES
@@ -281,7 +283,8 @@ BEGIN
         ('Sachet', 'sachet', 'quantity', 13),
         ('Packet', 'pkt', 'quantity', 14),
         ('Roll', 'roll', 'quantity', 15)
-    ) AS v(name, abbreviation, category, display_order);
+    ) AS v(name, abbreviation, category, display_order)
+    ON CONFLICT DO NOTHING;
 
     INSERT INTO public.medicine_types (name, description, display_order, tenant_id)
     SELECT v.*, t FROM (VALUES
@@ -308,12 +311,14 @@ BEGIN
         ('Anticoagulant', 'Blood thinning medications', 21),
         ('Anesthetic', 'Anesthetic medications', 22),
         ('Other', 'Other medications', 99)
-    ) AS v(name, description, display_order);
+    ) AS v(name, description, display_order)
+    ON CONFLICT DO NOTHING;
 
     INSERT INTO public.expiry_alert_settings (alert_days_before, alert_level, notification_method, tenant_id)
     VALUES (90, 'info', ARRAY['system']::text[], t),
            (60, 'warning', ARRAY['system', 'email']::text[], t),
-           (30, 'critical', ARRAY['system', 'email', 'sms']::text[], t);
+           (30, 'critical', ARRAY['system', 'email', 'sms']::text[], t)
+    ON CONFLICT DO NOTHING;
 
     RETURN t;
 END
