@@ -100,7 +100,7 @@ export default function VouchersTab() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-blue-200 bg-blue-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Vouchers</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
@@ -112,7 +112,7 @@ export default function VouchersTab() {
 
         <Card className="border-red-200 bg-red-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Payment Vouchers</p>
                 <p className="text-2xl font-bold text-red-600">{stats.payments}</p>
@@ -125,7 +125,7 @@ export default function VouchersTab() {
 
         <Card className="border-green-200 bg-green-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Receipt Vouchers</p>
                 <p className="text-2xl font-bold text-green-600">{stats.receipts}</p>
@@ -138,7 +138,7 @@ export default function VouchersTab() {
 
         <Card className="border-purple-200 bg-purple-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Net Cash Flow</p>
                 <p className={`text-2xl font-bold ${stats.totalReceipts - stats.totalPayments >= 0 ? 'text-green-600' : 'text-red-600'}`}>

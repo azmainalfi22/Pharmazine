@@ -22,7 +22,7 @@ export function SimpleBarChart({ data, title, valuePrefix = "", valueSuffix = ""
         <div className="space-y-4">
           {data.map((item, idx) => (
             <div key={idx} className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm flex-wrap gap-2">
                 <span className="font-medium">{item.label}</span>
                 <span className="font-bold">{valuePrefix}{item.value}{valueSuffix}</span>
               </div>
@@ -60,7 +60,7 @@ export function SimplePieChart({ data, title }: PieChartDataProps) {
             const percentage = total > 0 ? (item.value / total * 100) : 0;
             return (
               <div key={idx} className="space-y-1">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
@@ -109,7 +109,7 @@ export function SimpleTrendChart({ data, title, color = "hsl(var(--primary))" }:
             const normalizedValue = range > 0 ? ((item.value - minValue) / range) * 100 : 50;
             return (
               <div key={idx} className="space-y-1">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm flex-wrap gap-2">
                   <span className="text-muted-foreground">{item.date}</span>
                   <span className="font-bold">{formatCurrency(item.value)}</span>
                 </div>
@@ -134,11 +134,11 @@ interface MetricCardProps {
 export function MetricCard({ title, value, change, icon, color = "primary" }: MetricCardProps) {
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex-1">
             <p className="text-sm text-muted-foreground font-medium">{title}</p>
-            <p className="text-3xl font-bold mt-2">{value}</p>
+            <p className="text-2xl sm:text-3xl font-bold mt-2">{value}</p>
             {change !== undefined && (
               <p className={`text-sm mt-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(1)}% vs last period

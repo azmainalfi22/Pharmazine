@@ -155,23 +155,23 @@ export default function ProcurementModule() {
   const pendingOrders = purchases.filter(p => !["paid", "cancelled"].includes(p.po_status)).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 p-8 rounded-2xl border-2 border-orange-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 p-4 sm:p-8 rounded-2xl border-2 border-orange-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <ShoppingCart className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg">Procurement</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg">Procurement</h1>
               <p className="text-white/90 text-sm mt-1">
                 PO lifecycle · GRN · 3-way matching · Supplier credit aging · Price comparison
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 text-center">
               <div className="text-xs text-white/70">PENDING</div>
               <div className="text-2xl font-bold text-white">{pendingOrders}</div>

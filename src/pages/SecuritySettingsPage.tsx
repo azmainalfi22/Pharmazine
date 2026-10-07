@@ -184,10 +184,10 @@ export default function SecuritySettingsPage() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-700 via-gray-800 to-zinc-800 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-slate-700 via-gray-800 to-zinc-800 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Shield className="w-8 h-8" />
@@ -200,7 +200,7 @@ export default function SecuritySettingsPage() {
           </Button>
         </div>
         {/* KPI strip */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {[
             { label: "2FA Status",      value: twoFAStatus.is_enabled ? "Enabled" : "Disabled", color: twoFAStatus.is_enabled ? "bg-green-500/30" : "bg-red-500/30" },
             { label: "Audit Events",    value: auditLog.length,     color: "bg-white/15" },
@@ -216,7 +216,7 @@ export default function SecuritySettingsPage() {
       </div>
 
       <Tabs defaultValue="2fa">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+        <TabsList className="flex sm:grid sm:grid-cols-4 w-full max-w-2xl">
           <TabsTrigger value="2fa" className="gap-1"><Smartphone className="w-4 h-4" /> 2FA</TabsTrigger>
           <TabsTrigger value="password" className="gap-1"><Key className="w-4 h-4" /> Password</TabsTrigger>
           <TabsTrigger value="audit" className="gap-1"><Shield className="w-4 h-4" /> Audit Log</TabsTrigger>
@@ -382,7 +382,7 @@ export default function SecuritySettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-medium">Force HTTPS</p>
                   <p className="text-xs text-muted-foreground">Redirect all HTTP to HTTPS</p>

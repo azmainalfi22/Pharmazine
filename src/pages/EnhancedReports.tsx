@@ -422,19 +422,19 @@ export default function EnhancedReports() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-4 sm:p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <BarChart3 className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Reports & Analytics
                 </h1>
                 <p className="text-white/90 text-base">
@@ -573,7 +573,7 @@ export default function EnhancedReports() {
           navigate(routeMap[value], { replace: true });
         }
       }} className="space-y-4">
-        <TabsList className="glass grid grid-cols-6 w-full">
+        <TabsList className="glass flex sm:grid sm:grid-cols-6 w-full">
           <TabsTrigger value="medicine" className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-600 data-[state=active]:to-purple-700 data-[state=active]:text-white">
             <Pill className="w-4 h-4 mr-2" />
             Medicine
@@ -611,7 +611,7 @@ export default function EnhancedReports() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Sales</p>
                     <p className="text-2xl font-bold">{salesStats.totalSales}</p>
@@ -623,7 +623,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Revenue</p>
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(salesStats.totalRevenue)}</p>
@@ -635,7 +635,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Est. Profit</p>
                     <p className="text-2xl font-bold text-blue-600">{formatCurrency(salesStats.totalProfit)}</p>
@@ -647,7 +647,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
                     <p className="text-2xl font-bold">{formatCurrency(salesStats.averageOrderValue)}</p>
@@ -661,7 +661,7 @@ export default function EnhancedReports() {
           {/* Sales List */}
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Sales Transactions</CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => exportToCSV(salesData, "sales-report")}>
@@ -741,7 +741,7 @@ export default function EnhancedReports() {
                   <CardContent>
                     <div className="space-y-3">
                       {topCustomers.map((customer, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg glass-subtle">
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg glass-subtle flex-wrap gap-2">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                               <span className="text-sm font-bold text-primary">#{idx + 1}</span>
@@ -781,7 +781,7 @@ export default function EnhancedReports() {
                       return Object.entries(paymentMethods)
                         .sort((a, b) => b[1] - a[1])
                         .map(([method, total], idx) => (
-                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg glass-subtle">
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg glass-subtle flex-wrap gap-2">
                             <div className="flex items-center gap-3">
                               <CreditCard className="w-5 h-5 text-primary/50" />
                               <div className="font-medium capitalize">{method}</div>
@@ -802,7 +802,7 @@ export default function EnhancedReports() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Products</p>
                     <p className="text-2xl font-bold">{stockStats.totalProducts}</p>
@@ -814,7 +814,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Stock Value</p>
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(stockStats.totalValue)}</p>
@@ -826,7 +826,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Low Stock</p>
                     <p className="text-2xl font-bold text-orange-600">{stockStats.lowStockItems}</p>
@@ -838,7 +838,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Expiring Soon</p>
                     <p className="text-2xl font-bold text-red-600">{stockStats.expiringSoon}</p>
@@ -851,7 +851,7 @@ export default function EnhancedReports() {
 
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Current Stock</CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => exportToCSV(stockData, "stock-report")}>
@@ -915,7 +915,7 @@ export default function EnhancedReports() {
           {expiryAlerts.length > 0 && (
             <Card className="pharmacy-card border-red-200">
               <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-red-600" />
                     Expiry Alerts
@@ -985,36 +985,36 @@ export default function EnhancedReports() {
                 <div className="text-center py-12 text-muted-foreground">Loading...</div>
               ) : (
                 <div className="space-y-4">
-                  <div className="rounded-lg border p-6 space-y-4">
-                    <div className="flex justify-between items-center text-lg">
+                  <div className="rounded-lg border p-4 sm:p-6 space-y-4">
+                    <div className="flex justify-between items-center text-lg flex-wrap gap-2">
                       <span className="font-medium">Revenue</span>
                       <span className="font-bold text-green-600">{formatCurrency(financialData.totalSales)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center border-t pt-4">
+                    <div className="flex justify-between items-center border-t pt-4 flex-wrap gap-2">
                       <span className="text-muted-foreground">Cost of Goods Sold (COGS)</span>
                       <span className="font-medium text-red-600">{formatCurrency(financialData.cogs)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center border-t pt-4">
+                    <div className="flex justify-between items-center border-t pt-4 flex-wrap gap-2">
                       <span className="font-medium">Gross Profit</span>
                       <span className="font-bold text-blue-600">{formatCurrency(financialData.grossProfit)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center border-t pt-4">
+                    <div className="flex justify-between items-center border-t pt-4 flex-wrap gap-2">
                       <span className="text-muted-foreground">Operating Expenses</span>
                       <span className="font-medium text-red-600">{formatCurrency(financialData.expenses)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center border-t-2 border-primary pt-4">
+                    <div className="flex justify-between items-center border-t-2 border-primary pt-4 flex-wrap gap-2">
                       <span className="text-xl font-bold">Net Profit</span>
-                      <span className="text-3xl font-bold text-primary">
+                      <span className="text-2xl sm:text-3xl font-bold text-primary">
                         {formatCurrency(financialData.netProfit)}
                       </span>
                     </div>
 
                     <div className="border-t pt-4">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm flex-wrap gap-2">
                         <span>Gross Profit Margin:</span>
                         <span className="font-medium">
                           {financialData.totalSales > 0 
@@ -1022,7 +1022,7 @@ export default function EnhancedReports() {
                             : "0"}%
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm mt-2">
+                      <div className="flex justify-between text-sm mt-2 flex-wrap gap-2">
                         <span>Net Profit Margin:</span>
                         <span className="font-medium">
                           {financialData.totalSales > 0 
@@ -1055,7 +1055,7 @@ export default function EnhancedReports() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Customers</p>
                     <p className="text-2xl font-bold">{customerStats.totalCustomers}</p>
@@ -1067,7 +1067,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Active Customers</p>
                     <p className="text-2xl font-bold text-green-600">{customerStats.activeCustomers}</p>
@@ -1079,7 +1079,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Revenue</p>
                     <p className="text-2xl font-bold text-blue-600">{formatCurrency(customerStats.totalRevenue)}</p>
@@ -1091,7 +1091,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
                     <p className="text-2xl font-bold">{formatCurrency(customerStats.averageOrderValue)}</p>
@@ -1105,7 +1105,7 @@ export default function EnhancedReports() {
           {/* Customer List */}
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Customer Performance</CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => exportToCSV(customerData, "customer-report")}>
@@ -1170,7 +1170,7 @@ export default function EnhancedReports() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Purchases</p>
                     <p className="text-2xl font-bold">{purchaseStats.totalPurchases}</p>
@@ -1182,7 +1182,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Purchase Value</p>
                     <p className="text-2xl font-bold text-blue-600">{formatCurrency(purchaseStats.totalValue)}</p>
@@ -1194,7 +1194,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Purchase</p>
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(purchaseStats.averagePurchase)}</p>
@@ -1206,7 +1206,7 @@ export default function EnhancedReports() {
 
             <Card className="pharmacy-stat-card">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Suppliers</p>
                     <p className="text-2xl font-bold">{purchaseStats.totalSuppliers}</p>
@@ -1220,7 +1220,7 @@ export default function EnhancedReports() {
           {/* Purchase List */}
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Purchase Transactions</CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => exportToCSV(purchaseData, "purchase-report")}>

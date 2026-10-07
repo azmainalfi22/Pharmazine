@@ -83,10 +83,10 @@ export default function SystemConfiguration() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold">System Configuration</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">System Configuration</h1>
           <p className="text-gray-500 mt-1">Manage system settings and preferences</p>
         </div>
         <Button onClick={loadConfigs} variant="outline" className="gap-2">
@@ -96,7 +96,7 @@ export default function SystemConfiguration() {
       </div>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="flex sm:grid sm:grid-cols-5 w-full">
           {categories.map((cat) => {
             const Icon = getCategoryIcon(cat.value);
             return (
@@ -122,7 +122,7 @@ export default function SystemConfiguration() {
                   <div className="space-y-4">
                     {configs.map((config) => (
                       <div key={config.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start flex-wrap gap-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold">{config.config_key}</h3>
@@ -155,7 +155,7 @@ export default function SystemConfiguration() {
                                 </Button>
                               </div>
                             ) : (
-                              <div className="flex justify-between items-center mt-2">
+                              <div className="flex justify-between items-center mt-2 flex-wrap gap-2">
                                 <code className="text-sm bg-gray-100 px-3 py-1 rounded">
                                   {config.is_encrypted ? '***ENCRYPTED***' : config.config_value}
                                 </code>

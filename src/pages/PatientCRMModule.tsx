@@ -281,10 +281,10 @@ export default function PatientCRMModule() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Heart className="w-8 h-8" />
@@ -299,7 +299,7 @@ export default function PatientCRMModule() {
           </div>
         </div>
         {/* KPI strip */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {[
             { label: "Total Patients", value: patients.length, icon: User },
             { label: "Allergy Alerts", value: patients.filter(p => (p.allergies ?? []).length > 0).length, icon: AlertTriangle },
@@ -342,7 +342,7 @@ export default function PatientCRMModule() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-xl">
+        <TabsList className="flex sm:grid sm:grid-cols-4 w-full max-w-xl">
           <TabsTrigger value="allergies" className="flex items-center gap-1">
             <AlertTriangle className="w-4 h-4" /> Allergies
           </TabsTrigger>
@@ -505,7 +505,7 @@ export default function PatientCRMModule() {
 
         {/* ── Tab: Consent Forms ─────────────────────────────────────────────── */}
         <TabsContent value="consent" className="space-y-4 mt-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">{consentForms.length} consent forms on file</p>
             <Button size="sm" onClick={() => setNewConsentOpen(true)} className="bg-rose-600 hover:bg-rose-700 text-white gap-1">
               <Plus className="w-4 h-4" /> New Consent Form

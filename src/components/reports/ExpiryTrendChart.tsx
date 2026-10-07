@@ -35,7 +35,7 @@ export default function ExpiryTrendChart({ data, formatCurrency = (n) => `$${n.t
             
             return (
               <div key={idx} className="space-y-2">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <span className="text-sm font-medium">{month.month}</span>
                   <div className="flex gap-2">
                     <Badge variant="destructive" className="text-xs">

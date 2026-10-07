@@ -100,7 +100,7 @@ export default function AccountsPayableTab() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-red-200 bg-red-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Payables</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.total)}</p>
@@ -113,7 +113,7 @@ export default function AccountsPayableTab() {
 
         <Card className="border-orange-200 bg-orange-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Total Credit Limit</p>
                 <p className="text-2xl font-bold text-orange-600">{formatCurrency(stats.totalCredit)}</p>
@@ -125,7 +125,7 @@ export default function AccountsPayableTab() {
 
         <Card className="border-yellow-200 bg-yellow-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Credit Exceeded</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.exceeded}</p>
@@ -137,7 +137,7 @@ export default function AccountsPayableTab() {
 
         <Card className="border-indigo-200 bg-indigo-50/50">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm text-muted-foreground">Credit Utilization</p>
                 <p className="text-2xl font-bold text-indigo-600">
@@ -250,7 +250,7 @@ export default function AccountsPayableTab() {
 
           {filteredPayables.length > 0 && (
             <div className="mt-4 p-4 bg-muted rounded-lg">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm flex-wrap gap-2">
                 <span className="font-medium">Total Suppliers: {filteredPayables.length}</span>
                 <span className="font-bold text-red-600">
                   Total Due: {formatCurrency(filteredPayables.reduce((sum, p) => sum + p.balance, 0))}

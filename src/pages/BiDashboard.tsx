@@ -59,7 +59,7 @@ function KpiCard({ title, value, sub, icon: Icon, trend, color = "blue" }: {
     <Card className="pharmacy-card overflow-hidden">
       <CardContent className="p-0">
         <div className={`bg-gradient-to-br ${colors[color] || colors.blue} p-4 text-white`}>
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start flex-wrap gap-2">
             <div>
               <p className="text-xs text-white/70 font-medium uppercase tracking-wide">{title}</p>
               <p className="text-2xl font-bold mt-1">{value}</p>
@@ -361,23 +361,23 @@ export default function BiDashboard() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-4 sm:p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <BarChart3 className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg">BI Analytics Dashboard</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg">BI Analytics Dashboard</h1>
               <p className="text-white/90 text-sm mt-1">
                 Revenue trends · P&L · Inventory turnover · Customer LTV · Cashflow
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Select value={period} onValueChange={setPeriod}>
               <SelectTrigger className="w-36 bg-white/20 text-white border-white/30">
                 <SelectValue />
@@ -557,7 +557,7 @@ export default function BiDashboard() {
             ].map((item) => (
               <Card key={item.key} className={`pharmacy-card border ${item.color}`}>
                 <CardContent className="p-5">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-gray-500">{item.label}</p>
                       <p className={`text-2xl font-bold mt-1 ${item.textColor}`}>
@@ -760,7 +760,7 @@ export default function BiDashboard() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {cashflow.slice(-1).map((m) => (
                 <>
                   <Card className="pharmacy-card" key="inflow">

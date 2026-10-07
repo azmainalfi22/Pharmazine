@@ -231,7 +231,7 @@ export default function BarcodeTab() {
                 <div className="space-y-6">
                   {generatedBarcode && (
                     <div className="border rounded-lg p-4 bg-white">
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                         <Label>Barcode</Label>
                         <Button
                           size="sm"
@@ -250,7 +250,7 @@ export default function BarcodeTab() {
 
                   {generatedQRCode && (
                     <div className="border rounded-lg p-4 bg-white">
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                         <Label>QR Code</Label>
                         <Button
                           size="sm"

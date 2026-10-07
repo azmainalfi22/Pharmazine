@@ -33,7 +33,7 @@ export default function ManufacturerPerformanceChart({ data, formatCurrency = (n
             
             return (
               <div key={idx} className="space-y-2">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-cyan-600 text-white text-xs flex items-center justify-center font-bold">
                       {idx + 1}

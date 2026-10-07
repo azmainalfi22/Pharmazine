@@ -131,15 +131,25 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  /* Let grid items shrink below their content (e.g. a wide table) so the
+     content scrolls inside its card instead of widening the page on phones. */
+  .grid > * {
+    min-width: 0;
+  }
+
   html, body {
     @apply bg-background text-foreground antialiased;
     overflow: hidden !important;
     height: 100vh !important;
     max-height: 100vh !important;
+    /* Dynamic viewport height: excludes mobile browser toolbars where supported */
+    height: 100dvh !important;
+    max-height: 100dvh !important;
   }
   
-  /* Allow dropdowns to overflow */
-  .relative {
+  /* Allow dropdowns to overflow — except where an element sets its own overflow
+     (e.g. the table wrapper's overflow-auto, which must scroll on phones). */
+  .relative:not([class*="overflow-"]) {
     overflow: visible !important;
   }
   
@@ -154,7 +164,7 @@ All colors MUST be HSL.
   }
   
   /* Exception for dropdowns */
-  [class*="absolute"] {
+  [class*="absolute"]:not([class*="overflow-"]) {
     overflow: visible !important;
   }
   

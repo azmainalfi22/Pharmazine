@@ -97,18 +97,18 @@ export default function LowStockAlerts() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-orange-600 via-red-600 to-orange-700 p-8 rounded-2xl border-2 border-orange-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-orange-600 via-red-600 to-orange-700 p-4 sm:p-8 rounded-2xl border-2 border-orange-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <AlertTriangle className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Low Stock Alerts</h1>
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Low Stock Alerts</h1>
                 <p className="text-white/90 text-base">Products that need reordering</p>
               </div>
             </div>
@@ -124,22 +124,22 @@ export default function LowStockAlerts() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Out of Stock</p>
-              <p className="text-3xl font-bold text-white">{stats.outOfStock}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{stats.outOfStock}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Critically Low</p>
-              <p className="text-3xl font-bold text-orange-300">{stats.criticallyLow}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-orange-300">{stats.criticallyLow}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Low Stock</p>
-              <p className="text-3xl font-bold text-yellow-300">{stats.lowStock}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-300">{stats.lowStock}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Total Items</p>
-              <p className="text-3xl font-bold text-white">{products.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{products.length}</p>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function LowStockAlerts() {
 
       <Card className="pharmacy-card">
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <div>
               <CardTitle>Products Needing Reorder</CardTitle>
               <CardDescription>Items below minimum stock level - create purchase orders to restock</CardDescription>
@@ -223,7 +223,7 @@ export default function LowStockAlerts() {
 
           {products.length > 0 && (
             <div className="mt-6 p-4 bg-muted rounded-lg">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-medium">Total Items to Reorder: {products.length}</p>
                   <p className="text-sm text-muted-foreground">

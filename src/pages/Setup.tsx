@@ -29,10 +29,10 @@ const Setup = () => {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative">
-          <CardTitle className="text-3xl font-bold text-white drop-shadow-lg mb-2">Master Data Setup</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">Master Data Setup</CardTitle>
           <p className="text-white/90 text-base">
             Configure categories, subcategories, countries, customers, suppliers, and company information
           </p>

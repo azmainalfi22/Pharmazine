@@ -147,19 +147,19 @@ export default function SalesHistory() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-green-700 p-8 rounded-2xl border-2 border-green-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-green-700 p-4 sm:p-8 rounded-2xl border-2 border-green-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <Receipt className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Sales History
                 </h1>
                 <p className="text-white/90 text-base">
@@ -191,38 +191,38 @@ export default function SalesHistory() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <Receipt className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">TOTAL</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{stats.totalSales}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stats.totalSales}</div>
               <div className="text-xs text-white/70">Sales Count</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">REVENUE</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.totalRevenue)}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{formatCurrency(stats.totalRevenue)}</div>
               <div className="text-xs text-white/70">Total Amount</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CASH</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.cashSales)}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{formatCurrency(stats.cashSales)}</div>
               <div className="text-xs text-white/70">Cash Sales</div>
             </div>
 
             <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <DollarSign className="h-5 w-5 text-white/80" />
                 <span className="text-xs text-white/70 font-medium">CARD</span>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{formatCurrency(stats.cardSales)}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{formatCurrency(stats.cardSales)}</div>
               <div className="text-xs text-white/70">Card Sales</div>
             </div>
           </div>

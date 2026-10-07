@@ -497,7 +497,7 @@ export default function ProductsTab() {
             {/* Section: Pricing */}
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Pricing</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <Label>Purchase / Cost Price (৳) *</Label>
                   <Input
@@ -537,7 +537,7 @@ export default function ProductsTab() {
             {/* Section: Pack Details */}
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Pack Details</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <Label>Pack Size (units/pack)</Label>
                   <Input
@@ -570,7 +570,7 @@ export default function ProductsTab() {
             {/* Section: Stock Levels */}
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Stock Level Thresholds</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <Label>Reorder Level</Label>
                   <Input

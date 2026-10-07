@@ -55,21 +55,21 @@ export default function BackupManagementPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 p-4 sm:p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <Database className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Backup Management</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Backup Management</h1>
               <p className="text-white/90 text-base">Create and manage database backups</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button
               onClick={createBackup}
               disabled={creating}
@@ -91,7 +91,7 @@ export default function BackupManagementPage() {
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-green-200 bg-green-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
@@ -194,15 +194,15 @@ export default function BackupManagementPage() {
         <CardContent>
           <div className="space-y-3 text-sm text-yellow-900">
             <p><strong>1. Install PostgreSQL Tools:</strong></p>
-            <pre className="bg-yellow-100 p-2 rounded">sudo apt-get install postgresql-client</pre>
+            <pre className="bg-yellow-100 p-2 rounded overflow-x-auto">sudo apt-get install postgresql-client</pre>
             
             <p><strong>2. Start the Scheduler (for automated backups):</strong></p>
-            <pre className="bg-yellow-100 p-2 rounded">cd backend && python scheduler.py</pre>
+            <pre className="bg-yellow-100 p-2 rounded overflow-x-auto">cd backend && python scheduler.py</pre>
             
             <p><strong>3. Manual Backup:</strong> Use the "Create Backup Now" button above</p>
             
             <p><strong>4. Restore from Backup:</strong></p>
-            <pre className="bg-yellow-100 p-2 rounded">cd backend && python -c "from backup_system import BackupSystem; BackupSystem().restore_backup('path/to/backup.sql.gz')"</pre>
+            <pre className="bg-yellow-100 p-2 rounded overflow-x-auto">cd backend && python -c "from backup_system import BackupSystem; BackupSystem().restore_backup('path/to/backup.sql.gz')"</pre>
           </div>
         </CardContent>
       </Card>

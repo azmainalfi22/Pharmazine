@@ -296,18 +296,18 @@ export default function ServiceModule() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 p-8 rounded-2xl border-2 border-pink-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 p-4 sm:p-8 rounded-2xl border-2 border-pink-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <Stethoscope className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                 Service Management
               </h1>
               <p className="text-white/90 text-base">
@@ -345,7 +345,7 @@ export default function ServiceModule() {
         <TabsContent value="services">
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Services</CardTitle>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -353,7 +353,7 @@ export default function ServiceModule() {
                     placeholder="Search services..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pharmacy-input w-[300px]"
+                    className="pl-10 pharmacy-input w-full sm:w-[300px]"
                   />
                 </div>
               </div>
@@ -453,7 +453,7 @@ export default function ServiceModule() {
         <TabsContent value="bookings">
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Service Bookings</CardTitle>
                 <div className="flex gap-2">
                   <div className="relative">
@@ -462,7 +462,7 @@ export default function ServiceModule() {
                       placeholder="Search bookings..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pharmacy-input w-[300px]"
+                      className="pl-10 pharmacy-input w-full sm:w-[300px]"
                     />
                   </div>
                   <Button className="pharmacy-button" onClick={() => setBookingDialog(true)}>

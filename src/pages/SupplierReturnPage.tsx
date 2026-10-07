@@ -196,13 +196,13 @@ const SupplierReturnPage = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-primary/10">
               <RotateCcw className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Supplier Return</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold">Supplier Return</h1>
               <p className="text-muted-foreground">Return stock to suppliers</p>
             </div>
           </div>
@@ -218,14 +218,14 @@ const SupplierReturnPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative flex items-center gap-4">
           <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
             <RotateCcw className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">Supplier Return</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">Supplier Return</h1>
             <p className="text-white/90 text-base">Return stock to suppliers</p>
           </div>
           <Button 
@@ -244,7 +244,7 @@ const SupplierReturnPage = () => {
         <div className="bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950/20 dark:to-emerald-950/20 p-4 border-b-2 border-teal-200 dark:border-teal-800">
           <h2 className="text-lg font-bold text-teal-900 dark:text-teal-100">Return Information</h2>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="supplier">Supplier *</Label>

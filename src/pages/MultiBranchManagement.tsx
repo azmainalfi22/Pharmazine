@@ -248,11 +248,11 @@ export default function MultiBranchManagement() {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Multi-Branch Management
           </h1>
           <p className="text-gray-600 mt-1">
@@ -292,7 +292,7 @@ export default function MultiBranchManagement() {
             <CardDescription>Total Branches</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.total_branches}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{stats.total_branches}</div>
           </CardContent>
         </Card>
         <Card>
@@ -300,7 +300,7 @@ export default function MultiBranchManagement() {
             <CardDescription>Active Branches</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-2xl sm:text-3xl font-bold text-green-600">
               {stats.active_branches}
             </div>
           </CardContent>
@@ -310,7 +310,7 @@ export default function MultiBranchManagement() {
             <CardDescription>Total Employees</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.total_employees}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{stats.total_employees}</div>
           </CardContent>
         </Card>
         <Card>
@@ -318,7 +318,7 @@ export default function MultiBranchManagement() {
             <CardDescription>Sales Target</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-2xl sm:text-3xl font-bold">
               ৳{totalSales.toLocaleString()}
             </div>
           </CardContent>
@@ -472,7 +472,7 @@ export default function MultiBranchManagement() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label>City</Label>
                 <Input

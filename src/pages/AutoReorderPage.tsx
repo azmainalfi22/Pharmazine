@@ -94,21 +94,21 @@ export default function AutoReorderPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-4 sm:p-8 rounded-2xl border-2 border-blue-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <ShoppingCart className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Auto-Reorder System</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Auto-Reorder System</h1>
               <p className="text-white/90 text-base">Smart purchase order recommendations based on sales velocity</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Select value={days} onValueChange={setDays}>
               <SelectTrigger className="w-[150px] bg-white/20 border-white/30 text-white">
                 <SelectValue />
@@ -133,10 +133,10 @@ export default function AutoReorderPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Critical Priority</p>
                 <p className="text-2xl font-bold text-red-600">{stats.critical}</p>
@@ -148,7 +148,7 @@ export default function AutoReorderPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">High Priority</p>
                 <p className="text-2xl font-bold text-orange-600">{stats.high}</p>
@@ -160,7 +160,7 @@ export default function AutoReorderPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Medium Priority</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.medium}</p>
@@ -172,7 +172,7 @@ export default function AutoReorderPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Est. Cost</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.totalCost)}</p>
@@ -204,7 +204,7 @@ export default function AutoReorderPage() {
       {viewMode === 'all' && (
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <div>
                 <CardTitle>Reorder Recommendations</CardTitle>
                 <CardDescription>Products that need reordering based on sales velocity and stock levels</CardDescription>
@@ -307,7 +307,7 @@ export default function AutoReorderPage() {
             groupedBySupplier.map((group) => (
               <Card key={group.supplier_id}>
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
                     <div>
                       <CardTitle>{group.supplier_name || `Supplier ${group.supplier_id}`}</CardTitle>
                       <CardDescription>

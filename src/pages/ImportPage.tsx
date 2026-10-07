@@ -177,14 +177,14 @@ const ImportPage = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-emerald-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/10" />
         <div className="relative flex items-center gap-4">
           <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
             <Icon className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">CSV Import</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">CSV Import</h1>
             <p className="text-white/90 text-base">Import data in bulk using CSV files</p>
           </div>
         </div>

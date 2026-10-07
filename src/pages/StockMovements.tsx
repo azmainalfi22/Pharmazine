@@ -177,17 +177,17 @@ export default function StockMovements() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 p-8 rounded-2xl border-2 border-indigo-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 p-4 sm:p-8 rounded-2xl border-2 border-indigo-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <ArrowRightLeft className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">Stock Movements</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">Stock Movements</h1>
               <p className="text-white/90 text-base">Complete audit trail of all inventory transactions</p>
             </div>
           </div>
@@ -212,8 +212,8 @@ export default function StockMovements() {
               <CardTitle>All Stock Transactions</CardTitle>
               <CardDescription>Track every stock movement in your inventory</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="relative w-[250px]">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative w-full sm:w-[250px]">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search..."

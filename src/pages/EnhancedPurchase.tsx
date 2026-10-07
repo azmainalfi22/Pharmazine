@@ -420,19 +420,19 @@ export default function EnhancedPurchase() {
   logger.debug("EnhancedPurchase rendering - Active tab:", activeTab, "Purchase items:", purchaseItems.length, "Products:", products.length, "Suppliers:", suppliers.length);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-cyan-600 via-blue-600 to-cyan-700 p-8 rounded-2xl border-2 border-cyan-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-cyan-600 via-blue-600 to-cyan-700 p-4 sm:p-8 rounded-2xl border-2 border-cyan-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <ShoppingCart className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Purchase Management
                 </h1>
                 <p className="text-white/90 text-base">
@@ -549,7 +549,7 @@ export default function EnhancedPurchase() {
               {/* Purchase Items */}
               <Card className="pharmacy-card">
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
                     <CardTitle>Purchase Items</CardTitle>
                     <Button
                       className="pharmacy-button"
@@ -639,7 +639,7 @@ export default function EnhancedPurchase() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm flex-wrap gap-2">
                       <span className="text-muted-foreground">Items Total:</span>
                       <span className="font-medium">{formatCurrency(totals.itemsTotal)}</span>
                     </div>
@@ -654,7 +654,7 @@ export default function EnhancedPurchase() {
                       />
                     </div>
 
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm flex-wrap gap-2">
                       <span className="text-muted-foreground">After Discount:</span>
                       <span className="font-medium">{formatCurrency(totals.afterDiscount)}</span>
                     </div>
@@ -706,7 +706,7 @@ export default function EnhancedPurchase() {
                     </div>
 
                     <div className="border-t pt-2">
-                      <div className="flex justify-between text-lg font-bold">
+                      <div className="flex justify-between text-lg font-bold flex-wrap gap-2">
                         <span>Grand Total:</span>
                         <span className="text-primary">{formatCurrency(totals.grandTotal)}</span>
                       </div>
@@ -722,7 +722,7 @@ export default function EnhancedPurchase() {
                       />
                     </div>
 
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm flex-wrap gap-2">
                       <span className="text-muted-foreground">Balance:</span>
                       <span className="font-medium text-red-600">
                         {formatCurrency(totals.grandTotal - (purchaseForm.paid_amount || 0))}
@@ -777,7 +777,7 @@ export default function EnhancedPurchase() {
         <TabsContent value="list" className="space-y-4">
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Purchase Orders</CardTitle>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -785,7 +785,7 @@ export default function EnhancedPurchase() {
                     placeholder="Search purchases..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pharmacy-input w-[300px]"
+                    className="pl-10 pharmacy-input w-full sm:w-[300px]"
                   />
                 </div>
               </div>
@@ -1007,7 +1007,7 @@ export default function EnhancedPurchase() {
                 </div>
                 <div className="col-span-2">
                   <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
                       <span className="text-sm font-medium">Total:</span>
                       <span className="text-xl font-bold text-primary">
                         {formatCurrency(calculateItemTotal(itemForm).total)}

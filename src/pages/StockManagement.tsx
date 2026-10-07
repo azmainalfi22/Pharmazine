@@ -120,19 +120,19 @@ export default function StockManagement() {
   logger.debug("StockManagement rendering - Products:", products.length, "Loading:", loading);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-cyan-600 to-teal-700 p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-cyan-600 to-teal-700 p-4 sm:p-8 rounded-2xl border-2 border-teal-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <Package className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+                <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                   Products & Stock
                 </h1>
                 <p className="text-white/90 text-base">
@@ -152,26 +152,26 @@ export default function StockManagement() {
           </div>
           
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Link to="/inventory" className="block">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer">
                 <p className="text-white/80 text-sm mb-1">Total Products</p>
-                <p className="text-3xl font-bold text-white">{stats.totalProducts}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{stats.totalProducts}</p>
               </div>
             </Link>
             <Link to="/inventory/low-stock" className="block">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer">
                 <p className="text-white/80 text-sm mb-1">Low Stock Items</p>
-                <p className="text-3xl font-bold text-orange-300">{stats.lowStockItems}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-orange-300">{stats.lowStockItems}</p>
               </div>
             </Link>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Out of Stock</p>
-              <p className="text-3xl font-bold text-red-300">{stats.outOfStock}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-red-300">{stats.outOfStock}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1">Total Inventory Value</p>
-              <p className="text-3xl font-bold text-white">{formatCurrency(stats.totalValue)}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{formatCurrency(stats.totalValue)}</p>
             </div>
           </div>
         </div>
@@ -208,12 +208,12 @@ export default function StockManagement() {
       {/* Products Table */}
       <Card className="pharmacy-card">
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <div>
               <CardTitle>All Products - Current Stock</CardTitle>
               <CardDescription>Complete inventory with real-time stock levels</CardDescription>
             </div>
-            <div className="relative w-[300px]">
+            <div className="relative w-full sm:w-[300px]">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search products..."

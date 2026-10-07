@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import {
   LogIn,
   Info,
   X,
+  Menu,
   ShoppingBag,
   ChevronDown,
   ChevronRight,
@@ -56,6 +57,29 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { signOut, user, isGuest } = useAuth();
   const location = useLocation();
+  // Below lg the sidebar is an off-canvas drawer opened from the top bar.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // Mount a single NotificationBell (it polls): sidebar on desktop, top bar on mobile.
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsDesktop(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileNavOpen]);
   const [guestBannerHidden, setGuestBannerHidden] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(GUEST_BANNER_DISMISSED_KEY) === "1";
@@ -379,7 +403,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="bg-background h-screen overflow-hidden relative">
+    <div className="bg-background h-[100dvh] overflow-hidden relative">
       {/* Glassmorphic Background Effects */}
       <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-emerald-50/30 to-primary/10 dark:from-primary/10 dark:via-emerald-950/20 dark:to-primary/5 pointer-events-none"></div>
       <div className="fixed top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none"></div>
@@ -388,8 +412,24 @@ const Layout = ({ children }: LayoutProps) => {
         style={{ animationDelay: "2s" }}
       ></div>
 
-      {/* Glassmorphic Sidebar */}
-      <aside className="fixed left-0 top-0 z-50 h-screen w-72 backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 shadow-2xl">
+      {/* Backdrop behind the mobile drawer */}
+      {mobileNavOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Glassmorphic Sidebar (drawer below lg) */}
+      <aside
+        id="app-sidebar"
+        className={cn(
+          "fixed left-0 top-0 z-50 h-[100dvh] w-72 max-w-[85vw] backdrop-blur-2xl bg-white/90 lg:bg-white/70 dark:bg-gray-900/90 lg:dark:bg-gray-900/70 shadow-2xl transition-[transform,visibility] duration-300 lg:visible lg:translate-x-0",
+          // invisible (not just off-screen) when closed, so its links can't be tabbed to
+          mobileNavOpen ? "visible translate-x-0" : "invisible -translate-x-full"
+        )}
+      >
         {/* Glassmorphic overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/30 to-white/20 dark:from-gray-900/50 dark:via-gray-900/30 dark:to-gray-900/20 pointer-events-none"></div>
 
@@ -663,7 +703,7 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 {lang === "en" ? "EN" : "বাংলা"}
               </button>
-              <NotificationBell />
+              {isDesktop && <NotificationBell />}
             </div>
             {isGuest ? (
               <>
@@ -726,11 +766,37 @@ const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Main content */}
-      <main className="pl-72 h-screen overflow-hidden relative">
+      <main className="lg:pl-72 h-[100dvh] overflow-hidden relative flex flex-col">
+        {/* Mobile top bar */}
+        <header className="lg:hidden relative z-30 flex h-14 flex-shrink-0 items-center gap-2 border-b border-white/30 bg-white/80 px-3 backdrop-blur-xl dark:border-gray-700/40 dark:bg-gray-900/80">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Open menu"
+            aria-controls="app-sidebar"
+            aria-expanded={mobileNavOpen}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Link to="/" className="flex-1 truncate text-base font-bold text-primary">
+            Pharmazine
+          </Link>
+          {!isDesktop && <NotificationBell placement="down" />}
+          {isGuest && (
+            <Link to="/auth">
+              <Button size="sm" className="h-8 gap-1.5 px-3">
+                <LogIn className="h-3.5 w-3.5" />
+                Sign in
+              </Button>
+            </Link>
+          )}
+        </header>
         <div
-          className="container mx-auto h-full"
+          className="container mx-auto min-h-0 w-full flex-1 px-0 lg:px-8"
           style={{
             overflowY: "auto",
+            overflowX: "hidden",
             scrollbarWidth: "thin",
             msOverflowStyle: "none",
           }}
@@ -751,16 +817,21 @@ const Layout = ({ children }: LayoutProps) => {
             }
           `}</style>
           {isGuest && !guestBannerHidden && (
-            <div className="mx-6 mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
+            <div className="mx-3 sm:mx-6 mt-3 sm:mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
               <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p className="flex-1">
-                You're exploring Pharmazine as a guest — everything works on a
-                fresh, empty pharmacy and your changes are saved in this browser
-                only.{" "}
+                <span className="sm:hidden">
+                  Guest mode: changes stay in this browser.{" "}
+                </span>
+                <span className="hidden sm:inline">
+                  You're exploring Pharmazine as a guest — everything works on a
+                  fresh, empty pharmacy and your changes are saved in this browser
+                  only.{" "}
+                </span>
                 <Link to="/auth" className="font-semibold underline underline-offset-2">
                   Sign in
-                </Link>{" "}
-                to load your own pharmacy data.
+                </Link>
+                <span className="hidden sm:inline"> to load your own pharmacy data.</span>
               </p>
               <button
                 onClick={dismissGuestBanner}

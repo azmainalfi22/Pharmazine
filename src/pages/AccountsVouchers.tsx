@@ -94,18 +94,18 @@ export default function AccountsVouchers() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Prominent Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-600 via-gray-600 to-slate-700 p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-600 via-gray-600 to-slate-700 p-4 sm:p-8 rounded-2xl border-2 border-slate-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
         
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <DollarSign className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">
                 Accounts & Vouchers
               </h1>
               <p className="text-white/90 text-base">
@@ -132,7 +132,7 @@ export default function AccountsVouchers() {
         <TabsContent value="journal" className="space-y-4">
           <Card className="pharmacy-card">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <CardTitle>Journal Vouchers</CardTitle>
                 <Dialog open={voucherDialog} onOpenChange={setVoucherDialog}>
                   <DialogTrigger asChild>

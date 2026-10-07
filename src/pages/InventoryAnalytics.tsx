@@ -116,21 +116,21 @@ export default function InventoryAnalytics() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 p-4 sm:p-8 rounded-2xl border-2 border-purple-200/20 shadow-2xl mb-6">
         <div className="absolute inset-0 bg-grid-white/10 opacity-50" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
               <BarChart3 className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">ABC Inventory Analysis</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-1">ABC Inventory Analysis</h1>
               <p className="text-white/90 text-base">Strategic product classification based on sales value</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Select value={days} onValueChange={setDays}>
               <SelectTrigger className="w-[150px] bg-white/20 border-white/30 text-white">
                 <SelectValue />
@@ -157,7 +157,7 @@ export default function InventoryAnalytics() {
       {/* ABC Explanation Card */}
       <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Badge className="bg-purple-100 text-purple-800">Class A</Badge>
@@ -190,10 +190,10 @@ export default function InventoryAnalytics() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class A Products</p>
                 <p className="text-2xl font-bold">{stats.a.count}</p>
@@ -207,7 +207,7 @@ export default function InventoryAnalytics() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class B Products</p>
                 <p className="text-2xl font-bold">{stats.b.count}</p>
@@ -221,7 +221,7 @@ export default function InventoryAnalytics() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Class C Products</p>
                 <p className="text-2xl font-bold">{stats.c.count}</p>
@@ -235,7 +235,7 @@ export default function InventoryAnalytics() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total)}</p>
@@ -305,12 +305,12 @@ export default function InventoryAnalytics() {
       {/* Products Table */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <div>
               <CardTitle>Product Details</CardTitle>
               <CardDescription>Detailed ABC analysis with sales performance metrics</CardDescription>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Select value={filterClass} onValueChange={(value) => setFilterClass(value as 'ALL' | 'A' | 'B' | 'C')}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue />

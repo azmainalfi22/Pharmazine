@@ -108,11 +108,11 @@ export default function CashFlowTab() {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-green-200 bg-green-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Cash In</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">
                       {formatCurrency(summary.totalCashIn)}
                     </p>
                   </div>
@@ -122,11 +122,11 @@ export default function CashFlowTab() {
             </Card>
 
             <Card className="border-red-200 bg-red-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Total Cash Out</p>
-                    <p className="text-3xl font-bold text-red-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-2">
                       {formatCurrency(summary.totalCashOut)}
                     </p>
                   </div>
@@ -136,8 +136,8 @@ export default function CashFlowTab() {
             </Card>
 
             <Card className={summary.netCashFlow >= 0 ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Net Cash Flow</p>
                     <p className={`text-3xl font-bold mt-2 ${summary.netCashFlow >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -150,11 +150,11 @@ export default function CashFlowTab() {
             </Card>
 
             <Card className="border-blue-200 bg-blue-50/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-muted-foreground font-medium">Closing Balance</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-2">
+                    <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">
                       {formatCurrency(summary.closingBalance)}
                     </p>
                   </div>
@@ -182,7 +182,7 @@ export default function CashFlowTab() {
                 <div className="space-y-3">
                   {cashFlow.map((day, idx) => (
                     <div key={idx} className="space-y-2 p-3 rounded-lg bg-muted/30">
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-muted-foreground" />
                           <span className="font-medium">{format(new Date(day.date), "dd MMM yyyy")}</span>
@@ -232,25 +232,25 @@ export default function CashFlowTab() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center text-lg border-b pb-3">
+                <div className="flex justify-between items-center text-lg border-b pb-3 flex-wrap gap-2">
                   <span className="text-muted-foreground">Opening Balance:</span>
                   <span className="font-bold">{formatCurrency(summary.openingBalance)}</span>
                 </div>
-                <div className="flex justify-between items-center text-green-600 border-b pb-3">
+                <div className="flex justify-between items-center text-green-600 border-b pb-3 flex-wrap gap-2">
                   <span className="flex items-center gap-2">
                     <ArrowUpCircle className="w-5 h-5" />
                     Total Cash Inflow:
                   </span>
                   <span className="font-bold text-xl">+{formatCurrency(summary.totalCashIn)}</span>
                 </div>
-                <div className="flex justify-between items-center text-red-600 border-b pb-3">
+                <div className="flex justify-between items-center text-red-600 border-b pb-3 flex-wrap gap-2">
                   <span className="flex items-center gap-2">
                     <ArrowDownCircle className="w-5 h-5" />
                     Total Cash Outflow:
                   </span>
                   <span className="font-bold text-xl">-{formatCurrency(summary.totalCashOut)}</span>
                 </div>
-                <div className="flex justify-between items-center text-2xl font-bold border-t-2 border-primary pt-4">
+                <div className="flex justify-between items-center text-2xl font-bold border-t-2 border-primary pt-4 flex-wrap gap-2">
                   <span>Closing Balance:</span>
                   <span className={summary.closingBalance >= 0 ? "text-primary" : "text-red-600"}>
                     {formatCurrency(summary.closingBalance)}
