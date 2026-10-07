@@ -80,20 +80,31 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     tname text := (SELECT relname FROM pg_class WHERE oid = tbl);
+    has_nulls boolean;
 BEGIN
     IF tname = 'tenants' THEN
         RETURN;
     END IF;
 
-    EXECUTE format('ALTER TABLE %s ADD COLUMN IF NOT EXISTS tenant_id UUID', tbl);
+    IF NOT EXISTS (SELECT 1 FROM pg_attribute
+                   WHERE attrelid = tbl AND attname = 'tenant_id' AND NOT attisdropped) THEN
+        -- A constant default fills existing rows without rewriting or updating
+        -- them (Postgres 11+): existing data and accounts -> Original workspace.
+        EXECUTE format('ALTER TABLE %s ADD COLUMN tenant_id UUID '
+                       'DEFAULT ''00000000-0000-0000-0000-000000000001''', tbl);
+    ELSIF tname <> 'profiles' THEN
+        EXECUTE format('SELECT EXISTS (SELECT 1 FROM %s WHERE tenant_id IS NULL)', tbl) INTO has_nulls;
+        IF has_nulls THEN
+            EXECUTE format(
+                'UPDATE %s SET tenant_id = ''00000000-0000-0000-0000-000000000001'' WHERE tenant_id IS NULL', tbl);
+        END IF;
+    END IF;
 
     IF tname = 'profiles' THEN
         -- NULL = account without a workspace yet (e.g. a profile created by the
         -- auth.users trigger at sign-up); the API assigns a new one.
         EXECUTE format('ALTER TABLE %s ALTER COLUMN tenant_id SET DEFAULT public.current_tenant_id()', tbl);
     ELSE
-        EXECUTE format(
-            'UPDATE %s SET tenant_id = ''00000000-0000-0000-0000-000000000001'' WHERE tenant_id IS NULL', tbl);
         EXECUTE format(
             'ALTER TABLE %s ALTER COLUMN tenant_id SET DEFAULT '
             'coalesce(public.current_tenant_id(), ''00000000-0000-0000-0000-000000000001''::uuid)', tbl);
